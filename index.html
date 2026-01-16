@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>租稅小問答</title>
+<style>
+/* ---------- 全局樣式 ---------- */
+body{
+  font-family:system-ui;       /* 使用系統字型 */
+  background:#f5f7fb;          /* 背景顏色：淡灰藍 */
+  margin:0;                    /* 去掉預設外距 */
+  font-size:20px;              /* 字體大小 */
+}
+
+.app{
+  max-width: 900px;         /* 一般螢幕、平板適中寬度 */
+  margin: 40px auto;        /* 上下留白、左右置中 */
+  background: #fff;         /* 白色卡片背景 */
+  border-radius: 16px;      /* 圓角 */
+  padding: 24px;            /* 內距 */
+  box-shadow: 0 10px 30px rgba(0,0,0,.08); /* 柔和陰影 */
+}
+
+/* =========================
+   桌上型電腦（一般桌電）
+   螢幕寬度 1024px 以上
+   ========================= */
+@media (min-width: 1024px){
+  .app{
+    max-width: 1200px;      /* 桌電畫面放寬 */
+    padding: 40px;          /* 增加閱讀舒適度 */
+  }
+}
+
+
+/* =========================
+   超大螢幕桌電（選用）
+   螢幕寬度 1440px 以上
+   ========================= */
+@media (min-width: 1440px){
+  .app{
+    max-width: 1400px;      /* 大螢幕不顯得過窄 */
+  }
+}
+
+/* =========================
+   小尺寸手機（選用）
+   ========================= */
+@media (max-width: 480px){
+  .app{
+    margin: 16px;           /* 避免貼齊邊框 */
+    padding: 20px;          /* 手機閱讀較舒服 */
+  }
+}
+
+.hidden{display:none}           /* 隱藏元素 */
+
+.options{
+  display:grid;                 /* 選項使用 grid 排列 */
+  grid-template-columns:1fr 1fr; /* 每行兩個選項 */
+  gap:12px;                     /* 選項間距 */
+  margin-top:12px;              /* 上方間距 */
+}
+
+.opt{
+  border:1px solid #ddd;        /* 邊框顏色 */
+  border-radius:12px;           /* 圓角 */
+  padding:16px;                 /* 內距 */
+  cursor:pointer;               /* 滑鼠變手形 */
+  text-align:center;            /* 文字置中 */
+  font-size: 20px;              /* 文字大小 */
+}
+
+.opt:hover{
+  background:#eef2ff;           /* 滑鼠 hover 顏色：淡藍 */
+}
+
+button{
+  padding:12px 18px;            /* 按鈕內距 */
+  border-radius:10px;           /* 按鈕圓角 */
+  border:none;                  /* 移除預設邊框 */
+  cursor:pointer;               /* 滑鼠變手形 */
+  font-size: 18px;              /* 按鈕文字大小 */
+}
+
+/* ---------- 按鈕顏色 ---------- */
+.primary{
+  background:#4f6ef7;           /* 主要按鈕藍色 */
+  color:#fff;                   /* 文字白色 */
+}
+
+.secondary{
+  background:#eee;              /* 次要按鈕灰色 */
+}
+
+/* ---------- 倒數計時 ---------- */
+.time{
+  font-weight:bold;              /* 粗體 */
+  color:#f33;                    /* 紅色 */
+  margin-left:8px;               /* 左側間距 */
+}
+
+/* ---------- 進度條 ---------- */
+.progress-container{
+  background:#eee;              /* 外框顏色灰色 */
+  border-radius:8px;            /* 圓角 */
+  overflow:hidden;              /* 避免進度條溢出 */
+  margin-top:6px;               /* 上方間距 */
+  height:16px;                  /* 高度 */
+}
+
+.progress-bar{
+  height:100%;                  /* 佔滿容器高度 */
+  width:100%;                   /* 初始滿寬 */
+  transition:width 0.2s linear; /* 寬度變化動畫 */
+  background:linear-gradient(to right,#4f6ef7,#78a1ff); /* 漸層藍色 */
+}
+
+/* ---------- 答題檢討 ---------- */
+.review ul{
+  padding-left:20px;            /* 左側縮排 */
+  margin-top:8px;               /* 上方間距 */
+}
+
+.review li{
+  margin-bottom:6px;            /* 列間距 */
+}
+
+/* ---------- 表單樣式 ---------- */
+label{
+  display:block;                /* 變成區塊 */
+  margin:8px 0 4px;             /* 上8px，下4px */
+}
+
+select{
+  padding:6px;                  /* 內距 */
+  border-radius:8px;            /* 圓角 */
+  border:1px solid #ccc;        /* 邊框顏色 */
+}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>租稅小問答</h1>
+<p>每人 3 題｜每題 15 秒</p>
+
+<!-- ---------- 遊戲開始畫面 ---------- -->
+<div id="startScreen">
+<p>請選擇年齡：</p>
+<div id="ageBtns">
+  <!-- 年齡按鈕，每個按鈕點擊會呼叫 setAge 函式 -->
+  <button data-value="10-19" onclick="setAge('10-19', this)">10-19</button>
+  <button data-value="20-29" onclick="setAge('20-29', this)">20-29</button>
+  <button data-value="30-39" onclick="setAge('30-39', this)">30-39</button>
+  <button data-value="40-49" onclick="setAge('40-49', this)">40-49</button>
+  <button data-value="50-59" onclick="setAge('50-59', this)">50-59</button>
+  <button data-value="60-69" onclick="setAge('60-69', this)">60-69</button>
+  <button data-value="70-79" onclick="setAge('70-79', this)">70-79</button>
+  <button data-value="80+" onclick="setAge('80+', this)">80以上</button>
+</div>
+
+<p>請選擇性別：</p>
+<div id="genderBtns">
+  <!-- 性別按鈕 -->
+  <button data-value="男生" onclick="setGender('男生', this)">男生</button>
+  <button data-value="女生" onclick="setGender('女生', this)">女生</button>
+</div>
+
+<!-- 開始作答按鈕，會驗證是否選擇年齡與性別 -->
+<button class="primary" onclick="startGame()">開始作答</button>
+</div>
+
+<!-- ---------- 作答畫面 ---------- -->
+<div id="quizScreen" class="hidden">
+<div>
+  第 <span id="qIndex"></span> / 3 題｜
+  剩餘 <span id="time">10</span> 秒
+</div>
+<div class="progress-container">
+  <div id="progressBar" class="progress-bar"></div>
+</div>
+<h2 id="question"></h2>
+<div class="options" id="options"></div>
+<p>可使用滑鼠或鍵盤作答</p>
+</div>
+
+<!-- ---------- 作答結果畫面 ---------- -->
+<div id="resultScreen" class="hidden">
+<h2>作答結果</h2>
+<p>正確率：<b><span id="rate"></span>%</b></p>
+<div class="review">
+    <h3>答錯題目與正確答案</h3>
+    <ul id="reviewBody"></ul>
+</div>
+<div class="controls">
+<button class="primary" onclick="nextPlayer()">下一位</button>
+<button class="secondary" onclick="exportAllCSV()">匯出 CSV</button>
+<button class="secondary" onclick="clearAllData()">清空所有資料</button>
+</div>
+</div>
+
+<script>
+// ---------- 題庫 ---------- 
+const QUESTION_BANK = [
+          {q:"房屋稅納稅義務基準日是哪一日？",options:["2月末日","3月22日","9月22日"],correct:0},
+	{q:"房屋使用情形變更需在哪一天前提出申請？",options:["3月22日","7月22日","9月22日"],correct:0},
+	{q:"全國單一自住房屋，稅率是多少？",options:["1%","1.2%","1.5%"],correct:0},
+	{q:"住家用房屋現值10萬元以下免稅，適用對象？",options:["法人","自然人","以上皆可以適用"],correct:1},
+	{q:"住家用房屋現值10萬元以下免稅，全國最多幾戶？",options:["1戶","3戶","5戶"],correct:1},
+	{q:"房屋稅2.0新制，對於自住房屋適用條件增訂什麼規定？",options:["房屋不可出租或供營業使用","供本人、配偶或直系親屬實際居住使用","辦竣戶籍登記"],correct:2},
+	{q:"房屋稅2.0新制，自住房屋增訂戶籍登記之對象可以是誰？",options:["本人","配偶","直系親屬","以上皆是"],correct:3},
+	{q:"當年房屋要適用自住稅率，需在什麼時間前辦竣戶籍登記？",options:["3月22日","9月22日"],correct:0},
+	{q:"房屋稅由按月計徵，變成按什麼計徵？",options:["按年","按日"],correct:0},
+	{q:"自住房屋稅率1.2％的成立要件為何？",options:["房屋無出租或供營業情形","供本人、配偶或直系親屬實際居住使用，且應於該屋辦竣戶籍登記","本人、配偶及未成年子女全國合計3戶","以上皆是"],correct:3},
+	{q:"全國單一自住房屋稅率1%的成立要件為何？",options:["房屋無出租或供營業情形","供本人、配偶或直系親屬實際居住使用，且應於該屋辦竣戶籍登記","本人、配偶及未成年子女於全國僅持有1戶房屋","房屋現值在一定金額以下","以上皆是"],correct:4},
+	{q:"法人持有住家用房屋現值10萬元以下是否適用免稅規定？",options:["是","否"],correct:1},
+	{q:"房屋使用情形變更，經核定後，未再變更，是否需再申報？",options:["是","否"],correct:1},
+	{q:"非自住房屋在非六都之稅率為何？",options:["3％~5％","2.6％~4.8％","3.2％~4.8％"],correct:1},
+	{q:"非自住房屋在六都之稅率為何？",options:["2.6％~4.8％","3％~5％","3.2％~4.8％"],correct:2},
+	{q:"繼承取得之共有房屋稅率為何？",options:["3.2％~4.8％","2.6％~4.8％","1.5％~2.4％"],correct:2},
+	{q:"建商待銷售房屋稅率為何？",options:["2％~4.8％","3％~5％","1.5％~2.4％"],correct:0},
+	{q:"房屋出租申報租賃所得達租金標準稅率為何？",options:["1.5％~2.4％","2.6％~4.8％","3.2％~4.8％"],correct:0},
+	{q:"非自住房屋戶數計算是縣市歸戶還是全國歸戶？",options:["縣市歸戶","全國歸戶"],correct:1},
+	{q:"非自住房屋是以個人還是家戶來計算持有戶數？",options:["個人","家戶"],correct:0},
+	{q:"使用牌照稅幾月要繳納?",options:["4月","5月"],correct:0},
+	{q:"地價稅幾月要繳納?",options:["9月","11月"],correct:1},
+	{q:"地價稅自用住宅優惠稅率是多少?",options:["千分之二","千分之十"],correct:0},
+	{q:"小明有5輛車，可以申請只到一張稅單嗎?",options:["不可以","可以"],correct:1},
+	{q:"地價稅自用住宅優惠稅率幾月幾日前提出申請,當年度即適用?",options:["3月22日","9月22日"],correct:1}
+];
+
+// ---------- 遊戲狀態變數 ---------- 
+let allRecords=[], selected=[], idx=0, timer, timeLeft=15, answers=[], player=0, currentRate=0;
+let playerInfo={age:'', gender:''};
+let ageSelected=null, genderSelected=null;
+
+
+// ---------- 工具函式 ----------
+function shuffle(a){ return a.sort(()=>Math.random()-0.5); }
+function highlightButton(containerId, selectedBtn){
+  const container=document.getElementById(containerId);
+  Array.from(container.children).forEach(btn=>{btn.style.background=''; btn.style.color='';});
+  if(selectedBtn){ selectedBtn.style.background='#4f6ef7'; selectedBtn.style.color='#fff'; }
+}
+
+// ---------- 選擇年齡/性別（滑鼠） ----------
+function setAge(age, btn){ ageSelected=age; highlightButton('ageBtns', btn); }
+function setGender(gender, btn){ genderSelected=gender; highlightButton('genderBtns', btn); }
+
+// ---------- 開始遊戲 ----------
+function startGame(){
+  if(!ageSelected || !genderSelected){ alert('請先選擇年齡與性別'); return; }
+  playerInfo={age:ageSelected, gender:genderSelected};
+  player++;
+  selected=shuffle([...QUESTION_BANK]).slice(0,3);
+  idx=0; answers=[];
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  showQ();
+}
+
+// ---------- 顯示題目 ----------
+function showQ(){
+  const q=selected[idx];
+  document.getElementById('qIndex').textContent=idx+1;
+  document.getElementById('question').textContent=q.q;
+  const box=document.getElementById('options'); box.innerHTML='';
+  q.options.forEach((o,i)=>{
+    const d=document.createElement('div');
+    d.className='opt';
+    d.textContent=(i+1)+'. '+o;
+    d.onclick=()=>highlightAnswer(i);
+    box.appendChild(d);
+  });
+  startTimer();
+}
+
+// ---------- 倒數計時 ----------
+function startTimer(){
+  clearInterval(timer);
+  timeLeft=15;
+  const progressBar=document.getElementById('progressBar');
+  progressBar.style.width='100%'; progressBar.style.background='#4f6ef7';
+  document.getElementById('time').textContent=timeLeft;
+  timer=setInterval(()=>{
+    timeLeft-=0.1; if(timeLeft<0) timeLeft=0;
+    document.getElementById('time').textContent=Math.ceil(timeLeft);
+    const percent=(timeLeft/15)*100; progressBar.style.width=percent+'%';
+    if(timeLeft>10){progressBar.style.background='#4f6ef7';}
+    else if(timeLeft>5){progressBar.style.background='#ffc107';}
+    else{progressBar.style.background='#f33';}
+    if(timeLeft<=0){ clearInterval(timer); highlightAnswer(null);}
+  },100);
+}
+
+// ---------- 高亮作答選項 ----------
+function highlightAnswer(choice){
+  clearInterval(timer);
+  const q=selected[idx];
+  const optionsDivs=document.getElementById('options').children;
+  const progressBar=document.getElementById('progressBar');
+  progressBar.style.background='#999';
+  Array.from(optionsDivs).forEach(d=>d.style.pointerEvents='none');
+  if(choice!==null){
+    if(choice===q.correct){ optionsDivs[choice].style.background='#4CAF50'; optionsDivs[choice].style.color='#fff'; }
+    else{ optionsDivs[choice].style.background='#f33'; optionsDivs[choice].style.color='#fff';
+          optionsDivs[q.correct].style.background='#4CAF50'; optionsDivs[q.correct].style.color='#fff';}
+  } else { optionsDivs[q.correct].style.background='#4CAF50'; optionsDivs[q.correct].style.color='#fff'; }
+  setTimeout(()=>choose(choice),500);
+}
+
+// ---------- 紀錄作答 ----------
+function choose(i){
+  const q=selected[idx];
+  const now=new Date();
+  const dateTime=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+
+                 ' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+  answers.push({
+    player:'第'+player+'位',
+    age:playerInfo.age,
+    gender:playerInfo.gender,
+    question:q.q,
+    chosen:i,
+    correct:q.correct,
+    chosenText:i===null?'未作答':q.options[i],
+    correctText:q.options[q.correct],
+    dateTime:dateTime
+  });
+  idx++;
+  if(idx>=selected.length){
+    const correctCount=answers.filter(a=>a.chosen===a.correct).length;
+    const rate=Math.round(correctCount/answers.length*100);
+    answers.forEach(a=>a.rate=rate); currentRate=rate;
+    allRecords.push(...answers);
+    showResult();
+  } else { showQ(); }
+}
+
+// ---------- 顯示結果 ----------
+function showResult(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultScreen').classList.remove('hidden');
+  document.getElementById('rate').textContent=currentRate;
+  const review=document.getElementById('reviewBody'); review.innerHTML='';
+  answers.forEach(a=>{
+    if(a.chosen!==a.correct){
+      const li=document.createElement('li');
+      li.textContent=`${a.question} 正確答案：${a.correct+1}.${a.correctText}`;
+      review.appendChild(li);
+    }
+  });
+}
+
+// ---------- 下一位玩家 ----------
+function nextPlayer(){
+  ageSelected=null; genderSelected=null;
+  highlightButton('ageBtns', null); highlightButton('genderBtns', null);
+  document.getElementById('resultScreen').classList.add('hidden');
+  document.getElementById('startScreen').classList.remove('hidden');
+}
+
+// ---------- 匯出 CSV ----------
+function exportAllCSV(){
+  if(!allRecords.length){alert('無資料'); return;}
+  const rows=[['作答日期時間','作答者','年齡','性別','題目','你的答案編號','你的答案文字','正確答案編號','正確答案文字','是否正確','正確率']];
+  allRecords.forEach(r=>{
+    const yourNo=r.chosen===null?'':r.chosen+1;
+    const corrNo=r.correct+1;
+    const correctFlag=r.chosen===r.correct?'是':'否';
+    rows.push([r.dateTime,r.player,r.age,r.gender,r.question,yourNo,r.chosenText,corrNo,r.correctText,correctFlag,r.rate]);
+  });
+
+ // 計算每題錯誤率
+  const qErrorMap = {};
+  allRecords.forEach(r=>{
+    if(!qErrorMap[r.question]) qErrorMap[r.question]={wrong:0,total:0};
+    if(r.chosen!==r.correct) qErrorMap[r.question].wrong++;
+    qErrorMap[r.question].total++;
+  });
+  rows.push([]);
+  rows.push(['題目','錯誤率(%)']);
+  Object.keys(qErrorMap).forEach(q=>{
+    const err = Math.round(qErrorMap[q].wrong/qErrorMap[q].total*100);
+    rows.push([q,err]);
+  });
+
+
+  const safeText=c=>c?c.toString().replace(/\r?\n/g,' '):'';
+  const csv=rows.map(r=>r.map(c=>`"${safeText(c)}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='租稅小問答.csv'; a.click();
+}
+
+// ---------- 清空資料 ----------
+function clearAllData(){ if(confirm('確定要清空所有資料嗎？')) allRecords=[]; }
+
+// ---------- 作答鍵盤操作 1~4 ----------
+document.addEventListener('keydown', e=>{
+  const key=parseInt(e.key); if(isNaN(key)) return;
+  if(!document.getElementById('quizScreen').classList.contains('hidden')){
+    const optionsDivs=document.getElementById('options').children;
+    if(key>=1 && key<=optionsDivs.length) highlightAnswer(key-1);
+  }
+});
+</script>
+</div>
+</body>
+</html>
