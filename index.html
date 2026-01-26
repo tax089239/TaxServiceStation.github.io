@@ -143,7 +143,7 @@ select{
 <body>
 <div class="app">
 <h1>租稅小問答</h1>
-<p>每人 3 題｜每題 15 秒</p>
+<p>每人 3 題｜每題 10 秒</p>
 
 <!-- ---------- 遊戲開始畫面 ---------- -->
 <div id="startScreen">
@@ -244,6 +244,18 @@ function highlightButton(containerId, selectedBtn){
   if(selectedBtn){ selectedBtn.style.background='#4f6ef7'; selectedBtn.style.color='#fff'; }
 }
 
+function resetOptionState(){
+  const optionsDivs = document.getElementById('options').children;
+  Array.from(optionsDivs).forEach(d=>{
+    d.style.background = '';
+    d.style.color = '';
+    d.style.pointerEvents = 'auto';
+  });
+
+  const progressBar = document.getElementById('progressBar');
+  progressBar.style.background = '#4f6ef7';
+}
+
 // ---------- 選擇年齡/性別（滑鼠） ----------
 function setAge(age, btn){ ageSelected=age; highlightButton('ageBtns', btn); }
 function setGender(gender, btn){ genderSelected=gender; highlightButton('genderBtns', btn); }
@@ -262,6 +274,8 @@ function startGame(){
 
 // ---------- 顯示題目 ----------
 function showQ(){
+  resetOptionState();
+
   const q=selected[idx];
   document.getElementById('qIndex').textContent=idx+1;
   document.getElementById('question').textContent=q.q;
