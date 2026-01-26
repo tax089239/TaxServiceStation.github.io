@@ -5,6 +5,60 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>租稅小問答</title>
 <style>
+/* =========================
+   長輩模式（70+ 超大字）
+   ========================= */
+.elder-mode{
+  font-size: 48px;
+  line-height: 1.4;
+}
+
+/* 標題 */
+.elder-mode h1{ font-size: 56px; }
+.elder-mode h2{ font-size: 52px; }
+
+/* 一般文字 */
+.elder-mode p,
+.elder-mode span,
+.elder-mode li{
+  font-size: 44px;
+}
+
+/* 選項 */
+.elder-mode .options{
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.elder-mode .opt{
+  font-size: 48px;
+  padding: 40px 30px;
+}
+
+.elder-mode #ageBtns button,
+.elder-mode #genderBtns button{
+  font-size: 48px;      /* 文字放大 */
+  padding: 36px 48px;   /* 上下36px，左右48px增加點擊範圍 */
+  margin: 12px;         /* 間距稍大 */
+}
+
+/* 按鈕 */
+.elder-mode button{
+  font-size: 44px;
+  padding: 26px 36px;
+  margin: 8px 0;
+}
+
+/* 進度條 */
+.elder-mode .progress-container{
+  height: 28px;
+}
+
+/* 隱藏不必要說明 */
+.elder-mode #quizScreen p:last-of-type{
+  display: none;
+}
+
 /* ---------- 全局樣式 ---------- */
 body{
   font-family:system-ui;       /* 使用系統字型 */
@@ -148,6 +202,9 @@ select{
 </head>
 <body>
 <div class="app">
+<button id="elderBtn" class="primary" onclick="toggleElderMode()" style="float:right">
+  👴 長輩模式
+</button>
 <h1>租稅小問答</h1>
 <p>每人 3 題｜每題 10 秒</p>
 
@@ -188,7 +245,6 @@ select{
 </div>
 <h2 id="question"></h2>
 <div class="options" id="options"></div>
-<p>可使用滑鼠或鍵盤作答</p>
 </div>
 
 <!-- ---------- 作答結果畫面 ---------- -->
@@ -207,6 +263,13 @@ select{
 </div>
 
 <script>
+function toggleElderMode(){
+  document.body.classList.toggle('elder-mode');
+  const btn = document.getElementById('elderBtn');
+  btn.textContent = document.body.classList.contains('elder-mode')
+    ? '👦 一般模式'
+    : '👴 長輩模式';
+}
 // ---------- 題庫 ---------- 
 const QUESTION_BANK = [
           {q:"房屋稅納稅義務基準日是哪一日？",options:["2月末日","3月22日","9月22日"],correct:0},
@@ -391,7 +454,7 @@ function exportAllCSV(){
     rows.push([r.dateTime,r.player,r.age,r.gender,r.question,yourNo,r.chosenText,corrNo,r.correctText,correctFlag,r.rate]);
   });
 
- // 計算每題錯誤率
+  // 計算每題錯誤率
   const qErrorMap = {};
   allRecords.forEach(r=>{
     if(!qErrorMap[r.question]) qErrorMap[r.question]={wrong:0,total:0};
@@ -405,11 +468,20 @@ function exportAllCSV(){
     rows.push([q,err]);
   });
 
-
   const safeText=c=>c?c.toString().replace(/\r?\n/g,' '):'';
   const csv=rows.map(r=>r.map(c=>`"${safeText(c)}"`).join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='租稅小問答.csv'; a.click();
+
+// ✅ 加上 UTF-8 BOM，避免 Excel 中文亂碼
+  const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); 
+  a.href = URL.createObjectURL(blob); 
+
+// 使用時間戳檔名，避免多人作答覆蓋
+  const now = new Date();
+  const filename = `租稅小問答_${now.getFullYear()}-${String(now.getMonth()+  1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}.csv`;
+  a.download = filename;
+
+  a.click();
 }
 
 // ---------- 清空資料 ----------
