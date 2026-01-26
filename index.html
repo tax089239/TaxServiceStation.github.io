@@ -72,8 +72,14 @@ body{
   font-size: 20px;              /* 文字大小 */
 }
 
-.opt:hover{
-  background:#eef2ff;           /* 滑鼠 hover 顏色：淡藍 */
+@media (hover: hover) and (pointer: fine) {
+  .opt:hover {
+    background:#eef2ff;			 /* 滑鼠 hover 顏色：淡藍 */
+  }
+}
+
+.opt{
+  background:#fff;   /* 確保新題目一定是白的 */
 }
 
 button{
