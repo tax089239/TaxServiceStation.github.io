@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>臺東縣稅務局 稅務闖關園遊會</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+
+:root {
+    --primary: #FF6B6B;
+    --secondary: #4ECDC4;
+    --accent: #FFE66D;
+    --success: #6BCB77;
+    --wrong: #FF6B6B;
+    --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+}
+
+body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg-gradient);
+    margin: 0;
+    padding: 10px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.balloon {
+    position: absolute;
+    bottom: -100px;
+    opacity: 0.3;
+    z-index: -1;
+    animation: float-up 15s infinite ease-in;
+    pointer-events: none;
+}
+
+@keyframes float-up {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
+}
+
+.app-container {
+    width: 100%;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 40px;
+    padding: 20px 30px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+    text-align: center;
+    border: 8px solid white;
+    position: relative;
+    z-index: 10;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+@media (min-width: 640px) {
+    .grid-container { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1024px) {
+    .grid-container { grid-template-columns: repeat(4, 1fr); }
+}
+
+.card {
+    aspect-ratio: 1 / 1;
+    border-radius: 25px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: clamp(1rem,2.5vw,1.2rem);
+    cursor: pointer;
+    background: #fff;
+    border: 4px solid #f1f3f5;
+    box-shadow: 0 8px 0 #dee2e6;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    line-height: 1.4;
+    user-select: none;
+    color: #444;
+}
+
+.card:active {
+    transform: translateY(4px);
+    box-shadow: 0 4px 0 #dee2e6;
+}
+
+.card.selected {
+    border-color: var(--secondary);
+    background: #e6fffa;
+    transform: scale(1.05);
+    box-shadow: 0 8px 0 #81e6d9;
+}
+
+.card.matched {
+    animation: matchPop 0.6s forwards;
+    pointer-events: none;
+}
+
+@keyframes matchPop {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2) rotate(5deg); background: var(--success); color: white; border-color: transparent; }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+.btn-main {
+    background: var(--primary);
+    color: white;
+    padding: 14px 36px;
+    border-radius: 50px;
+    font-size: clamp(1rem,2.5vw,1.4rem);
+    font-weight: 900;
+    box-shadow: 0 8px 0 #d63031;
+    border: none;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.btn-main:active {
+    transform: translateY(4px);
+    box-shadow: 0 4px 0 #d63031;
+}
+
+#overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.98);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.firework {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: explode 0.8s ease-out forwards;
+}
+
+@keyframes explode {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+}
+
+.wrong-shake {
+    animation: shake 0.4s;
+    border-color: var(--wrong) !important;
+    box-shadow: 0 8px 0 #ff8787 !important;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #f00;
+    animation: confetti-fall 3s linear forwards;
+}
+
+@keyframes confetti-fall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<div id="balloon-container"></div>
+
+<div class="app-container">
+    <div class="mb-2">
+        <span class="bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full text-sm font-black">臺東縣稅務局</span>
+    </div>
+    <h1 class="text-4xl font-black text-gray-800 mb-2 tracking-tighter">🎡 稅務大闖關</h1>
+    <p class="text-gray-500 font-bold mb-4">快來配對領好禮！挑戰你的稅務知識 🧠</p>
+
+    <div class="flex justify-between items-center bg-gray-100 rounded-3xl px-6 py-3 mb-4 border-2 border-dashed border-gray-300">
+        <span id="progress-text" class="font-black text-gray-700 text-lg">READY?</span>
+        <span id="timer-text" class="text-xl font-mono font-bold text-red-500">00:00</span>
+    </div>
+
+    <div id="message-box" class="min-h-[70px] flex items-center justify-center text-indigo-600 font-bold mb-4 px-6 py-3 bg-indigo-50 rounded-2xl transition-all duration-300 opacity-0 border-2 border-indigo-100 shadow-inner italic"></div>
+
+    <div class="grid-container" id="game-grid">
+        <div class="col-span-2 py-10">
+            <p class="text-gray-400 font-bold">點擊下方按鈕開始遊戲</p>
+        </div>
+    </div>
+
+    <div class="mt-6 flex flex-col gap-4">
+        <button id="start-btn" class="btn-main" onclick="initGame()">GO! 開始挑戰</button>
+        <button class="text-gray-400 font-bold text-sm hover:text-gray-600 transition-colors" onclick="exportExcel()">📊 匯出成果報表</button>
+    </div>
+</div>
+
+<div id="overlay">
+    <div class="text-6xl mb-4 animate-bounce">🏆</div>
+    <div class="text-5xl font-black text-gray-800 mb-2">闖關大成功！</div>
+    <div id="result-msg" class="text-2xl text-gray-700 text-center mb-10 leading-relaxed font-bold"></div>
+    <div class="relative mb-10">
+        <div id="prize-icon" class="text-9xl animate-pulse">🎁</div>
+        <div class="absolute -top-4 -right-4 bg-red-500 text-white px-4 py-1 rounded-full font-black rotate-12">獎品 GET!</div>
+    </div>
+    <button class="btn-main text-2xl" onclick="resetUI()">換下一位玩！</button>
+</div>
+
+<script>
+const questionBank = [
+    { q: "牌照稅何時開徵？", a: "每年 4 月", info: "✨ 沒錯！4月是牌照稅開徵期！" },
+    { q: "房屋稅何時開徵？", a: "每年 5 月", info: "✨ 聰明！5月就是要繳房屋稅喔！" },
+    { q: "地價稅何時開徵？", a: "每年 11 月", info: "✨ 答對了！11月是地價稅開徵月！" },
+    { q: "地價稅優惠稅率？", a: "2 ‰ (千分之二)", info: "✨ 超厲害！自用住宅優惠稅率是2‰！" },
+    { q: "購買節能家電？", a: "減徵貨物稅", info: "✨ 沒錯！省錢環保還能退稅喔！" },
+    { q: "雲端發票載具？", a: "環保又多中獎機會", info: "✨ 答對了！存雲端發票獎項更多！" }
+];
+
+const prizes = ["精美原子筆", "彩色口罩組", "多功能提袋", "運動毛巾", "神秘小禮物"];
+let completedCount = 0, firstChoice = null, isProcessing = false, startTime = null, timerInterval = null;
+
+// 背景氣球
+function createBalloons() {
+    const container = document.getElementById('balloon-container');
+    const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F43', '#A29BFE'];
+    setInterval(() => {
+        const b = document.createElement('div');
+        b.className = 'balloon';
+        const size = Math.random() * (window.innerWidth<768?30:50)+20;
+        b.style.width = size + 'px';
+        b.style.height = size*1.2 + 'px';
+        b.style.left = Math.random()*100 + 'vw';
+        b.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+        b.style.borderRadius = '50% 50% 50% 50% / 40% 40% 60% 60%';
+        b.style.animation = `float-up ${Math.random()*5+5}s linear forwards`;
+        container.appendChild(b);
+        setTimeout(()=>b.remove(),10000);
+    }, 1500);
+}
+createBalloons();
+
+// 音效
+const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+function playNote(freq,duration=0.2,type='sine'){
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type=type; osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.2,audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+duration);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime+duration);
+}
+
+// 遊戲初始化
+function initGame(){
+    completedCount=0; firstChoice=null; isProcessing=false;
+    clearInterval(timerInterval);
+    document.getElementById("start-btn").innerText="重新挑戰！";
+    const grid=document.getElementById("game-grid"); grid.innerHTML="";
+    const selected=[...questionBank].sort(()=>0.5-Math.random()).slice(0,4);
+    const cards=[];
+    selected.forEach((item,idx)=>{cards.push({id:idx,text:item.q,info:item.info}); cards.push({id:idx,text:item.a,info:item.info});});
+    cards.sort(()=>0.5-Math.random());
+    cards.forEach(cardData=>{
+        const cardEl=document.createElement("div");
+        cardEl.className="card"; cardEl.innerText=cardData.text;
+        cardEl.dataset.pairId=cardData.id; cardEl.dataset.info=cardData.info;
+        cardEl.onclick=()=>handleCardClick(cardEl);
+        grid.appendChild(cardEl);
+    });
+    startTime=Date.now();
+    timerInterval=setInterval(updateTimer,1000);
+    updateProgress();
+    showMsg("✨ 遊戲開始！找找看配對在哪裡？ ✨");
+}
+
+// 點擊卡片
+function handleCardClick(el){
+    if(isProcessing||el.classList.contains("matched")||el===firstChoice) return;
+    playNote(500,0.05,'square'); el.classList.add("selected");
+    if(!firstChoice){firstChoice=el;} else {
+        isProcessing=true;
+        if(firstChoice.dataset.pairId===el.dataset.pairId){
+            setTimeout(()=>{
+                playNote(880,0.2,'sine');
+                firstChoice.classList.add("matched"); el.classList.add("matched");
+                showMsg(el.dataset.info); completedCount++;
+                updateProgress(); spawnFireworks();
+                firstChoice=null; isProcessing=false;
+                if(completedCount===4) endGame();
+            },300);
+        } else {
+            setTimeout(()=>{
+                playNote(200,0.3,'sawtooth');
+                firstChoice.classList.add("wrong-shake"); el.classList.add("wrong-shake");
+                setTimeout(()=>{
+                    firstChoice.classList.remove("selected","wrong-shake");
+                    el.classList.remove("selected","wrong-shake");
+                    firstChoice=null; isProcessing=false;
+                },400);
+            },300);
+        }
+    }
+}
+
+function updateTimer(){
+    const diff=Math.floor((Date.now()-startTime)/1000);
+    const m=Math.floor(diff/60).toString().padStart(2,'0');
+    const s=(diff%60).toString().padStart(2,'0');
+    document.getElementById("timer-text").innerText=`${m}:${s}`;
+}
+
+function updateProgress(){document.getElementById("progress-text").innerText=`進度: ${completedCount} / 4`;}
+function showMsg(txt){const box=document.getElementById("message-box"); box.innerText=txt; box.style.opacity="1";}
+
+function spawnFireworks(){
+    const colors=['#FF6B6B','#4ECDC4','#FFE66D','#6BCB77'];
+    for(let i=0;i<12;i++){
+        const f=document.createElement("div");
+        f.className="firework"; f.style.left="50%"; f.style.top="50%";
+        f.style.width="8px"; f.style.height="8px";
+        f.style.background=colors[Math.floor(Math.random()*colors.length)];
+        f.style.setProperty("--tx",(Math.random()-0.5)*500+"px");
+        f.style.setProperty("--ty",(Math.random()-0.5)*500+"px");
+        document.body.appendChild(f);
+        setTimeout(()=>f.remove(),800);
+    }
+}
+
+function createConfetti(){
+    for(let i=0;i<50;i++){
+        const c=document.createElement('div'); c.className='confetti';
+        c.style.left=Math.random()*100+'vw';
+        c.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
+        c.style.animationDelay=Math.random()*2+'s';
+        document.body.appendChild(c);
+        setTimeout(()=>c.remove(),4000);
+    }
+}
+
+function endGame(){
+    clearInterval(timerInterval); playNote(523,0.1); setTimeout(()=>playNote(659,0.1),100); setTimeout(()=>playNote(783,0.3),200);
+    createConfetti();
+    let count=parseInt(localStorage.getItem("tt_count")||0)+1; localStorage.setItem("tt_count",count);
+    let history=JSON.parse(localStorage.getItem("tt_history")||"[]");
+    history.push({序號:count,時間:new Date().toLocaleString(),用時:document.getElementById("timer-text").innerText});
+    localStorage.setItem("tt_history",JSON.stringify(history));
+    const prize=prizes[Math.floor(Math.random()*prizes.length)];
+    document.getElementById("result-msg").innerHTML=`你是第 <span class="text-red-500 text-4xl font-black">${count}</span> 位勇者！<br>成功獲得：<span class="text-blue-600">${prize}</span>`;
+    document.getElementById("overlay").style.display="flex";
+}
+
+function resetUI(){
+    document.getElementById("overlay").style.display="none";
+    document.getElementById("game-grid").innerHTML='<div class="col-span-2 py-10"><p class="text-gray-400 font-bold">點擊下方按鈕開始遊戲</p></div>';
+    document.getElementById("progress-text").innerText="READY?";
+    document.getElementById("timer-text").innerText="00:00";
+    document.getElementById("message-box").style.opacity="0";
+}
+
+function exportExcel(){
+    let history=JSON.parse(localStorage.getItem("tt_history")||"[]");
+    if(history.length===0){alert("目前沒有遊戲紀錄"); return;}
+    const ws=XLSX.utils.json_to_sheet(history);
+    const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"遊戲紀錄");
+    XLSX.writeFile(wb,"稅務闖關紀錄.xlsx");
+}
+</script>
+
+</body>
+</html>
