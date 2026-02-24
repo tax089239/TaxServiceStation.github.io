@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>租稅與史前文物時空冒險</title>
+<style>
+    :root {
+        --tax-theme: #4a90e2;
+        --museum-theme: #8d6e63;
+        --jade: #55efc4;
+        --white: #ffffff;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+        background-color: #f0f2f5;
+        overflow: hidden;
+        touch-action: manipulation;
+    }
+
+    /* 頂部資訊欄 */
+    #game-header {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 15px;
+        z-index: 100;
+    }
+
+    .stat-badge {
+        background: white;
+        padding: 10px 20px;
+        border-radius: 50px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 2px solid var(--tax-theme);
+    }
+
+    /* 舞台區域 */
+    #stage {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+        transition: all 1s ease;
+    }
+
+    .bg-tax { background: linear-gradient(135deg, #e0f2fe 0%, #7dd3fc 100%); }
+    .bg-museum { background: radial-gradient(circle, #f5f5f5 0%, #d7ccc8 100%); }
+
+    /* 文物容器樣式 */
+    .artifact-container {
+        position: absolute;
+        width: 110px;
+        text-align: center;
+        cursor: pointer;
+        z-index: 10;
+        transition: left 1.5s ease, top 1.5s ease, transform 0.2s; /* 平滑移動 */
+    }
+
+    .artifact-svg {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto;
+        filter: drop-shadow(0 5px 10px rgba(0,0,0,0.15));
+    }
+
+    .artifact-label {
+        background: rgba(255, 255, 255, 0.9);
+        color: #5d4037;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: clamp(0.7rem, 2vw, 0.85rem);
+        font-weight: bold;
+        margin-top: 5px;
+        display: inline-block;
+        border: 1px solid var(--museum-theme);
+        white-space: nowrap;
+    }
+
+    /* 題目文字手機友善 */
+    #q-text {
+        font-size: clamp(1rem, 4vw, 1.5rem);
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    .option-btn {
+        display: block;
+        width: 100%;
+        padding: clamp(10px,2vw,15px);
+        margin: 10px 0;
+        border: none;
+        background: #f1f2f6;
+        border-radius: 15px;
+        font-size: clamp(1rem, 3vw, 1.1rem);
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .option-btn:hover {
+        background: #dfe4ea;
+        transform: translateY(-2px);
+    }
+
+    /* 彈窗 */
+    .modal {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        backdrop-filter: blur(5px);
+    }
+
+    .card {
+        background: white;
+        width: 90%;
+        max-width: 450px;
+        padding: 30px;
+        border-radius: 25px;
+        text-align: center;
+        border: 6px solid var(--tax-theme);
+    }
+
+    /* 管理者按鈕 */
+    .admin-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 8px 15px;
+        background: #636e72;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        opacity: 0.6;
+        font-size: 0.8rem;
+    }
+
+    #confetti {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        pointer-events: none;
+        z-index: 2000;
+    }
+</style>
+</head>
+<body>
+
+<div id="game-header">
+    <div class="stat-badge" id="timer-badge">⏱️ <span id="timer">30</span>s</div>
+    <div class="stat-badge" id="task-info">第一關：租稅挑戰 (0/2)</div>
+</div>
+
+<div id="stage" class="bg-tax"></div>
+
+<!-- 啟動畫面 -->
+<div id="start-modal" class="modal">
+    <div class="card">
+        <h1 style="color:var(--tax-theme)">🏠 租稅與史前文化冒險</h1>
+        <p>1. 答對 2 題房屋稅問題開啟傳送門<br>2. 隨機修復 4 件史前國寶文物</p>
+        <button class="option-btn" style="background:var(--tax-theme); color:white;" onclick="startGame()">開始冒險</button>
+    </div>
+</div>
+
+<!-- 題目彈窗 -->
+<div id="quiz-modal" class="modal" style="display:none">
+    <div class="card" id="quiz-card">
+        <h3 id="stage-title" style="margin-top:0;"></h3>
+        <div id="q-text"></div>
+        <div id="options"></div>
+    </div>
+</div>
+
+<!-- 結束畫面 -->
+<div id="end-modal" class="modal" style="display:none">
+    <div class="card">
+        <h1 id="end-title"></h1>
+        <p id="end-msg"></p>
+        <button class="option-btn" style="background:var(--tax-theme); color:white;" onclick="location.reload()">再玩一次</button>
+    </div>
+</div>
+
+<!-- 統計數據 -->
+<div id="stats-modal" class="modal" style="display:none">
+    <div class="card" style="max-width: 600px;">
+        <h2>📊 參與紀錄分析</h2>
+        <div id="stats-list" style="text-align:left; max-height:300px; overflow-y:auto; background:#f8f9fa; padding:15px; border-radius:15px;"></div>
+        <button class="option-btn" onclick="document.getElementById('stats-modal').style.display='none'">關閉</button>
+    </div>
+</div>
+
+<canvas id="confetti"></canvas>
+<button class="admin-btn" onclick="showStats()">數據中心</button>
+
+<script>
+const taxQuestions = [
+    { q: "房屋使用情形變更需在哪天前提出申請？", a: "3月22日", options: ["3月22日", "5月1日", "12月31日"] },
+    { q: "全國單一自住房屋，稅率是多少？", a: "1%", options: ["1%", "1.2%", "2.4%"] },
+    { q: "房屋稅 2.0 新制，自住房屋需增訂什麼規定？", a: "辦竣戶籍登記", options: ["辦竣戶籍登記", "持有滿5年", "本人必須入住"] },
+    { q: "房屋稅在哪個月份要繳納？", a: "5月", options: ["5月", "11月", "4月"] },
+    { q: "非自住房屋戶數計算是縣市還是全國歸戶？", a: "全國歸戶", options: ["全國歸戶", "縣市歸戶"] }
+];
+
+const artifacts = [
+    { id: 'jade_people', name: '人獸形玉玦', color: '#55efc4', svg: `<svg viewBox="0 0 100 100"><path d="M30 20 L70 20 L70 40 L60 40 L60 80 L40 80 L40 40 L30 40 Z" fill="#55efc4" stroke="#2d3436" stroke-width="3"/><circle cx="40" cy="30" r="5"/><circle cx="60" cy="30" r="5"/><path d="M50 10 Q50 20 50 10" stroke="black" stroke-width="2"/></svg>` },
+    { id: 'bell', name: '鈴形玉串飾', color: '#81ecec', svg: `<svg viewBox="0 0 100 100"><path d="M50 15 Q80 15 85 85 L15 85 Q20 15 50 15" fill="#81ecec" stroke="#2d3436" stroke-width="3"/><circle cx="50" cy="85" r="8" fill="#fab1a0"/></svg>` },
+    { id: 'tube', name: '玉管', color: '#00b894', svg: `<svg viewBox="0 0 100 100"><rect x="35" y="10" width="30" height="80" rx="5" fill="#00b894" stroke="#2d3436" stroke-width="3"/><ellipse cx="50" cy="15" rx="15" ry="5" fill="#55efc4"/></svg>` },
+    { id: 'circle', name: '圓形玉飾', color: '#55efc4', svg: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#55efc4" stroke="#2d3436" stroke-width="4"/><circle cx="50" cy="50" r="15" fill="white" stroke="#2d3436" stroke-width="2"/></svg>` }
+];
+
+let gameActive = false;
+let timeLeft = 30;
+let currentStage = 1;
+let taxCorrect = 0;
+let museumCount = 0;
+let timerInterval;
+const stageEl = document.getElementById('stage');
+const storageKey = 'MuseumTaxGameStats';
+
+function playSound(win) {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.connect(g); g.connect(ctx.destination);
+    osc.frequency.setValueAtTime(win ? 880 : 220, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(win ? 1320 : 110, ctx.currentTime + 0.3);
+    g.gain.setValueAtTime(0.1, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+    osc.start(); osc.stop(ctx.currentTime + 0.3);
+}
+
+function startGame() {
+    document.getElementById('start-modal').style.display = 'none';
+    gameActive = true;
+    startTimer();
+    startTaxStage();
+}
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        if(!gameActive) return;
+        timeLeft--;
+        document.getElementById('timer').innerText = timeLeft;
+        if(timeLeft <= 0) endGame(false);
+    }, 1000);
+}
+
+// --- 階段 1: 租稅 ---
+function startTaxStage() {
+    document.getElementById('task-info').innerText = `第一關：租稅挑戰 (${taxCorrect}/2)`;
+    showQuiz();
+}
+
+let askedQuestions = [];
+function showQuiz() {
+    const remaining = taxQuestions.filter(q => !askedQuestions.includes(q.q));
+    if(!remaining.length) askedQuestions = [];
+    const q = remaining[Math.floor(Math.random() * remaining.length)];
+    askedQuestions.push(q.q);
+
+    const modal = document.getElementById('quiz-modal');
+    const optionsBox = document.getElementById('options');
+
+    document.getElementById('stage-title').innerText = "🏢 租稅知識問答";
+    document.getElementById('q-text').innerText = q.q;
+    optionsBox.innerHTML = '';
+    modal.style.display = 'flex';
+
+    q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.innerText = opt;
+        btn.onclick = () => {
+            const isCorrect = opt === q.a;
+            saveStats(q.q, opt, isCorrect);
+            if(isCorrect) {
+                taxCorrect++;
+                document.getElementById('task-info').innerText = `第一關：租稅挑戰 (${taxCorrect}/2)`;
+                if(taxCorrect >= 2) {
+                    modal.style.display = 'none';
+                    enterMuseumStage();
+                } else {
+                    showQuiz();
+                }
+            } else {
+                alert("答錯了！請再試一次");
+                showQuiz();
+            }
+        };
+        optionsBox.appendChild(btn);
+    });
+}
+
+// --- 階段 2: 博物館 ---
+function enterMuseumStage() {
+    currentStage = 2;
+    stageEl.className = 'bg-museum';
+    document.getElementById('task-info').innerText = `第二關：文物修復 (${museumCount}/4)`;
+    document.getElementById('task-info').style.borderColor = "var(--museum-theme)";
+    spawnArtifact();
+}
+
+function spawnArtifact() {
+    if(!gameActive || currentStage !== 2) return;
+    const artifactData = artifacts[Math.floor(Math.random() * artifacts.length)];
+
+    const container = document.createElement('div');
+    container.className = 'artifact-container';
+    container.style.left = (Math.random() * 80 + 5) + '%';
+    container.style.top = (Math.random() * 70 + 10) + '%';
+
+    container.innerHTML = `
+        <div class="artifact-svg">${artifactData.svg}</div>
+        <div class="artifact-label">${artifactData.name}</div>
+    `;
+
+    container.onclick = () => {
+        museumCount++;
+        playSound(true);
+        document.getElementById('task-info').innerText = `第二關：文物修復 (${museumCount}/4)`;
+        container.style.transform = 'scale(0) rotate(180deg)';
+        setTimeout(() => container.remove(), 200);
+
+        if(museumCount >= 4) {
+            endGame(true);
+        } else {
+            spawnArtifact();
+        }
+    };
+
+    stageEl.appendChild(container);
+
+    const moveTimer = setInterval(() => {
+        if(!container.parentElement) { clearInterval(moveTimer); return; }
+        container.style.left = (Math.random() * 80 + 5) + '%';
+        container.style.top = (Math.random() * 70 + 10) + '%';
+    }, 1500);
+}
+
+// --- 結束處理 ---
+function endGame(success) {
+    gameActive = false;
+    clearInterval(timerInterval);
+
+    const modal = document.getElementById('end-modal');
+    
+    // 只顯示簡單成功/失敗訊息
+    document.getElementById('end-title').innerText = success ? "🎉 冒險大成功！" : "⏰ 時間到！";
+    document.getElementById('end-msg').innerText = success ? 
+        "你完全掌握了租稅新知識，而且成功修復了 4 件史前國寶！" :
+        "別灰心，多練習幾次，你也能成為時空探險家！";
+
+    if(success) startConfetti();
+    modal.style.display = 'flex';
+}
+
+// --- 統計數據 ---
+function saveStats(q, ans, correct) {
+    const stats = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    stats.push({ time: new Date().toLocaleString(), q, ans, correct });
+    localStorage.setItem(storageKey, JSON.stringify(stats));
+}
+
+function showStats() {
+    const stats = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    const list = document.getElementById('stats-list');
+    list.innerHTML = stats.reverse().map(s => `
+        <div style="border-bottom:1px solid #ddd; padding:8px 0;">
+            <small>${s.time}</small><br>
+            <b>問：${s.q}</b><br>
+            答：<span style="color:${s.correct?'green':'red'}">${s.ans}</span>
+        </div>
+    `).join('') || '尚未有紀錄';
+    document.getElementById('stats-modal').style.display = 'flex';
+}
+
+// --- 煙火特效 ---
+function startConfetti() {
+    const c = document.getElementById('confetti');
+    const ctx = c.getContext('2d');
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
+    const pieces = Array.from({length:100}, () => ({
+        x: Math.random()*c.width, y: -20, r: Math.random()*6+4, 
+        color: `hsl(${Math.random()*360}, 80%, 60%)`, v: Math.random()*5+2
+    }));
+    function frame() {
+        ctx.clearRect(0,0,c.width,c.height);
+        pieces.forEach(p => { p.y += p.v; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fillStyle=p.color; ctx.fill(); });
+        requestAnimationFrame(frame);
+    }
+    frame();
+}
+</script>
+</body>
+</html>
