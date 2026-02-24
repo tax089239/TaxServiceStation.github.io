@@ -21,12 +21,16 @@
     --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%); /* 背景漸層 */
 }
 
+/* 🔒 關鍵：完全移除滾動條 */
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+    
 body {
     font-family: 'Noto Sans TC', sans-serif; /* 中文可讀性佳 */
     background: var(--bg-gradient);
-    margin: 0;
-    padding: 10px;
-    min-height: 100vh;
     display: flex;
     justify-content: center; /* 水平置中 */
     align-items: center;     /* 垂直置中 */
@@ -117,9 +121,17 @@ body {
 }
 
 @keyframes matchPop {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.2) rotate(5deg); background: var(--success); color: white; border-color: transparent; }
+    50% { transform: scale(1.2) rotate(5deg); background: var(--success); color: white;  }
     100% { transform: scale(0); opacity: 0; }
+}
+.wrong-shake {
+    animation: shake 0.4s;
+    border-color: var(--wrong) !important;
+}
+
+@keyframes shake {
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
 }
 
 /* ============================= */
@@ -135,7 +147,6 @@ body {
     box-shadow: 0 8px 0 #d63031;
     border: none;
     cursor: pointer;
-    transition: all 0.1s;
 }
 
 .btn-main:active { transform: translateY(4px); box-shadow: 0 4px 0 #d63031; }
@@ -145,15 +156,15 @@ body {
 /* ============================= */
 #overlay {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
+    inset: 0;
     background: rgba(255, 255, 255, 0.98);
     display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    padding: 20px;
 }
+
 
 /* 煙火效果 */
 .firework {
@@ -168,11 +179,6 @@ body {
 }
 
 /* 錯誤抖動效果 */
-.wrong-shake {
-    animation: shake 0.4s;
-    border-color: var(--wrong) !important;
-    box-shadow: 0 8px 0 #ff8787 !important;
-}
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-10px); }
@@ -192,21 +198,16 @@ body {
     100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
 }
 
-/* 提示訊息框 */
+/* 訊息框 */
 #message-box {
-    font-size: clamp(0.9rem, 3vw, 1.2rem);
-    padding: clamp(8px,2vw,12px) clamp(12px,4vw,16px);
-    min-height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    border-radius: 1rem;
-    transition: all 0.3s;
+    min-height: 60px;
+    transition: 0.3s;
 }
 </style>
 </head>
+
 <body>
+
 
 <!-- 背景氣球容器 -->
 <div id="balloon-container"></div>
@@ -271,22 +272,23 @@ const prizes = ["精美原子筆", "彩色口罩組", "多功能提袋", "運動
 let completedCount = 0, firstChoice = null, isProcessing = false, startTime = null, timerInterval = null;
 
 // 背景氣球生成函數
-function createBalloons() {
-    const container = document.getElementById('balloon-container');
-    const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F43', '#A29BFE'];
-    setInterval(() => {
-        const b = document.createElement('div');
-        b.className = 'balloon';
-        const size = Math.random() * (window.innerWidth<768?30:50)+20;
-        b.style.width = size + 'px';
-        b.style.height = size*1.2 + 'px';
-        b.style.left = Math.random()*100 + 'vw';
-        b.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
-        b.style.borderRadius = '50% 50% 50% 50% / 40% 40% 60% 60%';
-        b.style.animation = `float-up ${Math.random()*5+5}s linear forwards`;
+// 🔒 限制氣球數量，避免效能問題
+function createBalloons(){
+    const container=document.getElementById('balloon-container');
+    const colors=['#FF6B6B','#4ECDC4','#FFE66D'];
+    setInterval(()=>{
+        if(container.children.length>15) return;
+        const b=document.createElement('div');
+        b.className='balloon';
+        const size=Math.random()*40+20;
+        b.style.width=size+'px';
+        b.style.height=size*1.2+'px';
+        b.style.left=Math.random()*100+'vw';
+        b.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+        b.style.animationDuration=Math.random()*5+6+'s';
         container.appendChild(b);
-        setTimeout(()=>b.remove(),10000);
-    }, 1500);
+        setTimeout(()=>b.remove(),8000);
+    },1500);
 }
 createBalloons();
 
@@ -391,14 +393,34 @@ function createConfetti(){
 }
 
 function endGame(){
-    clearInterval(timerInterval); playNote(523,0.1); setTimeout(()=>playNote(659,0.1),100); setTimeout(()=>playNote(783,0.3),200);
+    clearInterval(timerInterval); 
+    //音效
+    playNote(523,0.1); setTimeout(()=>playNote(659,0.1),100); setTimeout(()=>playNote(783,0.3),200);
     createConfetti();
+    //抽獎品
+     const prize = prizes[Math.floor(Math.random()*prizes.length)];
+    //人數統計
     let count=parseInt(localStorage.getItem("tt_count")||0)+1; localStorage.setItem("tt_count",count);
+    
     let history=JSON.parse(localStorage.getItem("tt_history")||"[]");
-    history.push({序號:count,時間:new Date().toLocaleString(),用時:document.getElementById("timer-text").innerText});
+    const now = new Date();
+    const usedTimeText = document.getElementById("timer-text").innerText;
+    const parts = usedTimeText.split(":");
+    const totalSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+history.push({
+  序號: count,
+  活動日期: now.toLocaleDateString(),
+  完成時間: now.toLocaleString(),
+  用時(分秒): usedTimeText,
+  用時(秒數): totalSeconds,
+  獲得獎品: prize
+});
+    
     localStorage.setItem("tt_history",JSON.stringify(history));
-    const prize=prizes[Math.floor(Math.random()*prizes.length)];
-    document.getElementById("result-msg").innerHTML=`你是第 <span class="text-red-500 text-4xl font-black">${count}</span> 位勇者！<br>成功獲得：<span class="text-blue-600">${prize}</span>`;
+   //顯示結果
+    document.getElementById("result-msg").innerHTML=
+          `恭喜完成所有關卡！<br>請至服務台領取小禮物 🎁`;
+    
     document.getElementById("overlay").style.display="flex";
 }
 
@@ -411,12 +433,48 @@ function resetUI(){
 }
 
 function exportExcel(){
-    let history=JSON.parse(localStorage.getItem("tt_history")||"[]");
-    if(history.length===0){alert("目前沒有遊戲紀錄"); return;}
-    const ws=XLSX.utils.json_to_sheet(history);
-    const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"遊戲紀錄");
-    XLSX.writeFile(wb,"稅務闖關紀錄.xlsx");
+    let history = JSON.parse(localStorage.getItem("tt_history") || "[]");
+    if(history.length===0){
+        alert("目前沒有遊戲紀錄");
+        return;
+    }
+    
+    // 複製資料（避免污染原始資料）
+    let exportData = [...history];
+    
+    // 計算平均秒數
+    const avg = (
+        history.reduce((sum, item) => sum + item["用時(秒數)"], 0)
+        / history.length
+    ).toFixed(1);
+
+    // 加入空白列
+    exportData.push({
+        序號: "",
+        活動日期: "",
+        完成時間: "",
+        用時(分秒): "",
+        用時(秒數): "",
+        獲得獎品: "",
+    });
+
+    // 加入統計列
+    exportData.push({
+        序號: "統計",
+        活動日期: "",
+        完成時間: "",
+        用時(分秒): "平均秒數",
+        用時(秒數): avg,
+        獲得獎品: ""
+    });
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "遊戲紀錄");
+
+    XLSX.writeFile(wb, "臺東縣稅務局_闖關成果報表.xlsx");
 }
+    
 </script>
 
 </body>
