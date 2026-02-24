@@ -1,58 +1,90 @@
 <!DOCTYPE html>
+<!-- 宣告這是一個 HTML5 文件 -->
+
 <html lang="zh-Hant">
+<!-- 設定語言為繁體中文 -->
+
 <head>
 <meta charset="UTF-8">
+<!-- 設定編碼為 UTF-8，避免中文亂碼 -->
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 讓手機也能正常顯示（響應式設計必要設定） -->
+
 <title>租稅宣導活動入口</title>
+<!-- 網頁標題（瀏覽器上方分頁顯示文字） -->
 
 <style>
+/* ============================= */
+/* 全頁面基本設定 */
+/* ============================= */
 body{
-  font-family: system-ui;
-  background:#f5f7fb;
-  margin:0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:100vh;
+  font-family: system-ui;   /* 使用系統字型 */
+  background:#f5f7fb;        /* 背景顏色（淡灰藍） */
+  margin:0;                 /* 移除瀏覽器預設外距 */
+  display:flex;             /* 使用彈性排版 */
+  justify-content:center;   /* 水平置中 */
+  align-items:center;       /* 垂直置中 */
+  height:100vh;             /* 高度滿版（整個畫面） */
 }
 
+/* ============================= */
+/* 中央白色卡片區塊 */
+/* ============================= */
 .container{
-  text-align:center;
-  background:white;
-  padding:40px;
-  border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+  text-align:center;        /* 文字置中 */
+  background:white;         /* 白色背景 */
+  padding:40px;             /* 內距 */
+  border-radius:12px;       /* 圓角 */
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);  /* 陰影效果 */
 }
 
+/* ============================= */
+/* 標題樣式 */
+/* ============================= */
 h1{
-  margin-bottom:30px;
+  margin-bottom:30px;       /* 與下方按鈕保持距離 */
 }
 
+/* ============================= */
+/* 按鈕連結樣式 */
+/* ============================= */
 a{
-  display:block;
-  margin:15px 0;
-  padding:15px;
-  text-decoration:none;
-  background:#2563eb;
-  color:white;
-  border-radius:8px;
-  font-size:18px;
-  transition:0.3s;
+  display:block;            /* 變成區塊元素（整塊可點） */
+  margin:15px 0;            /* 上下間距 */
+  padding:15px;             /* 內距 */
+  text-decoration:none;     /* 移除底線 */
+  background:#2563eb;       /* 藍色背景 */
+  color:white;              /* 白色文字 */
+  border-radius:8px;        /* 圓角 */
+  font-size:18px;           /* 字體大小 */
+  transition:0.3s;          /* 滑鼠滑過動畫 */
 }
 
+/* 滑鼠移上去的效果 */
 a:hover{
-  background:#1d4ed8;
+  background:#1d4ed8;       /* 深一點的藍色 */
 }
+
 </style>
 </head>
 
 <body>
 
+<!-- ============================= -->
+<!-- 中央內容區 -->
+<!-- ============================= -->
 <div class="container">
-  <h1>🎉 租稅宣導活動</h1>
 
+  <h1>🎉 租稅宣導活動</h1>
+  <!-- 活動標題 -->
+
+  <!-- 連到租稅小問答頁面 -->
   <a href="quiz.html">👉 前往租稅小問答</a>
+
+  <!-- 連到卡牌遊戲頁面 -->
   <a href="card.html">👉 前往卡牌遊戲</a>
+
 </div>
 
 </body>
