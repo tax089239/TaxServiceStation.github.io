@@ -1,91 +1,196 @@
 <!DOCTYPE html>
-<!-- 宣告這是一個 HTML5 文件 -->
+<!-- 宣告為 HTML5 文件，瀏覽器會用標準模式解析 -->
 
 <html lang="zh-Hant">
-<!-- 設定語言為繁體中文 -->
+<!-- 設定語言為繁體中文，有助於搜尋與無障礙閱讀 -->
 
 <head>
-<meta charset="UTF-8">
-<!-- 設定編碼為 UTF-8，避免中文亂碼 -->
+    <meta charset="UTF-8">
+    <!-- 使用 UTF-8 編碼，避免中文亂碼 -->
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- 讓手機也能正常顯示（響應式設計必要設定） -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 手機裝置適應畫面寬度（響應式設計必備） -->
 
-<title>租稅宣導活動入口</title>
-<!-- 網頁標題（瀏覽器上方分頁顯示文字） -->
+    <title>🌟 租稅大冒險｜宣導活動入口</title>
+    <!-- 瀏覽器分頁上顯示的標題 -->
 
-<style>
-/* ============================= */
-/* 全頁面基本設定 */
-/* ============================= */
-body{
-  font-family: system-ui;   /* 使用系統字型 */
-  background:#f5f7fb;        /* 背景顏色（淡灰藍） */
-  margin:0;                 /* 移除瀏覽器預設外距 */
-  display:flex;             /* 使用彈性排版 */
-  justify-content:center;   /* 水平置中 */
-  align-items:center;       /* 垂直置中 */
-  height:100vh;             /* 高度滿版（整個畫面） */
-}
+    <style>
+        /* ============================= */
+        /* 一、全頁面基本設定 */
+        /* ============================= */
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            /* 字體設定：優先使用微軟正黑體 */
 
-/* ============================= */
-/* 中央白色卡片區塊 */
-/* ============================= */
-.container{
-  text-align:center;        /* 文字置中 */
-  background:white;         /* 白色背景 */
-  padding:40px;             /* 內距 */
-  border-radius:12px;       /* 圓角 */
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);  /* 陰影效果 */
-}
+            background: linear-gradient(135deg, #fff9e6 0%, #ffe4e1 100%);
+            /* 背景漸層色（可改色碼調整主視覺） */
 
-/* ============================= */
-/* 標題樣式 */
-/* ============================= */
-h1{
-  margin-bottom:30px;       /* 與下方按鈕保持距離 */
-}
+            margin: 0; /* 移除瀏覽器預設外距 */
 
-/* ============================= */
-/* 按鈕連結樣式 */
-/* ============================= */
-a{
-  display:block;            /* 變成區塊元素（整塊可點） */
-  margin:15px 0;            /* 上下間距 */
-  padding:15px;             /* 內距 */
-  text-decoration:none;     /* 移除底線 */
-  background:#2563eb;       /* 藍色背景 */
-  color:white;              /* 白色文字 */
-  border-radius:8px;        /* 圓角 */
-  font-size:18px;           /* 字體大小 */
-  transition:0.3s;          /* 滑鼠滑過動畫 */
-}
+            display: flex;
+            justify-content: center; /* 水平置中 */
+            align-items: center;     /* 垂直置中 */
 
-/* 滑鼠移上去的效果 */
-a:hover{
-  background:#1d4ed8;       /* 深一點的藍色 */
-}
+            height: 100vh; /* 滿版高度 */
 
-</style>
+            overflow: hidden;
+            /* 防止背景圓圈造成滾動條 */
+
+            position: relative;
+        }
+
+        /* ============================= */
+        /* 二、背景裝飾泡泡 */
+        /* ============================= */
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            z-index: 0;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        /* 上下浮動動畫 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* ============================= */
+        /* 三、中央主卡片區塊 */
+        /* ============================= */
+        .container {
+            position: relative;
+            z-index: 10; /* 確保在泡泡上方 */
+            text-align: center;
+
+            background: rgba(255, 255, 255, 0.9);
+            padding: 50px 40px;
+
+            border-radius: 30px; /* 圓角大小 */
+            border: 5px solid #ffcfd2;
+
+            box-shadow: 0 15px 35px rgba(255, 182, 193, 0.4);
+
+            max-width: 350px;
+            width: 90%;
+        }
+
+        /* ============================= */
+        /* 四、標題與圖示 */
+        /* ============================= */
+        .header-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        h1 {
+            color: #ff6b6b;
+            font-size: 28px;
+            margin-bottom: 35px;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 0px #fff;
+        }
+
+        /* ============================= */
+        /* 五、按鈕樣式（遊戲風格） */
+        /* ============================= */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            margin: 20px 0;
+            padding: 18px;
+
+            text-decoration: none;
+            color: white;
+
+            border-radius: 20px;
+            font-size: 20px;
+            font-weight: bold;
+
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+            box-shadow: 0 6px 0px rgba(0, 0, 0, 0.1);
+            position: relative;
+            top: 0;
+        }
+
+        /* 小問答按鈕顏色 */
+        .btn-quiz {
+            background: #ff9f43;
+            border-bottom: 6px solid #e67e22;
+        }
+
+        /* 卡牌遊戲按鈕顏色 */
+        .btn-game {
+            background: #48dbfb;
+            border-bottom: 6px solid #2e91e5;
+        }
+
+        /* 滑鼠移上去效果 */
+        .btn:hover {
+            transform: scale(1.05);
+            top: -2px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 點擊按壓效果 */
+        .btn:active {
+            transform: scale(0.98);
+            top: 4px;
+            box-shadow: 0 2px 0px rgba(0, 0, 0, 0.1);
+            border-bottom-width: 2px;
+        }
+
+        /* 按鈕內 emoji 與文字間距 */
+        .btn span {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+
+        /* ============================= */
+        /* 六、底部提示文字 */
+        /* ============================= */
+        .footer-text {
+            margin-top: 25px;
+            font-size: 14px;
+            color: #a0a0a0;
+        }
+
+    </style>
 </head>
 
 <body>
 
-<!-- ============================= -->
-<!-- 中央內容區 -->
-<!-- ============================= -->
-<div class="container">
+    <!-- 背景裝飾圓圈（可自行增加或刪除） -->
+    <div class="bubble" style="width:100px; height:100px; top:10%; left:10%;"></div>
+    <div class="bubble" style="width:150px; height:150px; bottom:15%; right:5%; animation-delay: 1s;"></div>
+    <div class="bubble" style="width:60px; height:60px; top:40%; right:15%; animation-delay: 2s;"></div>
 
-  <h1>🎉 租稅宣導活動</h1>
-  <!-- 活動標題 -->
+    <!-- ============================= -->
+    <!-- 中央內容區 -->
+    <!-- ============================= -->
+    <div class="container">
 
-  <!-- 連到租稅小問答頁面 -->
-  <a href="quiz.html">👉 前往租稅小問答</a>
+        <span class="header-icon">🌈</span>
+        <h1>租稅大冒險</h1>
 
-  <!-- 連到卡牌遊戲頁面 -->
-  <a href="card.html">👉 前往卡牌遊戲</a>
+        <!-- 前往租稅小問答 -->
+        <a href="quiz.html" class="btn btn-quiz">
+            <span>📝</span> 租稅小問答
+        </a>
 
-</div>
+        <!-- 前往卡牌遊戲 -->
+        <a href="card.html" class="btn btn-game">
+            <span>🃏</span> 趣味卡牌遊戲
+        </a>
+
+        <p class="footer-text">一起學習正確的稅務知識吧！</p>
+
+    </div>
 
 </body>
 </html>
