@@ -8,36 +8,41 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+/* ============================= */
+/* 字型與全域色彩設定 */
+/* ============================= */
 
 :root {
-    --primary: #FF6B6B;
-    --secondary: #4ECDC4;
-    --accent: #FFE66D;
-    --success: #6BCB77;
-    --wrong: #FF6B6B;
-    --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    --primary: #FF6B6B;    /* 主色系 */
+    --secondary: #4ECDC4;  /* 次色系 / 成功選擇 */
+    --accent: #FFE66D;     /* 強調色 */
+    --success: #6BCB77;    /* 正確配對背景 */
+    --wrong: #FF6B6B;      /* 錯誤提示色 */
+    --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%); /* 背景漸層 */
 }
 
 body {
-    font-family: 'Noto Sans TC', sans-serif;
+    font-family: 'Noto Sans TC', sans-serif; /* 中文可讀性佳 */
     background: var(--bg-gradient);
     margin: 0;
     padding: 10px;
     min-height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+    justify-content: center; /* 水平置中 */
+    align-items: center;     /* 垂直置中 */
+    overflow-x: hidden;      /* 防止水平滾動 */
 }
 
+/* ============================= */
+/* 背景氣球動畫 */
+/* ============================= */
 .balloon {
     position: absolute;
-    bottom: -100px;
+    bottom: -100px;          /* 從底部出現 */
     opacity: 0.3;
-    z-index: -1;
+    z-index: -1;             /* 在容器後方 */
     animation: float-up 15s infinite ease-in;
-    pointer-events: none;
+    pointer-events: none;    /* 不影響點擊 */
 }
 
 @keyframes float-up {
@@ -45,12 +50,14 @@ body {
     100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
 }
 
+/* ============================= */
+/* 中央遊戲容器 */
+/* ============================= */
 .app-container {
-    width: 100%;
-    max-width: 600px;
+    width: clamp(280px, 90%, 700px); /* 手機-桌機自適應 */
     background: rgba(255, 255, 255, 0.95);
     border-radius: 40px;
-    padding: 20px 30px;
+    padding: clamp(15px,5vw,30px);
     box-shadow: 0 30px 60px rgba(0,0,0,0.15);
     text-align: center;
     border: 8px solid white;
@@ -58,28 +65,27 @@ body {
     z-index: 10;
 }
 
+/* ============================= */
+/* 卡片 Grid 排版 */
+/* ============================= */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: clamp(8px, 2vw, 16px);
 }
 
-@media (min-width: 640px) {
-    .grid-container { grid-template-columns: repeat(3, 1fr); }
-}
-@media (min-width: 1024px) {
-    .grid-container { grid-template-columns: repeat(4, 1fr); }
-}
-
+/* ============================= */
+/* 卡片樣式 */
+/* ============================= */
 .card {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 1;           /* 保持正方形 */
     border-radius: 25px;
     padding: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 900;
-    font-size: clamp(1rem,2.5vw,1.2rem);
+    font-size: clamp(0.9rem,2.5vw,1.3rem); /* 自適應文字大小 */
     cursor: pointer;
     background: #fff;
     border: 4px solid #f1f3f5;
@@ -90,11 +96,13 @@ body {
     color: #444;
 }
 
-.card:active {
-    transform: translateY(4px);
-    box-shadow: 0 4px 0 #dee2e6;
+/* 點擊效果 */
+.card:active { 
+    transform: translateY(4px); 
+    box-shadow: 0 4px 0 #dee2e6; 
 }
 
+/* 選中卡片效果 */
 .card.selected {
     border-color: var(--secondary);
     background: #e6fffa;
@@ -102,6 +110,7 @@ body {
     box-shadow: 0 8px 0 #81e6d9;
 }
 
+/* 成功配對卡片效果 */
 .card.matched {
     animation: matchPop 0.6s forwards;
     pointer-events: none;
@@ -113,12 +122,15 @@ body {
     100% { transform: scale(0); opacity: 0; }
 }
 
+/* ============================= */
+/* 按鈕樣式 */
+/* ============================= */
 .btn-main {
     background: var(--primary);
     color: white;
-    padding: 14px 36px;
+    padding: clamp(12px,2.5vw,18px) clamp(24px,5vw,36px); /* 上下左右自適應 */
     border-radius: 50px;
-    font-size: clamp(1rem,2.5vw,1.4rem);
+    font-size: clamp(1rem,3vw,1.4rem);
     font-weight: 900;
     box-shadow: 0 8px 0 #d63031;
     border: none;
@@ -126,11 +138,11 @@ body {
     transition: all 0.1s;
 }
 
-.btn-main:active {
-    transform: translateY(4px);
-    box-shadow: 0 4px 0 #d63031;
-}
+.btn-main:active { transform: translateY(4px); box-shadow: 0 4px 0 #d63031; }
 
+/* ============================= */
+/* 遊戲完成 Overlay */
+/* ============================= */
 #overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -143,30 +155,31 @@ body {
     padding: 20px;
 }
 
+/* 煙火效果 */
 .firework {
     position: absolute;
     border-radius: 50%;
     pointer-events: none;
     animation: explode 0.8s ease-out forwards;
 }
-
 @keyframes explode {
     0% { transform: scale(1); opacity: 1; }
     100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
 }
 
+/* 錯誤抖動效果 */
 .wrong-shake {
     animation: shake 0.4s;
     border-color: var(--wrong) !important;
     box-shadow: 0 8px 0 #ff8787 !important;
 }
-
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-10px); }
     75% { transform: translateX(10px); }
 }
 
+/* 彩帶掉落效果 */
 .confetti {
     position: absolute;
     width: 10px;
@@ -174,17 +187,31 @@ body {
     background-color: #f00;
     animation: confetti-fall 3s linear forwards;
 }
-
 @keyframes confetti-fall {
     0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
     100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* 提示訊息框 */
+#message-box {
+    font-size: clamp(0.9rem, 3vw, 1.2rem);
+    padding: clamp(8px,2vw,12px) clamp(12px,4vw,16px);
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 1rem;
+    transition: all 0.3s;
 }
 </style>
 </head>
 <body>
 
+<!-- 背景氣球容器 -->
 <div id="balloon-container"></div>
 
+<!-- 主遊戲區 -->
 <div class="app-container">
     <div class="mb-2">
         <span class="bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full text-sm font-black">臺東縣稅務局</span>
@@ -192,25 +219,30 @@ body {
     <h1 class="text-4xl font-black text-gray-800 mb-2 tracking-tighter">🎡 稅務大闖關</h1>
     <p class="text-gray-500 font-bold mb-4">快來配對領好禮！挑戰你的稅務知識 🧠</p>
 
+    <!-- 進度與計時器 -->
     <div class="flex justify-between items-center bg-gray-100 rounded-3xl px-6 py-3 mb-4 border-2 border-dashed border-gray-300">
         <span id="progress-text" class="font-black text-gray-700 text-lg">READY?</span>
         <span id="timer-text" class="text-xl font-mono font-bold text-red-500">00:00</span>
     </div>
 
-    <div id="message-box" class="min-h-[70px] flex items-center justify-center text-indigo-600 font-bold mb-4 px-6 py-3 bg-indigo-50 rounded-2xl transition-all duration-300 opacity-0 border-2 border-indigo-100 shadow-inner italic"></div>
+    <!-- 遊戲提示訊息 -->
+    <div id="message-box" class="text-indigo-600 font-bold mb-4 bg-indigo-50 border-2 border-indigo-100 shadow-inner italic opacity-0"></div>
 
+    <!-- 卡片 Grid -->
     <div class="grid-container" id="game-grid">
         <div class="col-span-2 py-10">
             <p class="text-gray-400 font-bold">點擊下方按鈕開始遊戲</p>
         </div>
     </div>
 
-    <div class="mt-6 flex flex-col gap-4">
+    <!-- 按鈕區 -->
+    <div class="mt-6 flex flex-wrap justify-center gap-4">
         <button id="start-btn" class="btn-main" onclick="initGame()">GO! 開始挑戰</button>
-        <button class="text-gray-400 font-bold text-sm hover:text-gray-600 transition-colors" onclick="exportExcel()">📊 匯出成果報表</button>
+        <button class="btn-main text-sm" onclick="exportExcel()">📊 匯出成果報表</button>
     </div>
 </div>
 
+<!-- 遊戲完成 Overlay -->
 <div id="overlay">
     <div class="text-6xl mb-4 animate-bounce">🏆</div>
     <div class="text-5xl font-black text-gray-800 mb-2">闖關大成功！</div>
@@ -223,6 +255,9 @@ body {
 </div>
 
 <script>
+// =============================
+// 遊戲題庫與獎品
+// =============================
 const questionBank = [
     { q: "牌照稅何時開徵？", a: "每年 4 月", info: "✨ 沒錯！4月是牌照稅開徵期！" },
     { q: "房屋稅何時開徵？", a: "每年 5 月", info: "✨ 聰明！5月就是要繳房屋稅喔！" },
@@ -235,7 +270,7 @@ const questionBank = [
 const prizes = ["精美原子筆", "彩色口罩組", "多功能提袋", "運動毛巾", "神秘小禮物"];
 let completedCount = 0, firstChoice = null, isProcessing = false, startTime = null, timerInterval = null;
 
-// 背景氣球
+// 背景氣球生成函數
 function createBalloons() {
     const container = document.getElementById('balloon-container');
     const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F43', '#A29BFE'];
