@@ -8,242 +8,104 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-/* ============================= */
-/* 字型與全域色彩設定 */
-/* ============================= */
-
 :root {
-    --primary: #FF6B6B;    /* 主色系 */
-    --secondary: #4ECDC4;  /* 次色系 / 成功選擇 */
-    --accent: #FFE66D;     /* 強調色 */
-    --success: #6BCB77;    /* 正確配對背景 */
-    --wrong: #FF6B6B;      /* 錯誤提示色 */
-    --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%); /* 背景漸層 */
+    --primary: #FF6B6B;
+    --secondary: #4ECDC4;
+    --accent: #FFE66D;
+    --success: #6BCB77;
+    --wrong: #FF6B6B;
+    --bg-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
 }
+html, body { height: 100%; margin: 0; overflow: hidden; }
+body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg-gradient); display: flex; justify-content: center; align-items: center; overflow-x: hidden; }
 
-/* 🔒 關鍵：完全移除滾動條 */
-html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-}
-    
-body {
-    font-family: 'Noto Sans TC', sans-serif; /* 中文可讀性佳 */
-    background: var(--bg-gradient);
-    display: flex;
-    justify-content: center; /* 水平置中 */
-    align-items: center;     /* 垂直置中 */
-    overflow-x: hidden;      /* 防止水平滾動 */
-}
-
-/* ============================= */
-/* 背景氣球動畫 */
-/* ============================= */
 .balloon {
-    position: absolute;
-    bottom: -100px;          /* 從底部出現 */
-    opacity: 0.3;
-    z-index: -1;             /* 在容器後方 */
-    animation: float-up 15s infinite ease-in;
-    pointer-events: none;    /* 不影響點擊 */
+    position: absolute; bottom: -100px; opacity: 0.3; z-index: -1;
+    animation: float-up 15s infinite ease-in; pointer-events: none;
 }
+@keyframes float-up { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; } }
 
-@keyframes float-up {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
-}
-
-/* ============================= */
-/* 中央遊戲容器 */
-/* ============================= */
 .app-container {
-    width: clamp(280px, 90%, 700px); /* 手機-桌機自適應 */
+    width: clamp(280px, 90%, 700px);
     background: rgba(255, 255, 255, 0.95);
-    border-radius: 40px;
-    padding: clamp(15px,5vw,30px);
+    border-radius: 40px; padding: clamp(15px,5vw,30px);
     box-shadow: 0 30px 60px rgba(0,0,0,0.15);
-    text-align: center;
-    border: 8px solid white;
-    position: relative;
-    z-index: 10;
+    text-align: center; border: 8px solid white; position: relative; z-index: 10;
 }
 
-/* ============================= */
-/* 卡片 Grid 排版 */
-/* ============================= */
 .grid-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: clamp(8px, 2vw, 16px);
 }
 
-/* ============================= */
-/* 卡片樣式 */
-/* ============================= */
 .card {
-    aspect-ratio: 1 / 1;           /* 保持正方形 */
-    border-radius: 25px;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    font-size: clamp(0.9rem,2.5vw,1.3rem); /* 自適應文字大小 */
-    cursor: pointer;
-    background: #fff;
-    border: 4px solid #f1f3f5;
-    box-shadow: 0 8px 0 #dee2e6;
+    aspect-ratio: 1 / 1; border-radius: 25px;
+    padding: 10px; display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: clamp(0.9rem,2.5vw,1.3rem); cursor: pointer;
+    background: #fff; border: 4px solid #f1f3f5; box-shadow: 0 8px 0 #dee2e6;
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    line-height: 1.4;
-    user-select: none;
-    color: #444;
+    line-height: 1.4; user-select: none; color: #444;
 }
-
-/* 點擊效果 */
-.card:active { 
-    transform: translateY(4px); 
-    box-shadow: 0 4px 0 #dee2e6; 
-}
-
-/* 選中卡片效果 */
-.card.selected {
-    border-color: var(--secondary);
-    background: #e6fffa;
-    transform: scale(1.05);
-    box-shadow: 0 8px 0 #81e6d9;
-}
-
-/* 成功配對卡片效果 */
-.card.matched {
-    animation: matchPop 0.6s forwards;
-    pointer-events: none;
-}
-
-@keyframes matchPop {
-    50% { transform: scale(1.2) rotate(5deg); background: var(--success); color: white;  }
-    100% { transform: scale(0); opacity: 0; }
-}
-.wrong-shake {
-    animation: shake 0.4s;
-    border-color: var(--wrong) !important;
-}
-
-@keyframes shake {
-    25% { transform: translateX(-8px); }
-    75% { transform: translateX(8px); }
-}
-
-/* ============================= */
-/* 按鈕樣式 */
-/* ============================= */
-.btn-main {
-    background: var(--primary);
-    color: white;
-    padding: clamp(12px,2.5vw,18px) clamp(24px,5vw,36px); /* 上下左右自適應 */
-    border-radius: 50px;
-    font-size: clamp(1rem,3vw,1.4rem);
-    font-weight: 900;
-    box-shadow: 0 8px 0 #d63031;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-main:active { transform: translateY(4px); box-shadow: 0 4px 0 #d63031; }
-
-/* ============================= */
-/* 遊戲完成 Overlay */
-/* ============================= */
-#overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.98);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-
-/* 煙火效果 */
-.firework {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    animation: explode 0.8s ease-out forwards;
-}
-@keyframes explode {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
-}
+.card:active { transform: translateY(4px); box-shadow: 0 4px 0 #dee2e6; }
+.card.selected { border-color: var(--secondary); background: #e6fffa; transform: scale(1.05); box-shadow: 0 8px 0 #81e6d9; }
+.card.matched { animation: matchPop 0.6s forwards; pointer-events: none; }
+@keyframes matchPop { 50% { transform: scale(1.2) rotate(5deg); background: var(--success); color: white;  } 100% { transform: scale(0); opacity: 0; } }
 
 /* 錯誤抖動效果 */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-10px); }
-    75% { transform: translateX(10px); }
+@keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
+.wrong-shake { animation: shake 0.4s; border-color: var(--wrong) !important; }
+
+.btn-main {
+    background: var(--primary); color: white;
+    padding: clamp(12px,2.5vw,18px) clamp(24px,5vw,36px);
+    border-radius: 50px; font-size: clamp(1rem,3vw,1.4rem); font-weight: 900;
+    box-shadow: 0 8px 0 #d63031; border: none; cursor: pointer;
+}
+.btn-main:active { transform: translateY(4px); box-shadow: 0 4px 0 #d63031; }
+
+#overlay {
+    position: fixed; inset: 0; background: rgba(255,255,255,0.98);
+    display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000;
 }
 
-/* 彩帶掉落效果 */
+.firework { position: absolute; border-radius: 50%; pointer-events: none; animation: explode 0.8s ease-out forwards; }
+
 .confetti {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background-color: #f00;
+    position: absolute; width: 10px; height: 10px;
     animation: confetti-fall 3s linear forwards;
 }
-@keyframes confetti-fall {
-    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-}
+@keyframes confetti-fall { 0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 
-/* 訊息框 */
-#message-box {
-    min-height: 60px;
-    transition: 0.3s;
-}
+#message-box { min-height:50px; display:flex; align-items:center; justify-content:center; transition: opacity 0.3s ease-in-out; opacity: 0; }
 </style>
 </head>
 
 <body>
-
-
-<!-- 背景氣球容器 -->
 <div id="balloon-container"></div>
 
-<!-- 主遊戲區 -->
 <div class="app-container">
-    <div class="mb-2">
-        <span class="bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full text-sm font-black">臺東縣稅務局</span>
-    </div>
+    <div class="mb-2"><span class="bg-yellow-100 text-yellow-700 px-4 py-1 rounded-full text-sm font-black">臺東縣稅務局</span></div>
     <h1 class="text-4xl font-black text-gray-800 mb-2 tracking-tighter">🎡 稅務大闖關</h1>
     <p class="text-gray-500 font-bold mb-4">快來配對領好禮！挑戰你的稅務知識 🧠</p>
 
-    <!-- 進度與計時器 -->
     <div class="flex justify-between items-center bg-gray-100 rounded-3xl px-6 py-3 mb-4 border-2 border-dashed border-gray-300">
         <span id="progress-text" class="font-black text-gray-700 text-lg">READY?</span>
         <span id="timer-text" class="text-xl font-mono font-bold text-red-500">00:00</span>
     </div>
 
-    <!-- 遊戲提示訊息 -->
-    <div id="message-box" class="text-indigo-600 font-bold mb-4 bg-indigo-50 border-2 border-indigo-100 shadow-inner italic opacity-0"></div>
+    <div id="message-box" class="text-indigo-600 font-bold mb-4 bg-indigo-50 border-2 border-indigo-100 shadow-inner italic"></div>
 
-    <!-- 卡片 Grid -->
     <div class="grid-container" id="game-grid">
-        <div class="col-span-2 py-10">
-            <p class="text-gray-400 font-bold">點擊下方按鈕開始遊戲</p>
-        </div>
+        <div class="col-span-2 py-10"><p class="text-gray-400 font-bold">點擊下方按鈕開始遊戲</p></div>
     </div>
 
-    <!-- 按鈕區 -->
     <div class="mt-6 flex flex-wrap justify-center gap-4">
         <button id="start-btn" class="btn-main" onclick="initGame()">GO! 開始挑戰</button>
         <button class="btn-main text-sm" onclick="exportExcel()">📊 匯出成果報表</button>
     </div>
 </div>
 
-<!-- 遊戲完成 Overlay -->
 <div id="overlay">
     <div class="text-6xl mb-4 animate-bounce">🏆</div>
     <div class="text-5xl font-black text-gray-800 mb-2">闖關大成功！</div>
@@ -256,9 +118,6 @@ body {
 </div>
 
 <script>
-// =============================
-// 遊戲題庫與獎品
-// =============================
 const questionBank = [
     { q: "牌照稅何時開徵？", a: "每年 4 月", info: "✨ 沒錯！4月是牌照稅開徵期！" },
     { q: "房屋稅何時開徵？", a: "每年 5 月", info: "✨ 聰明！5月就是要繳房屋稅喔！" },
@@ -269,91 +128,90 @@ const questionBank = [
 ];
 
 const prizes = ["精美原子筆", "彩色口罩組", "多功能提袋", "運動毛巾", "神秘小禮物"];
-let completedCount = 0, firstChoice = null, isProcessing = false, startTime = null, timerInterval = null;
+let completedCount = 0, firstChoice = null, isProcessing = false, startTime = null, timerInterval = null, audioCtx = null;
 
-// 背景氣球生成函數
-// 🔒 限制氣球數量，避免效能問題
 function createBalloons(){
-    const container=document.getElementById('balloon-container');
-    const colors=['#FF6B6B','#4ECDC4','#FFE66D'];
-    setInterval(()=>{
-        if(container.children.length>15) return;
-        const b=document.createElement('div');
-        b.className='balloon';
-        const size=Math.random()*40+20;
-        b.style.width=size+'px';
-        b.style.height=size*1.2+'px';
-        b.style.left=Math.random()*100+'vw';
-        b.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
-        b.style.animationDuration=Math.random()*5+6+'s';
+    const container = document.getElementById('balloon-container');
+    const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D'];
+    const maxBalloons = 10;
+    setInterval(() => {
+        if(container.children.length >= maxBalloons) return;
+        const b = document.createElement('div');
+        b.className = 'balloon';
+        const size = Math.random() * 40 + 20;
+        b.style.width = size+'px'; b.style.height = size*1.2+'px';
+        b.style.left = Math.random()*100+'vw';
+        b.style.backgroundColor = colors[Math.floor(Math.random()*colors.length)];
+        b.style.animationDuration = Math.random()*5+8+'s';
         container.appendChild(b);
-        setTimeout(()=>b.remove(),8000);
-    },1500);
+        b.addEventListener('animationend',()=>b.remove());
+    },1000);
 }
 createBalloons();
 
-// 音效
-const audioCtx = new (window.AudioContext||window.webkitAudioContext)();
 function playNote(freq,duration=0.2,type='sine'){
-    if(audioCtx.state==='suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type=type; osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.2,audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01,audioCtx.currentTime+duration);
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(); osc.stop(audioCtx.currentTime+duration);
+    try{
+        if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+        if(audioCtx.state==='suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type; osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.05,audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime+duration);
+    }catch(e){console.log("Audio disabled");}
 }
 
-// 遊戲初始化
 function initGame(){
     completedCount=0; firstChoice=null; isProcessing=false;
-    clearInterval(timerInterval);
-    document.getElementById("start-btn").innerText="重新挑戰！";
+    if(timerInterval) clearInterval(timerInterval);
+    document.getElementById("start-btn").innerText="重新挑戰";
     const grid=document.getElementById("game-grid"); grid.innerHTML="";
     const selected=[...questionBank].sort(()=>0.5-Math.random()).slice(0,4);
     const cards=[];
-    selected.forEach((item,idx)=>{cards.push({id:idx,text:item.q,info:item.info}); cards.push({id:idx,text:item.a,info:item.info});});
+    selected.forEach((item,idx)=>{
+        cards.push({id:idx,text:item.q,info:item.info});
+        cards.push({id:idx,text:item.a,info:item.info});
+    });
     cards.sort(()=>0.5-Math.random());
     cards.forEach(cardData=>{
         const cardEl=document.createElement("div");
-        cardEl.className="card"; cardEl.innerText=cardData.text;
-        cardEl.dataset.pairId=cardData.id; cardEl.dataset.info=cardData.info;
+        cardEl.className="card";
+        cardEl.innerText=cardData.text;
+        cardEl.dataset.pairId=cardData.id;
+        cardEl.dataset.info=cardData.info;
         cardEl.onclick=()=>handleCardClick(cardEl);
         grid.appendChild(cardEl);
     });
-    startTime=Date.now();
-    timerInterval=setInterval(updateTimer,1000);
+    startTime=Date.now(); timerInterval=setInterval(updateTimer,1000);
     updateProgress();
     showMsg("✨ 遊戲開始！找找看配對在哪裡？ ✨");
+    playNote(440,0.1,'sine');
 }
 
-// 點擊卡片
 function handleCardClick(el){
     if(isProcessing||el.classList.contains("matched")||el===firstChoice) return;
-    playNote(500,0.05,'square'); el.classList.add("selected");
-    if(!firstChoice){firstChoice=el;} else {
-        isProcessing=true;
-        if(firstChoice.dataset.pairId===el.dataset.pairId){
+    el.classList.add("selected"); playNote(500,0.05,'square');
+    if(!firstChoice){ firstChoice=el; return; }
+    isProcessing=true;
+    if(firstChoice.dataset.pairId===el.dataset.pairId){
+        setTimeout(()=>{
+            firstChoice.classList.add("matched"); el.classList.add("matched");
+            showMsg(el.dataset.info); playNote(880,0.2,'sine');
+            completedCount++; updateProgress(); firstChoice=null; isProcessing=false;
+            if(completedCount===4) endGame();
+        },400);
+    } else {
+        setTimeout(()=>{
+            firstChoice.classList.add("wrong-shake"); el.classList.add("wrong-shake");
+            playNote(200,0.3,'sawtooth');
             setTimeout(()=>{
-                playNote(880,0.2,'sine');
-                firstChoice.classList.add("matched"); el.classList.add("matched");
-                showMsg(el.dataset.info); completedCount++;
-                updateProgress(); spawnFireworks();
+                firstChoice.classList.remove("selected","wrong-shake");
+                el.classList.remove("selected","wrong-shake");
                 firstChoice=null; isProcessing=false;
-                if(completedCount===4) endGame();
-            },300);
-        } else {
-            setTimeout(()=>{
-                playNote(200,0.3,'sawtooth');
-                firstChoice.classList.add("wrong-shake"); el.classList.add("wrong-shake");
-                setTimeout(()=>{
-                    firstChoice.classList.remove("selected","wrong-shake");
-                    el.classList.remove("selected","wrong-shake");
-                    firstChoice=null; isProcessing=false;
-                },400);
-            },300);
-        }
+            },400);
+        },300);
     }
 }
 
@@ -364,25 +222,17 @@ function updateTimer(){
     document.getElementById("timer-text").innerText=`${m}:${s}`;
 }
 
-function updateProgress(){document.getElementById("progress-text").innerText=`進度: ${completedCount} / 4`;}
-function showMsg(txt){const box=document.getElementById("message-box"); box.innerText=txt; box.style.opacity="1";}
+function updateProgress(){ document.getElementById("progress-text").innerText=`進度: ${completedCount} / 4`; }
 
-function spawnFireworks(){
-    const colors=['#FF6B6B','#4ECDC4','#FFE66D','#6BCB77'];
-    for(let i=0;i<12;i++){
-        const f=document.createElement("div");
-        f.className="firework"; f.style.left="50%"; f.style.top="50%";
-        f.style.width="8px"; f.style.height="8px";
-        f.style.background=colors[Math.floor(Math.random()*colors.length)];
-        f.style.setProperty("--tx",(Math.random()-0.5)*500+"px");
-        f.style.setProperty("--ty",(Math.random()-0.5)*500+"px");
-        document.body.appendChild(f);
-        setTimeout(()=>f.remove(),800);
-    }
+function showMsg(txt){
+    const box=document.getElementById("message-box");
+    box.innerText=txt;
+    box.style.opacity="1";
+    setTimeout(()=>box.style.opacity="0",2000);
 }
 
-function createConfetti(){
-    for(let i=0;i<50;i++){
+function createConfetti(count=50){
+    for(let i=0;i<count;i++){
         const c=document.createElement('div'); c.className='confetti';
         c.style.left=Math.random()*100+'vw';
         c.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
@@ -393,89 +243,36 @@ function createConfetti(){
 }
 
 function endGame(){
-    clearInterval(timerInterval); 
-    //音效
+    clearInterval(timerInterval);
+    const usedTimeText=document.getElementById("timer-text").innerText;
     playNote(523,0.1); setTimeout(()=>playNote(659,0.1),100); setTimeout(()=>playNote(783,0.3),200);
-    createConfetti();
-    //抽獎品
-     const prize = prizes[Math.floor(Math.random()*prizes.length)];
-    //人數統計
+    createConfetti(30);
+    const prize=prizes[Math.floor(Math.random()*prizes.length)];
     let count=parseInt(localStorage.getItem("tt_count")||0)+1; localStorage.setItem("tt_count",count);
-    
     let history=JSON.parse(localStorage.getItem("tt_history")||"[]");
-    const now = new Date();
-    const usedTimeText = document.getElementById("timer-text").innerText;
-    const parts = usedTimeText.split(":");
-    const totalSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-history.push({
-  序號: count,
-  活動日期: now.toLocaleDateString(),
-  完成時間: now.toLocaleString(),
-  用時(分秒): usedTimeText,
-  用時(秒數): totalSeconds,
-  獲得獎品: prize
-});
-    
+    const now=new Date();
+    history.push({"序號":count,"完成時間":now.toLocaleString(),"用時":usedTimeText,"獲得獎品":prize});
     localStorage.setItem("tt_history",JSON.stringify(history));
-   //顯示結果
-    document.getElementById("result-msg").innerHTML=
-          `恭喜完成所有關卡！<br>請至服務台領取小禮物 🎁`;
-    
+    document.getElementById("result-msg").innerHTML=`恭喜完成所有關卡！<br>請至服務台領取小禮物 🎁`;
     document.getElementById("overlay").style.display="flex";
 }
 
 function resetUI(){
     document.getElementById("overlay").style.display="none";
-    document.getElementById("game-grid").innerHTML='<div class="col-span-2 py-10"><p class="text-gray-400 font-bold">點擊下方按鈕開始遊戲</p></div>';
+    document.getElementById("game-grid").innerHTML='<div class="col-span-4 py-10"><p class="text-gray-400 font-bold">點擊下方按鈕開始遊戲</p></div>';
     document.getElementById("progress-text").innerText="READY?";
     document.getElementById("timer-text").innerText="00:00";
     document.getElementById("message-box").style.opacity="0";
 }
 
 function exportExcel(){
-    let history = JSON.parse(localStorage.getItem("tt_history") || "[]");
-    if(history.length===0){
-        alert("目前沒有遊戲紀錄");
-        return;
-    }
-    
-    // 複製資料（避免污染原始資料）
-    let exportData = [...history];
-    
-    // 計算平均秒數
-    const avg = (
-        history.reduce((sum, item) => sum + item["用時(秒數)"], 0)
-        / history.length
-    ).toFixed(1);
-
-    // 加入空白列
-    exportData.push({
-        序號: "",
-        活動日期: "",
-        完成時間: "",
-        用時(分秒): "",
-        用時(秒數): "",
-        獲得獎品: "",
-    });
-
-    // 加入統計列
-    exportData.push({
-        序號: "統計",
-        活動日期: "",
-        完成時間: "",
-        用時(分秒): "平均秒數",
-        用時(秒數): avg,
-        獲得獎品: ""
-    });
-
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "遊戲紀錄");
-
-    XLSX.writeFile(wb, "臺東縣稅務局_闖關成果報表.xlsx");
+    let history=JSON.parse(localStorage.getItem("tt_history")||"[]");
+    if(history.length===0){ alert("目前沒有遊戲紀錄"); return; }
+    const ws=XLSX.utils.json_to_sheet(history);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"遊戲紀錄");
+    XLSX.writeFile(wb,"稅務局闖關紀錄.xlsx");
 }
-    
 </script>
-
 </body>
 </html>
