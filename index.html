@@ -1,26 +1,26 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><!-- 手機裝置適應畫面寬度（響應式設計必備） -->
-<title>🌟 租稅大冒險｜宣導活動入口</title> <!-- 瀏覽器分頁上顯示的標題 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌟 租稅大冒險｜宣導活動入口</title>
 <style>
 /* ============================= */
 /* 一、全頁面基本設定 */
 /* ============================= */
 body {
-    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;  /* 字體設定：優先使用微軟正黑體 */
-    background: linear-gradient(135deg, #fff9e6 0%, #ffe4e1 100%);  /* 背景漸層色（可改色碼調整主視覺） */
-    margin: 0; /* 移除瀏覽器預設外距 */
+    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+    background: linear-gradient(135deg, #fff9e6 0%, #ffe4e1 100%);
+    margin: 0;
     display: flex;
-    justify-content: center; /* 水平置中 */
+    justify-content: center;
     align-items: center;    
-    height: 100vh; /* 滿版高度 */
-    overflow: hidden; /* 防止背景圓圈造成滾動條 */
+    height: 100vh;
+    overflow: hidden;
     position: relative;
 }
 /* ============================= */
-/* 二、背景裝飾泡泡 */
+/* 二、背景泡泡 */
 /* ============================= */
 .bubble {
      position: absolute;
@@ -28,12 +28,11 @@ body {
      border-radius: 50%;
      z-index: 0;
      pointer-events: none;
-     box-shadow: 0 0 15px rgba(255, 200, 200, 0.5); /* 光暈效果 */
+     box-shadow: 0 0 15px rgba(255, 200, 200, 0.5);
      animation: floatUp linear infinite;
 }
 
- /* 浮動動畫 */
- @keyframes floatUp {
+@keyframes floatUp {
      0% { transform: translateY(0px); opacity: 0.9; }
      50% { opacity: 0.7; }
      100% { transform: translateY(-120vh); opacity: 0; }
@@ -42,16 +41,15 @@ body {
 /* ============================= */
 /* 三、中央主卡片區塊 */
 /* ============================= */
- main {
+main {
     position: relative;
     z-index: 10;
     text-align: center;
 }      
-    
 .container {      
     background: rgba(255, 255, 255, 0.95);
     padding: 50px 40px;
-    border-radius: 30px; /* 圓角大小 */
+    border-radius: 30px;
     border: 5px solid #ffcfd2;
     box-shadow: 0 15px 35px rgba(255, 182, 193, 0.4);
     max-width: 350px;
@@ -85,7 +83,7 @@ h1 {
      margin: 20px 0;
      padding: 18px;
      text-decoration: none;
-     color: white;
+     color: black; /* 將文字改成黑色 */
      border-radius: 20px;
      font-size: 20px;
      font-weight: bold;
@@ -93,24 +91,18 @@ h1 {
      box-shadow: 0 6px 0 rgba(0,0,0,0.1), 0 12px 15px rgba(0,0,0,0.1);
      position: relative;
      top: 0;
-        }
-/* 按鈕內 emoji 與文字間距 */
+}
 .btn span { margin-right: 10px; font-size: 24px; }
-/* 小問答按鈕顏色 */
 .btn-quiz { background: #ff9f43; border-bottom: 6px solid #e67e22; }
-/* 卡牌遊戲按鈕顏色 */
 .btn-game { background: #48dbfb; border-bottom: 6px solid #2e91e5; }
-/*問答與尋寶按鈕顏色*/
 .btn-find { background: #27ae60; border-bottom: 6px solid #1e8449; }
-   
-/* 滑鼠移上去效果 */
+
 .btn:hover {
     transform: scale(1.05);
     top: -2px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* 點擊按壓效果 */
 .btn:active {
     transform: scale(0.98);
     top: 4px;
@@ -136,45 +128,59 @@ const bubbleCount = 25;
 for(let i=0; i<bubbleCount; i++){
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
-    const size = Math.random()*120 + 40; // 40~160px
+    const size = Math.random()*120 + 40; 
     bubble.style.width = size + 'px';
     bubble.style.height = size + 'px'; 
-    bubble.style.left = Math.random()*90 + 5 + '%'; // 5%~95%// 水平分散，避免集中
-    bubble.style.bottom = (-Math.random()*100 - 100) + 'px'; // -100px~-200px // 垂直初始位置也隨機（稍微不同高度開始）
-    bubble.style.animationDuration = (Math.random()*6 + 8) + 's'; // 8~14秒 // 漂浮速度更隨機
+    bubble.style.left = Math.random()*90 + 5 + '%';
+    bubble.style.bottom = (-Math.random()*100 - 100) + 'px';
+    bubble.style.animationDuration = (Math.random()*6 + 8) + 's';
     bubble.style.animationDelay = (Math.random()*5) + 's';
     document.body.appendChild(bubble);
 }
 </script>
 
-<!-- ============================= -->
-<!-- 中央內容區 -->
-<!-- ============================= -->
 <main>
     <div class="container">
         <span class="header-icon">🌈</span>
         <h1>租稅大冒險</h1>
-
-        <!-- 前往租稅小問答 -->
-        <a href="quiz.html" class="btn btn-quiz">
-            <span>📝</span> 租稅小問答
-        </a>
-
-        <!-- 前往卡牌遊戲 -->
-        <a href="card.html" class="btn btn-game">
-            <span>🃏</span> 趣味卡牌遊戲
-        </a>
-
-        <!-- 前往數據中心 -->
-        <a href="q-find.html" class="btn btn-find" >
-            <span>🔎</span> 租稅尋寶大挑戰
-        </a>
-        
+        <!-- 按鈕會由 JavaScript 動態生成 -->
         <p class="footer-text">一起學習正確的稅務知識吧！</p>
-
     </div>
 </main>
 
+<script>
+// 取得容器
+const container = document.querySelector('.container');
+
+// 函式：新增按鈕
+function addButton(text, emoji, href, btnClass) {
+    const btn = document.createElement('a');
+    btn.href = href;
+    btn.className = 'btn ' + btnClass;
+
+    const span = document.createElement('span');
+    span.textContent = emoji;
+    btn.appendChild(span);
+    btn.appendChild(document.createTextNode(' ' + text));
+
+    // 插入到 footer-text 之前，保持底部文字在最下方
+    const footer = container.querySelector('.footer-text');
+    container.insertBefore(btn, footer);
+}
+
+// 定義按鈕資料
+const buttons = [
+    {text: '租稅小問答', emoji:'📝', href:'quiz.html', cls:'btn-quiz'},
+    {text: '趣味卡牌遊戲', emoji:'🃏', href:'card.html', cls:'btn-game'},
+    {text: '租稅尋寶大挑戰', emoji:'🔎', href:'q-find.html', cls:'btn-find'},
+    {text: '租稅趣味拼圖', emoji:'🧩', href:'pintoo.html', cls:'btn-pintoo'},
+    // 以後新增按鈕只要在這裡加一筆
+    // {text: '新的遊戲', emoji:'🎮', href:'newgame.html', cls:'btn-game'},
+];
+
+// 生成按鈕
+buttons.forEach(b => addButton(b.text, b.emoji, b.href, b.cls));
+</script>
+
 </body>
 </html>
-
