@@ -13,9 +13,10 @@
 :root { 
     --vh: 1vh; 
     --primary: #0284c7; 
-    --secondary: #e2e8f0;
+    --secondary: #f1f5f9;
     --accent: #10b981;
     --danger: #ef4444;
+    --text-main: #1e293b;
 }
 
 body { 
@@ -24,7 +25,7 @@ body {
     overflow: hidden; 
     background: #0f172a; 
     user-select: none;
-    color: #1e293b; 
+    color: var(--text-main); 
 }
 
 /* ===================== 主舞台 ===================== */
@@ -33,21 +34,22 @@ body {
     height: calc(var(--vh) * 100); 
     position: relative; 
     overflow: hidden; 
-    transition: background 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background 1.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.bg-tax { background: linear-gradient(135deg, #f0f9ff 0%, #bae6fd 100%); }
-.bg-museum { background: linear-gradient(135deg, #fafaf9 0%, #d6d3d1 100%); }
+.bg-tax { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); }
+.bg-museum { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); }
 
 /* ===================== 頂部狀態列 ===================== */
 .stat { 
     position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.9); padding: 10px 25px; border-radius: 50px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-weight: bold; z-index: 50;
+    background: rgba(255, 255, 255, 0.9); padding: 12px 25px; border-radius: 50px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1); font-weight: bold; z-index: 50;
     display: flex; gap: 15px; align-items: center; backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.8);
+    min-width: 240px; justify-content: space-between;
 }
 .progress-container { 
-    width: 80px; height: 12px; background: #cbd5e1; border-radius: 6px; overflow: hidden; 
+    flex-grow: 1; height: 10px; background: #e2e8f0; border-radius: 6px; overflow: hidden; 
 }
 .progress-bar { 
     height: 100%; background: var(--primary); width: 0%; transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); 
@@ -57,22 +59,25 @@ body {
 .artifact { 
     position: absolute; cursor: pointer;
     display: flex; justify-content: center; align-items: center;
-    width: 80px; height: 80px;
-    filter: drop-shadow(0 8px 15px rgba(0,0,0,0.25));
+    width: 90px; height: 90px;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
     z-index: 20;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
-.artifact span { font-size: 50px; transition: transform 0.2s; }
-.artifact:active span { transform: scale(1.3); }
+.artifact:active { transform: scale(0.9); }
+.artifact img { width: 100px; height: 100px; object-fit: contain; pointer-events: none; }
+/* 圖片失效時的備案 */
+.artifact-fallback { font-size: 50px; }
 
 /* ===================== 特效 ===================== */
 .float-text {
-    position: absolute; font-weight: 800; font-size: 26px;
+    position: absolute; font-weight: 900; font-size: 28px;
     pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 100;
     text-shadow: 2px 2px 0px white;
 }
 @keyframes floatUp {
     0% { transform: translate(-50%, 0); opacity: 1; }
-    100% { transform: translate(-50%, -60px); opacity: 0; }
+    100% { transform: translate(-50%, -80px); opacity: 0; }
 }
 
 @keyframes shake {
@@ -83,38 +88,44 @@ body {
 }
 .shake-effect { animation: shake 0.2s ease-in-out; }
 
-/* ===================== 彈窗 ===================== */
+/* ===================== 彈窗樣式 ===================== */
 .modal { 
-    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9);
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8);
     display: flex; justify-content: center; align-items: center; z-index: 200;
-    backdrop-filter: blur(12px); opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.4s;
 }
 .modal.active { opacity: 1; pointer-events: auto; }
 
 .card { 
-    background: white; padding: 30px; border-radius: 30px;
-    width: 85%; max-width: 450px; text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-    transform: translateY(30px); transition: transform 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    background: white; padding: 40px; border-radius: 32px;
+    width: 85%; max-width: 480px; text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
+    transform: translateY(40px); transition: transform 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
     display: flex; flex-direction: column;
 }
 .modal.active .card { transform: translateY(0); }
 
+h1 { color: var(--primary); margin-top: 0; }
+
 button { 
-    padding: 16px; margin: 8px 0; width: 100%; font-size: 18px; 
-    border-radius: 16px; border: 0; cursor: pointer; font-weight: bold;
-    transition: all 0.2s; position: relative; overflow: hidden;
+    padding: 16px; margin: 10px 0; width: 100%; font-size: 18px; 
+    border-radius: 18px; border: 0; cursor: pointer; font-weight: bold;
+    transition: all 0.2s; position: relative;
 }
-.btn-primary { background: var(--primary); color: white; box-shadow: 0 6px 0 #0369a1; }
-.btn-accent { background: var(--accent); color: white; box-shadow: 0 6px 0 #059669; }
+button:active { transform: translateY(2px); filter: brightness(0.9); }
+
+.btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 0 #0369a1; }
+.btn-accent { background: var(--accent); color: white; box-shadow: 0 4px 0 #059669; }
 .btn-secondary { background: var(--secondary); color: #475569; }
-.btn-danger { background: var(--danger); color: white; box-shadow: 0 6px 0 #b91c1c; }
+.btn-danger { background: var(--danger); color: white; box-shadow: 0 4px 0 #b91c1c; }
 
-#hint { background: #fffbeb; border: 2px dashed #fde68a; padding: 15px; margin-top: 15px; text-align: left; border-radius: 15px; font-size: 14px; color: #92400e; width: 100%; box-sizing: border-box; }
-input[type="password"] { width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #e2e8f0; border-radius: 15px; font-size: 20px; text-align: center; box-sizing: border-box; }
+#hint { background: #fffbeb; border: 2px dashed #fde68a; padding: 15px; margin-top: 15px; text-align: left; border-radius: 15px; font-size: 14px; color: #92400e; line-height: 1.5; }
+input[type="password"] { width: 100%; padding: 18px; margin: 15px 0; border: 2px solid #e2e8f0; border-radius: 18px; font-size: 20px; text-align: center; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
+input[type="password"]:focus { border-color: var(--primary); }
 
-@media (min-width: 768px) and (orientation: landscape) {
-    .card { max-width: 500px; }
+@media (max-height: 600px) {
+    .card { padding: 20px; max-width: 90%; }
+    h1 { font-size: 24px; margin: 5px; }
 }
 </style>
 </head>
@@ -135,7 +146,7 @@ input[type="password"] { width: 100%; padding: 15px; margin: 15px 0; border: 2px
         <p>通過考驗以開啟時空之門，收集史前文物！</p>
         <button class="btn-primary" onclick="startGame()">⚡ 開始挑戰</button>
         <div style="display: flex; gap: 10px; margin-top: 10px; width: 100%;">
-            <button class="btn-secondary" style="font-size: 14px" onclick="triggerImport()">📥 匯入紀錄</button>
+            <button class="btn-secondary" style="font-size: 14px" onclick="triggerImport()">📥 匯入歷史數據</button>
         </div>
         <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     </div>
@@ -144,9 +155,9 @@ input[type="password"] { width: 100%; padding: 15px; margin: 15px 0; border: 2px
 <!-- 題目畫面 -->
 <div id="quiz" class="modal">
     <div class="card">
-        <h3 id="q" style="font-size: 22px; color: var(--primary); margin-bottom: 15px;"></h3>
+        <h3 id="q" style="font-size: 22px; color: var(--primary); margin-bottom: 20px; min-height: 60px;"></h3>
         <div id="opts" style="width: 100%;"></div>
-        <button id="hintBtn" class="btn-secondary" style="display:none; margin-top: 10px;" onclick="showHint()">💡 查看解析</button>
+        <button id="hintBtn" class="btn-secondary" style="display:none; margin-top: 10px;" onclick="showHint()">💡 解析查看</button>
         <div id="hint" style="display:none"></div>
     </div>
 </div>
@@ -155,17 +166,20 @@ input[type="password"] { width: 100%; padding: 15px; margin: 15px 0; border: 2px
 <div id="auth" class="modal">
     <div class="card">
         <h3>🔒 管理員授權</h3>
-        <input type="password" id="adminPwd" placeholder="請輸入密碼">
+        <p>請輸入密碼以進行機密操作</p>
+        <input type="password" id="adminPwd" placeholder="管理員密碼">
         <button class="btn-primary" id="authConfirmBtn">確認執行</button>
-        <button class="btn-secondary" onclick="closeAuth()">返回</button>
+        <button class="btn-secondary" onclick="closeAuth()">取消返回</button>
     </div>
 </div>
 
 <!-- 結算畫面 -->
 <div id="win" class="modal">
     <div class="card">
-        <h2 style="color: var(--primary)">🎉 挑戰完成！</h2>
-        <p id="finalStat" style="font-size: 18px; line-height: 2.2; margin: 20px 0;"></p>
+        <h2 style="color: var(--primary); margin-bottom: 10px;">🎉 任務完成！</h2>
+        <div style="background: #f8fafc; padding: 20px; border-radius: 20px; margin: 15px 0;">
+            <p id="finalStat" style="font-size: 18px; line-height: 2.2; margin: 0;"></p>
+        </div>
         <button class="btn-accent" onclick="openAuth('export')">📊 匯出學習紀錄報表</button>
         <button class="btn-danger" id="resetBtn">🗑️ 長按清空紀錄</button>
         <button class="btn-secondary" onclick="location.reload()">再試一次</button>
@@ -174,28 +188,28 @@ input[type="password"] { width: 100%; padding: 15px; margin: 15px 0; border: 2px
 
 <script>
 // ==========================================================
-// ⚙️ 遊戲核心設定 (在此修改參數)
+// ⚙️ 遊戲核心設定
 // ==========================================================
 const CONFIG = { 
-    exportPassword: "admin888",      // 🔒 管理員匯出與清空密碼
-    taxGoal: 3,                      // 🎯 答對題目數量目標
-    museumGoal: 5,                   // 🏺 收集文物數量目標
-    timeLimit: 40,                   // ⏳ 遊戲總限時(秒)
-    artifactMoveInterval: 3000,      // 🏃 文物初始移動間隔(毫秒，數字越大越慢)
-    artifactSpeedStep: 150,          // ⚡ 每收集一個增加的速度(減少移動間隔150ms)
-    artifactMinInterval: 800,        // 🐢 文物最快移動間隔(毫秒，避免快到無法點擊)
-    artifactImages: ["🏺", "🗿", "🦴", "💎", "🏹", "🛡️", "🐚"] 
+    exportPassword: "231600",      
+    taxGoal: 3,                      
+    museumGoal: 5,                   
+    timeLimit: 40,                   
+    artifactMoveInterval: 2500,      
+    artifactSpeedStep: 200,          
+    artifactMinInterval: 700,        
+    artifactImages: ["phooto1.png", "phooto2.png", "phooto3.png", "phooto4.png"],
+    fallbackIcons: ["🏺", "🗿", "🦴", "🏹", "🐚"]
 };
 
-// ==========================================================
-// 📝 題庫資料
-// ==========================================================
 const QUESTIONS = [
     {q:"房屋稅在哪個月份繳納？", a:"5月", o:["5月","4月","11月"], e:"房屋稅每年5月開徵；地價稅則是11月。"},
-    {q:"單一自住房屋(非豪宅)全國單一稅率為？", a:"1%", o:["1%","1.2%","2%"], e:"自辦竣戶籍登記且無出租營業，稅率降為1%。"},
-    {q:"申請自住房屋稅率需具備什麼條件？", a:"辦竣戶籍登記", o:["辦竣戶籍登記","持有5年","本人入住"], e:"113年起新制：必須有本人、配偶或直系親親屬「辦竣戶籍登記」。"},
-    {q:"土地增值稅在什麼時候需要繳納？", a:"土地所有權移轉時", o:["每年5月","每年11月","土地所有權移轉時"], e:"當土地買賣或贈與進行所有權移轉時，需繳納土地增值稅。"},
-    {q:"牌照稅逾期繳納，每逾幾日加徵1%滯納金？", a:"3日", o:["1日","3日","7日"], e:"每逾3日加徵1%滯納金，最高加徵至10%。"}
+    {q:"單一自住房屋(非豪宅)全國單一稅率為？", a:"1%", o:["1%","1.2%","2%"], e:"113年起，全國單一自住房屋（排除豪宅）稅率由1.2%降為1%。"},
+    {q:"申請自住房屋稅率需具備什麼條件？", a:"辦竣戶籍登記", o:["辦竣戶籍登記","持有5年","本人入住"], e:"113年起新制：房屋必須有本人、配偶或直系親屬「辦竣戶籍登記」才符合自住。"},
+    {q:"土地增值稅在什麼時候需要繳納？", a:"土地所有權移轉時", o:["每年5月","每年11月","土地所有權移轉時"], e:"當土地買賣、贈與或進行所有權移轉時，需繳納土地增值稅。"},
+    {q:"牌照稅逾期繳納，每逾幾日加徵1%滯納金？", a:"3日", o:["1日","3日","7日"], e:"每逾3日加徵1%滯納金，最高加徵至10%。"},
+    {q:"使用牌照稅於每年何時開徵？", a:"4月", o:["4月","5月","11月"], e:"一般自用車輛及機車的使用牌照稅於每年4月開徵。"},
+    {q:"印花稅的憑證不包括下列何者？", a:"一般收據", o:["銀錢收據","合約書","一般收據"], e:"印花稅課徵範圍包含銀錢收據、買賣動產契據、承攬契據與典賣、讓受及分割不動產契據。"}
 ];
 
 // ==========================================================
@@ -207,13 +221,19 @@ window.addEventListener('resize', setVH);
 setVH();
 
 let state = { 
-    active: false, time: CONFIG.timeLimit, stage: 1, tax: 0, museum: 0, 
-    startTime: null, playerID: crypto.randomUUID().substring(0,8), 
-    details: [], hintCount: 0, shuffledQuestions: [], currentQuestionIndex: 0 
+    active: false, 
+    time: CONFIG.timeLimit, 
+    stage: 1, 
+    tax: 0, 
+    museum: 0, 
+    startTime: null, 
+    playerID: crypto.randomUUID().substring(0,8), 
+    details: [], 
+    shuffledQuestions: [], 
+    currentQuestionIndex: 0 
 };
 
-let resetTimer = null;
-const DB_NAME = "TAX_ADVENTURE_SIMPLE";
+const DB_NAME = "TAX_ADVENTURE_RECORDS_V1";
 
 const getHistory = () => JSON.parse(localStorage.getItem(DB_NAME) || "[]");
 const saveToHistory = (record) => {
@@ -229,8 +249,8 @@ function init() {
 
 function startGame() {
     document.getElementById("start").classList.remove("active");
+    // 洗牌題目
     state.shuffledQuestions = [...QUESTIONS].sort(() => Math.random() - 0.5);
-    state.currentQuestionIndex = 0;
     state.active = true; 
     state.startTime = Date.now();
     startTimer(); 
@@ -239,14 +259,18 @@ function startGame() {
 }
 
 function startTimer() { 
+    const timerEl = document.getElementById("timer");
     const t = setInterval(() => { 
         if (!state.active) { clearInterval(t); return; } 
         state.time--; 
-        document.getElementById("timer").innerText = state.time; 
+        timerEl.innerText = state.time; 
         if (state.time <= 0) { 
             state.active = false; 
             triggerShake();
-            setTimeout(() => { alert("⏳ 挑戰時間結束！"); location.reload(); }, 300);
+            setTimeout(() => { 
+                alert("⏳ 時間到！挑戰未能及時完成。"); 
+                location.reload(); 
+            }, 500);
         } 
     }, 1000); 
 }
@@ -272,11 +296,13 @@ function showQuiz() {
         b.onclick = () => {
             const isCorrect = opt === q.a;
             
+            // 紀錄細節
             if (!hasAttemptedThisQ || isCorrect) {
-                if (isCorrect) state.details = state.details.filter(d => d.question !== q.q);
                 state.details.push({ 
-                    playerID: state.playerID, question: q.q, userChoice: opt, 
-                    isCorrect, timestamp: new Date().toLocaleTimeString() 
+                    question: q.q, 
+                    userChoice: opt, 
+                    isCorrect, 
+                    timestamp: new Date().toLocaleTimeString() 
                 });
                 hasAttemptedThisQ = true;
             }
@@ -286,11 +312,13 @@ function showQuiz() {
                 state.tax++; 
                 createFloatText(b, "✔️ 正確", "#10b981");
                 state.currentQuestionIndex++;
+                
                 setTimeout(() => {
                     if (state.tax >= CONFIG.taxGoal) { 
                         modal.classList.remove("active"); 
                         enterMuseum(); 
                     } else {
+                        // 如果題目不夠，重新抽題
                         if (state.currentQuestionIndex >= state.shuffledQuestions.length) {
                             state.shuffledQuestions = [...QUESTIONS].sort(() => Math.random() - 0.5);
                             state.currentQuestionIndex = 0;
@@ -298,7 +326,7 @@ function showQuiz() {
                         showQuiz(); 
                     }
                     updateUI();
-                }, 400);
+                }, 600);
             } else { 
                 b.className = "btn-danger";
                 triggerShake();
@@ -311,9 +339,9 @@ function showQuiz() {
 }
 
 function showHint() { 
-    document.getElementById("hint").style.display = "block"; 
-    document.getElementById("hint").innerText = `📘 說明：${state.current.e}`;
-    state.hintCount++; 
+    const hintEl = document.getElementById("hint");
+    hintEl.style.display = "block"; 
+    hintEl.innerHTML = `📘 <b>解析：</b>${state.current.e}`;
 }
 
 function enterMuseum() { 
@@ -334,15 +362,24 @@ function spawnArtifact() {
     const stage = document.getElementById("stage"); 
     const el = document.createElement("div"); 
     el.className = "artifact";
-    const icon = document.createElement("span");
-    icon.innerText = CONFIG.artifactImages[Math.floor(Math.random() * CONFIG.artifactImages.length)];
-    el.appendChild(icon);
+    
+    // 優先加載圖片，失敗則使用 Emoji
+    const img = new Image();
+    img.src = CONFIG.artifactImages[Math.floor(Math.random() * CONFIG.artifactImages.length)];
+    img.onload = () => el.appendChild(img);
+    img.onerror = () => {
+        const span = document.createElement("span");
+        span.className = "artifact-fallback";
+        span.innerText = CONFIG.fallbackIcons[Math.floor(Math.random() * CONFIG.fallbackIcons.length)];
+        el.appendChild(span);
+    };
 
-    const size = 80;
+    const size = 90;
     const setPos = (node) => {
         const x = Math.random() * (window.innerWidth - size);
-        const y = 80 + Math.random() * (window.innerHeight - size - 80);
-        node.style.left = x + "px"; node.style.top = y + "px";
+        const y = 80 + Math.random() * (window.innerHeight - size - 100);
+        node.style.left = x + "px"; 
+        node.style.top = y + "px";
     };
     setPos(el);
     
@@ -350,7 +387,11 @@ function spawnArtifact() {
         state.museum++; 
         createFloatText(null, "💎 +1", "#0284c7", e.clientX, e.clientY);
         el.remove();
-        if (state.museum >= CONFIG.museumGoal) endGame(); else spawnArtifact();
+        if (state.museum >= CONFIG.museumGoal) {
+            endGame(); 
+        } else {
+            spawnArtifact();
+        }
         updateUI();
     };
     stage.appendChild(el); 
@@ -359,14 +400,14 @@ function spawnArtifact() {
         if (!state.active || !el.parentNode) return;
         setPos(el);
         
-        // 核心邏輯：每收集一個增加 150ms 速度（即間隔減少 150ms）
-        const nextTime = Math.max(
+        // 速度隨著收集數量增加
+        const currentInterval = Math.max(
             CONFIG.artifactMinInterval, 
             CONFIG.artifactMoveInterval - (state.museum * CONFIG.artifactSpeedStep)
         );
         
-        el.style.transition = `all ${nextTime/1000}s ease-in-out`;
-        setTimeout(move, nextTime);
+        el.style.transition = `all ${currentInterval/1000}s cubic-bezier(0.45, 0.05, 0.55, 0.95)`;
+        setTimeout(move, currentInterval);
     }; 
     setTimeout(move, 100);
 }
@@ -388,10 +429,10 @@ function updateUI() {
     const info = document.getElementById("info");
     const pBar = document.getElementById("pBar");
     if (state.stage === 1) {
-        info.innerText = `考驗：${state.tax}/${CONFIG.taxGoal}`;
+        info.innerText = `稅務考驗：${state.tax}/${CONFIG.taxGoal}`;
         pBar.style.width = (state.tax / CONFIG.taxGoal) * 100 + "%";
     } else {
-        info.innerText = `文物：${state.museum}/${CONFIG.museumGoal}`;
+        info.innerText = `文物收集：${state.museum}/${CONFIG.museumGoal}`;
         pBar.style.width = (state.museum / CONFIG.museumGoal) * 100 + "%";
     }
 }
@@ -399,46 +440,80 @@ function updateUI() {
 function endGame() {
     state.active = false;
     const duration = Math.floor((Date.now() - state.startTime) / 1000);
-    const correctCount = state.details.filter(d => d.isCorrect).length;
+    const correctCount = state.tax;
     
     saveToHistory({ 
-        playerID: state.playerID, date: new Date().toLocaleString(), 
-        duration, correctCount, total: CONFIG.taxGoal, artifacts: state.museum, details: state.details 
+        playerID: state.playerID, 
+        date: new Date().toLocaleString(), 
+        duration, 
+        correctCount, 
+        artifacts: state.museum,
+        details: state.details 
     });
     
     document.getElementById("finalStat").innerHTML = `
         🕒 <b>通關時間：</b> ${duration} 秒<br>
-        🏺 <b>獲得文物：</b> ${state.museum} 件
+        🏺 <b>收集文物：</b> ${state.museum} 件<br>
+        🎓 <b>答對題數：</b> ${correctCount} 題
     `;
     document.getElementById("win").classList.add("active");
 }
 
+// ==========================================================
+// 🛡️ 管理與匯出功能
+// ==========================================================
+
 function openAuth(mode) { 
     document.getElementById("auth").classList.add("active");
-    document.getElementById("adminPwd").focus();
+    const pwdInput = document.getElementById("adminPwd");
+    pwdInput.value = "";
+    pwdInput.focus();
+    
     document.getElementById("authConfirmBtn").onclick = () => {
-        if (document.getElementById("adminPwd").value === CONFIG.exportPassword) {
+        if (pwdInput.value === CONFIG.exportPassword) {
             if (mode === 'export') exportExcel();
-            else if (mode === 'clear') { localStorage.removeItem(DB_NAME); location.reload(); }
+            else if (mode === 'clear') { 
+                localStorage.removeItem(DB_NAME); 
+                alert("🗑️ 歷史數據已清空");
+                location.reload(); 
+            }
             closeAuth();
-        } else alert("密碼錯誤");
+        } else {
+            alert("❌ 密碼錯誤");
+            pwdInput.value = "";
+        }
     };
 }
-function closeAuth() { document.getElementById("auth").classList.remove("active"); document.getElementById("adminPwd").value = ""; }
+
+function closeAuth() { 
+    document.getElementById("auth").classList.remove("active"); 
+}
 
 function exportExcel() {
     const history = getHistory();
-    if (!history.length) return alert("尚無紀錄資料");
-    const ws = XLSX.utils.json_to_sheet(history.map(h => ({ 
-        "玩家ID": h.playerID, "日期": h.date, "用時(秒)": h.duration, 
-        "答對數": h.correctCount, "總題數": h.total, "獲取文物數": h.artifacts 
-    })));
+    if (!history.length) return alert("目前尚無通關紀錄資料");
+    
+    const exportData = history.map(h => ({ 
+        "玩家ID": h.playerID, 
+        "日期": h.date, 
+        "通關用時(秒)": h.duration, 
+        "答對題數": h.correctCount, 
+        "文物數量": h.artifacts 
+    }));
+    
+    const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "學習數據");
-    XLSX.writeFile(wb, `TaxAdventure_Records_${Date.now()}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, "學習紀錄");
+    
+    // 下載
+    const fileName = `TaxAdventure_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
 }
 
-function triggerImport() { document.getElementById("importFile").click(); }
+function triggerImport() { 
+    document.getElementById("importFile").click(); 
+}
+
 function importData(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -446,18 +521,38 @@ function importData(e) {
     reader.onload = (ev) => {
         try {
             const data = JSON.parse(ev.target.result);
-            if (Array.isArray(data)) { localStorage.setItem(DB_NAME, JSON.stringify(data)); alert("匯入成功"); }
-        } catch(e) { alert("格式錯誤"); }
+            if (Array.isArray(data)) { 
+                localStorage.setItem(DB_NAME, JSON.stringify(data)); 
+                alert("✅ 資料匯入完成"); 
+            }
+        } catch(err) { 
+            alert("❌ 格式不正確"); 
+        }
     };
     reader.readAsText(file);
 }
 
 function setupResetButton() {
     const btn = document.getElementById("resetBtn");
-    let timer;
-    const start = (e) => { e.preventDefault(); timer = setTimeout(() => openAuth('clear'), 1500); };
-    const stop = () => clearTimeout(timer);
-    btn.onmousedown = start; btn.onmouseup = stop; btn.ontouchstart = start; btn.ontouchend = stop;
+    let pressTimer;
+    
+    const startPress = (e) => {
+        e.preventDefault();
+        btn.style.filter = "brightness(0.7)";
+        pressTimer = setTimeout(() => {
+            openAuth('clear');
+        }, 1500);
+    };
+    
+    const cancelPress = () => {
+        btn.style.filter = "none";
+        clearTimeout(pressTimer);
+    };
+    
+    btn.addEventListener('mousedown', startPress);
+    btn.addEventListener('mouseup', cancelPress);
+    btn.addEventListener('touchstart', startPress);
+    btn.addEventListener('touchend', cancelPress);
 }
 </script>
 </body>
