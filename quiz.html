@@ -1,409 +1,525 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>租稅小問答 - 專業版</title>
-<style>
-/* =========================
-   長輩模式（70+ 超大字）
-   ========================= */
-.elder-mode{
-  font-size: 48px;
-  line-height: 1.4;
-}
-.elder-mode h1{ font-size: 56px; }
-.elder-mode h2{ font-size: 52px; }
-.elder-mode p, .elder-mode span, .elder-mode li{ font-size: 44px; }
-.elder-mode .options{ grid-template-columns: 1fr; gap: 20px; }
-.elder-mode .opt{ font-size: 48px; padding: 40px 30px; }
-.elder-mode #ageBtns button, .elder-mode #genderBtns button{ font-size: 48px; padding: 36px 48px; margin: 12px; }
-.elder-mode button{ font-size: 44px; padding: 26px 36px; margin: 8px 0; }
-.elder-mode .progress-container{ height: 28px; }
-.elder-mode #quizScreen p:last-of-type{ display: none; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>租稅小問答 - 專業行動版</title>
+    <style>
+        :root {
+            --primary: #4f6ef7;
+            --primary-dark: #3b54c4;
+            --secondary: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+        }
 
-/* ---------- 全局樣式 ---------- */
-body{
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f5f7fb;
-  margin: 0;
-  font-size: 20px;
-  color: #333;
-}
+        /* =========================
+           長輩模式（超大字體與高對比）
+           ========================= */
+        .elder-mode {
+            font-size: 32px;
+        }
+        .elder-mode .app { max-width: 100%; margin: 0; border-radius: 0; min-height: 100vh; }
+        .elder-mode h1 { font-size: 48px; }
+        .elder-mode h2 { font-size: 42px; }
+        .elder-mode p, .elder-mode span, .elder-mode li { font-size: 36px; }
+        .elder-mode .options { grid-template-columns: 1fr; gap: 20px; }
+        .elder-mode .opt { font-size: 40px; padding: 35px 20px; border-width: 3px; }
+        .elder-mode button { font-size: 38px; padding: 25px; }
+        .elder-mode #ageBtns button, .elder-mode #genderBtns button { padding: 30px; margin: 10px; flex: 1 1 40%; }
+        .elder-mode .progress-container { height: 35px; }
 
-.app{
-  max-width: 900px;
-  margin: 40px auto;
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.08);
-  position: relative;
-}
+        /* ---------- 全局樣式 ---------- */
+        body {
+            font-family: "PingFang TC", "Heiti TC", "Microsoft JhengHei", sans-serif;
+            background: var(--bg);
+            margin: 0;
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-@media (min-width: 1024px){ .app{ max-width: 1200px; padding: 40px; } }
-@media (max-width: 480px){ .app{ margin: 10px; padding: 15px; } }
+        .app {
+            max-width: 800px;
+            margin: 20px auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
 
-.hidden{ display: none !important; }
+        @media (max-width: 600px) {
+            .app { margin: 0; border-radius: 0; padding: 20px; }
+        }
 
-/* 選項與按鈕 */
-.options{ display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-.opt{
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  padding: 16px;
-  cursor: pointer;
-  text-align: center;
-  font-size: 20px;
-  background: #fff;
-  transition: all 0.2s;
-}
-@media (hover: hover) { .opt:hover { background: #eef2ff; border-color: #4f6ef7; } }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .hidden { display: none !important; }
 
-button{
-  padding: 12px 18px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  transition: opacity 0.2s, transform 0.1s;
-}
-button:active { transform: scale(0.98); }
-.primary{ background: #4f6ef7; color: #fff; }
-.secondary{ background: #eee; color: #333; }
-.danger { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        h1 { color: var(--primary); margin: 0; font-size: 28px; }
+        h2 { font-size: 22px; margin-top: 0; }
 
-/* 進度條 */
-.progress-container{ background: #eee; border-radius: 8px; overflow: hidden; margin: 10px 0; height: 16px; }
-.progress-bar{ height: 100%; width: 100%; transition: width 0.1s linear; background: linear-gradient(to right, #4f6ef7, #78a1ff); }
+        /* 按鈕與交互 */
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0; }
+        
+        button {
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            font-size: 16px;
+        }
 
-/* 長按動畫提示 */
-.holding {
-  position: relative;
-  overflow: hidden;
-}
-.holding::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 4px;
-  background: #dc2626;
-  width: 0%;
-  transition: width 2s linear;
-}
-.is-holding::after { width: 100%; }
+        button:active { transform: scale(0.96); }
+        .primary { background: var(--primary); color: white; }
+        .primary:hover { background: var(--primary-dark); }
+        .secondary { background: #e2e8f0; color: var(--secondary); }
+        .danger { background: #fee2e2; color: var(--danger); }
+        .outline { background: transparent; border: 2px solid #e2e8f0; color: var(--secondary); }
+        .active-choice { background: var(--primary) !important; color: white !important; border-color: var(--primary) !important; }
 
-/* 彈窗樣式 */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-.modal {
-  background: #fff;
-  padding: 24px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
-}
-.modal input {
-  width: 80%;
-  padding: 12px;
-  font-size: 24px;
-  text-align: center;
-  letter-spacing: 5px;
-  margin: 15px 0;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-}
-</style>
+        /* 選項卡片 */
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 25px 0; }
+        @media (max-width: 500px) { .options { grid-template-columns: 1fr; } }
+        
+        .opt {
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 500;
+            background: white;
+            transition: all 0.2s;
+        }
+        .opt:hover { border-color: var(--primary); background: #f0f4ff; }
+
+        /* 進度條 */
+        .progress-container { background: #e2e8f0; border-radius: 10px; overflow: hidden; margin: 15px 0; height: 12px; }
+        .progress-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--primary), #818cf8); transition: width 0.1s linear; }
+
+        /* 回顧列表 */
+        .review-list { list-style: none; padding: 0; text-align: left; }
+        .review-item { background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--danger); }
+
+        /* 密碼彈窗 */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.8);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; backdrop-filter: blur(4px);
+        }
+        .modal {
+            background: white; padding: 30px; border-radius: 20px;
+            width: 90%; max-width: 400px; text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .modal input {
+            width: 100%; padding: 15px; font-size: 24px; text-align: center;
+            letter-spacing: 8px; margin: 20px 0; border: 2px solid #e2e8f0;
+            border-radius: 12px; box-sizing: border-box;
+        }
+
+        /* 長按動畫 */
+        .holding { position: relative; overflow: hidden; }
+        .holding::after {
+            content: ''; position: absolute; bottom: 0; left: 0; height: 6px;
+            background: var(--danger); width: 0%; transition: width 2s linear;
+        }
+        .is-holding::after { width: 100%; }
+
+        /* 管理員數據面板 */
+        .admin-stat-card {
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .stat-box { text-align: center; }
+        .stat-val { font-size: 24px; font-weight: bold; color: var(--primary); }
+        .stat-lbl { font-size: 12px; color: var(--secondary); }
+    </style>
 </head>
 <body>
 
 <div class="app">
-  <button id="elderBtn" class="secondary" onclick="toggleElderMode()" style="float:right">👴 長輩模式</button>
-  <h1>租稅小問答</h1>
-  <p>每人 3 題｜每題 15 秒</p>
+    <div class="header">
+        <h1>租稅小問答</h1>
+        <button id="elderBtn" class="outline" onclick="toggleElderMode()">👴 長輩模式</button>
+    </div>
 
-  <!-- 開始畫面 -->
-  <div id="startScreen">
-    <p>請選擇年齡：</p>
-    <div id="ageBtns">
-      <button onclick="setAge('10-19', this)">10-19</button>
-      <button onclick="setAge('20-29', this)">20-29</button>
-      <button onclick="setAge('30-39', this)">30-39</button>
-      <button onclick="setAge('40-49', this)">40-49</button>
-      <button onclick="setAge('50-59', this)">50-59</button>
-      <button onclick="setAge('60-69', this)">60-69</button>
-      <button onclick="setAge('70-79', this)">70-79</button>
-      <button onclick="setAge('80+', this)">80+</button>
+    <!-- 開始畫面 -->
+    <div id="startScreen">
+        <p>💡 每人隨機 3 題，每題限時 15 秒</p>
+        
+        <p><b>1. 請選擇您的年齡層：</b></p>
+        <div id="ageBtns" class="btn-group">
+            <button class="outline" onclick="setAge('10-19', this)">10-19</button>
+            <button class="outline" onclick="setAge('20-29', this)">20-29</button>
+            <button class="outline" onclick="setAge('30-39', this)">30-39</button>
+            <button class="outline" onclick="setAge('40-49', this)">40-49</button>
+            <button class="outline" onclick="setAge('50-59', this)">50-59</button>
+            <button class="outline" onclick="setAge('60-69', this)">60-69</button>
+            <button class="outline" onclick="setAge('70-79', this)">70-79</button>
+            <button class="outline" onclick="setAge('80+', this)">80+</button>
+        </div>
+        <p><b>2. 請選擇您的性別：</b></p>
+        <div id="genderBtns" class="btn-group">
+            <button class="outline" onclick="setGender('男生', this)">男生</button>
+            <button class="outline" onclick="setGender('女生', this)">女生</button>
+        </div>
+        <div style="margin-top: 30px;">
+            <button class="primary" style="width:100%; height: 70px; font-size: 20px;" onclick="startGame()">開始作答</button>
+        </div>
+        
+        <!-- 管理員隱藏入口 -->
+        <div style="margin-top: 50px; text-align: center;">
+            <button class="outline" style="font-size: 12px; padding: 8px 15px; color: #cbd5e1; border-color: #f1f5f9;" onclick="openAdmin()">⚙️ 管理員數據</button>
+        </div>
     </div>
-    <p>請選擇性別：</p>
-    <div id="genderBtns">
-      <button onclick="setGender('男生', this)">男生</button>
-      <button onclick="setGender('女生', this)">女生</button>
-    </div>
-    <br>
-    <button class="primary" style="width:100%; padding:20px;" onclick="startGame()">開始作答</button>
-  </div>
 
-  <!-- 作答畫面 -->
-  <div id="quizScreen" class="hidden">
-    <div>第 <span id="qIndex"></span> / 3 題｜剩餘 <span id="time">15</span> 秒</div>
-    <div class="progress-container"><div id="progressBar" class="progress-bar"></div></div>
-    <h2 id="question"></h2>
-    <div class="options" id="options"></div>
-  </div>
+    <!-- 作答畫面 -->
+    <div id="quizScreen" class="hidden">
+        <div style="display:flex; justify-content:space-between; font-weight:bold;">
+            <span>第 <span id="qIndex">1</span> / 3 題</span>
+            <span style="color:var(--danger)">⏱ 剩餘 <span id="time">15</span> 秒</span>
+        </div>
+        <div class="progress-container">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <h2 id="question" style="margin: 20px 0;">題目載入中...</h2>
+        <div class="options" id="options"></div>
+    </div>
 
-  <!-- 結果畫面 -->
-  <div id="resultScreen" class="hidden">
-    <h2>作答結果</h2>
-    <p>正確率：<b style="font-size:1.5em; color:#4f6ef7;"><span id="rate"></span>%</b></p>
-    <div id="reviewSection" class="review">
-      <h3>答錯題目回顧：</h3>
-      <ul id="reviewBody"></ul>
+    <!-- 結果畫面 -->
+    <div id="resultScreen" class="hidden">
+        <div style="text-align:center; margin-bottom:30px;">
+            <div style="font-size: 60px;">🎯</div>
+            <h2 style="margin-bottom: 5px;">作答完成！</h2>
+            <p>您的正確率為 <b style="font-size: 2em; color: var(--primary);"><span id="rate">0</span>%</b></p>
+        </div>
+        
+        <div id="reviewSection">
+            <h3 style="border-left: 4px solid var(--primary); padding-left: 10px;">重點回顧</h3>
+            <ul id="reviewBody" class="review-list"></ul>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:12px; margin-top:30px;">
+            <button class="primary" style="height:60px;" onclick="nextPlayer()">下一位作答</button>
+        </div>
     </div>
-    <hr>
-    <div style="display:flex; flex-direction:column; gap:10px;">
-      <button class="primary" onclick="nextPlayer()">下一位作答</button>
-      <button class="secondary" onclick="handleExport()">匯出資料 (CSV)</button>
-      <!-- 長按按鈕 -->
-      <button id="clearBtn" class="danger holding" 
-              onmousedown="startHold()" onmouseup="cancelHold()" 
-              onmouseleave="cancelHold()" ontouchstart="startHold()" 
-              ontouchend="cancelHold()">
-        ⚠️ 長按 2 秒清空所有資料
-      </button>
-    </div>
-  </div>
 </div>
 
-<!-- 密碼彈窗 -->
+<!-- 管理員密碼彈窗 (兼具數據顯示) -->
 <div id="pwdModal" class="modal-overlay hidden">
-  <div class="modal">
-    <h3 id="pwdTitle">管理員驗證</h3>
-    <p id="pwdDesc">請輸入管理密碼以執行此操作</p>
-    <input type="password" id="pwdInput" maxlength="6" placeholder="******" inputmode="numeric">
-    <div style="display:flex; gap:10px;">
-      <button class="secondary" style="flex:1" onclick="closeModal()">取消</button>
-      <button class="primary" style="flex:1" onclick="submitPassword()">確認</button>
+    <div class="modal">
+        <h3 id="pwdTitle">管理員驗證</h3>
+        
+        <!-- 管理員專屬統計 (解鎖後顯示) -->
+        <div id="adminDataSection" class="hidden">
+            <div class="admin-stat-card">
+                <div class="stat-box">
+                    <div class="stat-val" id="statPlayerCount">0</div>
+                    <div class="stat-lbl">累積人數</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val" id="statRecordCount">0</div>
+                    <div class="stat-lbl">數據總量</div>
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom: 15px;">
+                <button class="primary" onclick="performExport()">📥 匯出 CSV</button>
+                <button id="clearBtn" class="danger holding" 
+                        onmousedown="startHold()" onmouseup="cancelHold()" 
+                        onmouseleave="cancelHold()" ontouchstart="startHold()" 
+                        ontouchend="cancelHold()">
+                    🗑 清空紀錄
+                </button>
+            </div>
+        </div>
+
+        <div id="pwdInputArea">
+            <p style="color: var(--secondary); font-size: 14px;">請輸入授權密碼以進入後台</p>
+            <input type="password" id="pwdInput" maxlength="6" placeholder="••••••" inputmode="numeric">
+        </div>
+
+        <div style="display:flex; gap:12px;">
+            <button class="secondary" style="flex:1" onclick="closeModal()">關閉退出</button>
+            <button id="pwdSubmitBtn" class="primary" style="flex:1" onclick="submitPassword()">確認驗證</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-// ---------- 初始化與資料持久化 ----------
-let allRecords = JSON.parse(localStorage.getItem('tax_records') || '[]');
-const ADMIN_PASSWORD = "231600"; // 直接固定密碼
-
-// ---------- 狀態變數 ----------
-const QUESTION_BANK = [
-    {q:"房屋稅納稅義務基準日是哪一日？",options:["2月末日","3月22日","9月22日"],correct:0},
-    {q:"房屋使用情形變更需在哪一天前提出申請？",options:["3月22日","7月22日","9月22日"],correct:0},
-    {q:"全國單一自住房屋，稅率是多少？",options:["1%","1.2%","1.5%"],correct:0},
-    {q:"住家用房屋現值10萬元以下免稅，適用對象？",options:["法人","自然人","以上皆可以適用"],correct:1},
-    {q:"住家用房屋現值10萬元以下免稅，全國最多幾戶？",options:["1戶","3戶","5戶"],correct:1},
-    {q:"房屋稅2.0新制，對於自住房屋適用條件增訂規定？",options:["不可出租或供營業使用","本人、配偶或直系親屬實際居住","應辦竣戶籍登記"],correct:2},
-    {q:"房屋稅2.0新制，自住房屋增訂戶籍登記之對象？",options:["本人","配偶","直系親屬","以上皆是"],correct:3},
-    {q:"當年房屋要適用自住稅率，需在何時前辦竣戶籍？",options:["3月22日","9月22日"],correct:0},
-    {q:"房屋稅由按月計徵，變成按什麼計徵？",options:["按年","按日"],correct:0},
-    {q:"自住房屋稅率1.2％的成立要件？",options:["無出租/營業","實際居住並辦竣戶籍","全國合計3戶內","以上皆是"],correct:3},
-    {q:"使用牌照稅幾月要繳納?",options:["4月","5月"],correct:0},
-    {q:"地價稅幾月要繳納?",options:["9月","11月"],correct:1},
-    {q:"地價稅自用住宅優惠稅率是多少?",options:["千分之二","千分之十"],correct:0},
-    {q:"地價稅優惠稅率幾月幾日前提出申請,當年度適用?",options:["3月22日","9月22日"],correct:1}
+// ---------- 資料庫 ----------
+const questions = [
+   {q:"房屋稅納稅義務基準日是哪一日？",options:["2月末日","3月22日","9月22日"],correct:0},
+   {q:"房屋使用情形變更需在哪一天前提出申請？",options:["3月22日","7月22日","9月22日"],correct:0},
+   {q:"全國單一自住房屋，稅率是多少？",options:["1%","1.2%","1.5%"],correct:0},
+   {q:"住家用房屋現值10萬元以下免稅，適用對象？",options:["法人","自然人","以上皆可以適用"],correct:1},
+   {q:"住家用房屋現值10萬元以下免稅，全國最多幾戶？",options:["1戶","3戶","5戶"],correct:1},
+   {q:"房屋稅2.0新制，自住房屋適用條件增訂規定？",options:["不可出租或供營業使用","本人、配偶 or 直系親屬實際居住","應辦竣戶籍登記"],correct:2},
+   {q:"房屋稅2.0新制，自用增訂戶籍登記對象？",options:["本人","配偶","直系親屬","以上皆是"],correct:3},
+   {q:"要適用自住稅率，需在何時前辦竣戶籍？",options:["3月22日","9月22日"],correct:0},
+   {q:"房屋稅由按月計徵，改為何種計徵方式？",options:["按年","按日"],correct:0},
+   {q:"自住房屋稅率1.2％的成立要件？",options:["無出租營業","辦竣戶籍","全國合計3戶內","以上皆是"],correct:3},
+   {q:"使用牌照稅於幾月份開徵？",options:["4月","5月","11月"],correct:0},
+   {q:"地價稅於幾月份開徵？",options:["4月","5月","11月"],correct:2},
+   {q:"地價稅自用住宅優惠稅率是多少？",options:["千分之二","千分之十","千分之十五"],correct:0},
+   {q:"地價稅優惠稅率應於何日前提出申請？",options:["3月22日","9月22日","11月30日"],correct:1},
+   {q:"小明有5輛車，可以申請合併到一張稅單嗎?",options:["不可以","可以"],correct:1},
+   {q:"全國單一自住房屋稅率1%的成立要件為何？",options:["房屋無出租或供營業情形","供本人、配偶或直系親屬實際居住使用，且應於該屋辦竣戶籍登記","本人、配偶及未成年子女於全國僅持有1戶房屋","房屋現值在一定金額以下","以上皆是"],correct:4},
+   {q:"法人持有住家用房屋現值10萬元以下是否適用免稅規定？",options:["是","否"],correct:1},
+   {q:"房屋使用情形變更，經核定後，未再變更，是否需再申報？",options:["是","否"],correct:1},
+   {q:"非自住房屋戶數計算是縣市歸戶還是全國歸戶？",options:["縣市歸戶","全國歸戶"],correct:1},
+   {q:"非自住房屋是以個人還是家戶來計算持有戶數？",options:["個人","家戶"],correct:0}
 ];
 
-let selected=[], idx=0, timer, timeLeft=15, answers=[], playerInfo={age:'', gender:''};
-let ageSelected=null, genderSelected=null;
+// ---------- 狀態管理 ----------
+const STORAGE_KEY = 'tax_v3_records';
+let allRecords = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+const ADMIN_PWD = "231600";
+let currentQuiz = [], currentIdx = 0, timer, timeLeft = 15;
+let playerAnswers = [], playerProfile = {age:'', gender:''};
 let holdTimer;
 
-// ---------- 核心功能 ----------
-function saveToLocal() {
-    localStorage.setItem('tax_records', JSON.stringify(allRecords));
+// ---------- 介面邏輯 ----------
+function toggleElderMode() {
+    document.body.classList.toggle('elder-mode');
+    document.getElementById('elderBtn').innerHTML = document.body.classList.contains('elder-mode') ? '👦 一般模式' : '👴 長輩模式';
 }
 
-function toggleElderMode(){
-  document.body.classList.toggle('elder-mode');
-  document.getElementById('elderBtn').textContent = document.body.classList.contains('elder-mode') ? '👦 一般模式' : '👴 長輩模式';
+function setAge(val, btn) {
+    playerProfile.age = val;
+    updateBtnStyle('ageBtns', btn);
 }
 
-function setAge(age, btn){ ageSelected=age; highlightButton('ageBtns', btn); }
-function setGender(gender, btn){ genderSelected=gender; highlightButton('genderBtns', btn); }
-
-function highlightButton(containerId, selectedBtn){
-  const container=document.getElementById(containerId);
-  Array.from(container.children).forEach(btn=>{btn.className='';});
-  if(selectedBtn) selectedBtn.className='primary';
+function setGender(val, btn) {
+    playerProfile.gender = val;
+    updateBtnStyle('genderBtns', btn);
 }
 
-function startGame(){
-  if(!ageSelected || !genderSelected){ showMsg('請先選擇年齡與性別'); return; }
-  playerInfo={age:ageSelected, gender:genderSelected};
-  selected=QUESTION_BANK.sort(()=>Math.random()-0.5).slice(0,3);
-  idx=0; answers=[];
-  document.getElementById('startScreen').classList.add('hidden');
-  document.getElementById('quizScreen').classList.remove('hidden');
-  showQ();
+function updateBtnStyle(id, activeBtn) {
+    const btns = document.getElementById(id).querySelectorAll('button');
+    btns.forEach(b => b.classList.remove('active-choice'));
+    activeBtn.classList.add('active-choice');
 }
 
-function showQ(){
-  const q=selected[idx];
-  document.getElementById('qIndex').textContent=idx+1;
-  document.getElementById('question').textContent=q.q;
-  const box=document.getElementById('options'); box.innerHTML='';
-  q.options.forEach((o,i)=>{
-    const d=document.createElement('div');
-    d.className='opt';
-    d.textContent=(i+1)+'. '+o;
-    d.onclick=()=>checkAnswer(i);
-    box.appendChild(d);
-  });
-  startTimer();
+// ---------- 遊戲邏輯 ----------
+function startGame() {
+    if(!playerProfile.age || !playerProfile.gender) {
+        alert("請先選擇您的年齡與性別！");
+        return;
+    }
+    currentQuiz = [...QUESTION_BANK].sort(() => Math.random() - 0.5).slice(0, 3);
+    currentIdx = 0;
+    playerAnswers = [];
+    
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('quizScreen').classList.remove('hidden');
+    renderQuestion();
 }
 
-function startTimer(){
-  clearInterval(timer);
-  timeLeft=15;
-  const bar=document.getElementById('progressBar');
-  timer=setInterval(()=>{
-    timeLeft-=0.1;
-    if(timeLeft<=0){ clearInterval(timer); checkAnswer(null); return;}
-    document.getElementById('time').textContent=Math.ceil(timeLeft);
-    bar.style.width=(timeLeft/15*100)+'%';
-  },100);
+function renderQuestion() {
+    const q = currentQuiz[currentIdx];
+    document.getElementById('qIndex').textContent = currentIdx + 1;
+    document.getElementById('question').textContent = q.q;
+    
+    const optionsBox = document.getElementById('options');
+    optionsBox.innerHTML = '';
+    
+    q.options.forEach((optStr, i) => {
+        const div = document.createElement('div');
+        div.className = 'opt';
+        div.textContent = optStr;
+        div.onclick = () => selectOption(i);
+        optionsBox.appendChild(div);
+    });
+    
+    startTimer();
 }
 
-function checkAnswer(choice){
-  clearInterval(timer);
-  const q=selected[idx];
-  const options=document.getElementById('options').children;
-  Array.from(options).forEach(opt=>opt.style.pointerEvents='none');
-
-  if(choice !== null){
-      if(choice === q.correct) options[choice].style.background='#4CAF50';
-      else {
-          options[choice].style.background='#f33';
-          options[q.correct].style.background='#4CAF50';
-      }
-  } else {
-      options[q.correct].style.background='#ffc107';
-  }
-
-  setTimeout(()=>{
-      const now = new Date();
-      answers.push({
-          time: now.toLocaleString(),
-          age: playerInfo.age,
-          gender: playerInfo.gender,
-          q: q.q,
-          chosen: choice===null ? '未作答' : q.options[choice],
-          correct: q.options[q.correct],
-          isRight: choice === q.correct
-      });
-      idx++;
-      if(idx<3) showQ(); else finishGame();
-  }, 1000);
+function startTimer() {
+    clearInterval(timer);
+    timeLeft = 15;
+    const bar = document.getElementById('progressBar');
+    const timeText = document.getElementById('time');
+    
+    timer = setInterval(() => {
+        timeLeft -= 0.1;
+        if(timeLeft <= 0) {
+            clearInterval(timer);
+            selectOption(null);
+            return;
+        }
+        timeText.textContent = Math.ceil(timeLeft);
+        bar.style.width = (timeLeft / 15 * 100) + '%';
+    }, 100);
 }
 
-function finishGame(){
-  const rightCount = answers.filter(a=>a.isRight).length;
-  const rate = Math.round(rightCount/3*100);
-  
-  // 寫入總紀錄
-  answers.forEach(a => a.rate = rate);
-  allRecords.push(...answers);
-  saveToLocal();
+function selectOption(choiceIdx) {
+    clearInterval(timer);
+    const q = currentQuiz[currentIdx];
+    const options = document.querySelectorAll('.opt');
+    
+    options.forEach(o => o.style.pointerEvents = 'none');
 
-  document.getElementById('quizScreen').classList.add('hidden');
-  document.getElementById('resultScreen').classList.remove('hidden');
-  document.getElementById('rate').textContent=rate;
+    if(choiceIdx !== null) {
+        if(choiceIdx === q.correct) {
+            options[choiceIdx].style.borderColor = 'var(--success)';
+            options[choiceIdx].style.background = '#dcfce7';
+        } else {
+            options[choiceIdx].style.borderColor = 'var(--danger)';
+            options[choiceIdx].style.background = '#fee2e2';
+            options[q.correct].style.borderColor = 'var(--success)';
+        }
+    } else {
+        options[q.correct].style.borderColor = 'var(--primary)';
+        options[q.correct].style.background = '#f0f4ff';
+    }
 
-  const review=document.getElementById('reviewBody');
-  review.innerHTML='';
-  const wrongs = answers.filter(a=>!a.isRight);
-  if(wrongs.length === 0) review.innerHTML='<li>🎉 完美！全部答對。</li>';
-  else wrongs.forEach(w=>review.innerHTML+=`<li><b>${w.q}</b><br>正確答案：${w.correct}</li>`);
+    playerAnswers.push({
+        q: q.q,
+        chosen: choiceIdx === null ? "未作答" : q.options[choiceIdx],
+        correct: q.options[q.correct],
+        isRight: choiceIdx === q.correct
+    });
+
+    setTimeout(() => {
+        currentIdx++;
+        if(currentIdx < 3) renderQuestion();
+        else showResults();
+    }, 1200);
 }
 
-function nextPlayer(){
-  ageSelected=null; genderSelected=null;
-  highlightButton('ageBtns', null); highlightButton('genderBtns', null);
-  document.getElementById('resultScreen').classList.add('hidden');
-  document.getElementById('startScreen').classList.remove('hidden');
+function showResults() {
+    document.getElementById('quizScreen').classList.add('hidden');
+    document.getElementById('resultScreen').classList.remove('hidden');
+    
+    const correctCount = playerAnswers.filter(a => a.isRight).length;
+    const scoreRate = Math.round((correctCount / 3) * 100);
+    document.getElementById('rate').textContent = scoreRate;
+
+    const playerIDs = new Set(allRecords.map(r => r.playerID));
+    const nextPlayerID = playerIDs.size + 1;
+
+    const timestamp = new Date().toLocaleString();
+    playerAnswers.forEach(ans => {
+        allRecords.push({
+            playerID: nextPlayerID,
+            time: timestamp,
+            age: playerProfile.age,
+            gender: playerProfile.gender,
+            ...ans,
+            finalScore: scoreRate
+        });
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(allRecords));
+
+    const reviewBody = document.getElementById('reviewBody');
+    reviewBody.innerHTML = '';
+    playerAnswers.forEach(ans => {
+        const li = document.createElement('li');
+        li.className = 'review-item';
+        if(ans.isRight) li.style.borderColor = 'var(--success)';
+        li.innerHTML = `<b>${ans.q}</b><br>
+                        <small>您的作答：${ans.chosen} | 正確答案：<span style="color:var(--success)">${ans.correct}</span></small>`;
+        reviewBody.appendChild(li);
+    });
 }
 
-// ---------- 密碼與清空功能 ----------
-let currentAction = null;
+function nextPlayer() {
+    playerProfile = {age:'', gender:''};
+    const btns = document.querySelectorAll('.active-choice');
+    btns.forEach(b => b.classList.remove('active-choice'));
+    
+    document.getElementById('resultScreen').classList.add('hidden');
+    document.getElementById('startScreen').classList.remove('hidden');
+}
 
-function startHold(){
+// ---------- 管理員功能 ----------
+function openAdmin() {
+    document.getElementById('pwdModal').classList.remove('hidden');
+    document.getElementById('adminDataSection').classList.add('hidden');
+    document.getElementById('pwdInputArea').classList.remove('hidden');
+    document.getElementById('pwdSubmitBtn').classList.remove('hidden');
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('pwdInput').focus();
+    document.getElementById('pwdTitle').textContent = '管理員驗證';
+}
+
+function closeModal() {
+    document.getElementById('pwdModal').classList.add('hidden');
+}
+
+function submitPassword() {
+    const input = document.getElementById('pwdInput').value;
+    if(input === ADMIN_PWD) {
+        // 驗證成功，切換至數據面板
+        document.getElementById('pwdTitle').textContent = '數據總計';
+        document.getElementById('pwdInputArea').classList.add('hidden');
+        document.getElementById('pwdSubmitBtn').classList.add('hidden');
+        document.getElementById('adminDataSection').classList.remove('hidden');
+        
+        // 更新數據顯示
+        const uniqueCount = new Set(allRecords.map(r => r.playerID)).size;
+        document.getElementById('statPlayerCount').textContent = uniqueCount;
+        document.getElementById('statRecordCount').textContent = allRecords.length;
+    } else {
+        alert("密碼錯誤！");
+    }
+}
+
+function performExport() {
+    if(allRecords.length === 0) return alert("尚無紀錄可匯出");
+    const headers = ['玩家序號', '時間', '年齡', '性別', '題目', '玩家答案', '正確答案', '是否正確', '該次總得分'];
+    const rows = allRecords.map(r => [
+        `第 ${r.playerID} 位`, r.time, r.age, r.gender, r.q, r.chosen, r.correct, r.isRight ? '是' : '否', r.finalScore
+    ]);
+    
+    let csvContent = "\uFEFF"; 
+    csvContent += headers.join(",") + "\n";
+    rows.forEach(row => {
+        csvContent += row.map(cell => `"${cell}"`).join(",") + "\n";
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `租稅挑戰紀錄_累計至第${new Set(allRecords.map(r=>r.playerID)).size}位.csv`;
+    link.click();
+}
+
+function startHold() {
     const btn = document.getElementById('clearBtn');
     btn.classList.add('is-holding');
     holdTimer = setTimeout(() => {
         btn.classList.remove('is-holding');
-        triggerPassword('clear');
+        if(confirm("確定要清空所有紀錄與快存嗎？此動作無法復原。")) {
+            allRecords = [];
+            localStorage.removeItem(STORAGE_KEY);
+            alert("資料已完全清除。");
+            location.reload();
+        }
     }, 2000);
 }
 
-function cancelHold(){
+function cancelHold() {
     clearTimeout(holdTimer);
     document.getElementById('clearBtn').classList.remove('is-holding');
 }
-
-function triggerPassword(action){
-    currentAction = action;
-    const modal = document.getElementById('pwdModal');
-    modal.classList.remove('hidden');
-    document.getElementById('pwdInput').value = '';
-    document.getElementById('pwdInput').focus();
-}
-
-function submitPassword(){
-    const val = document.getElementById('pwdInput').value;
-    if(val === ADMIN_PASSWORD){
-        if(currentAction === 'clear') {
-            if(confirm('確定要徹底刪除所有本地歷史紀錄嗎？')){
-                allRecords = [];
-                saveToLocal();
-                showMsg('資料已成功清空');
-                nextPlayer();
-            }
-        } else if(currentAction === 'export') {
-            exportCSV();
-        }
-        closeModal();
-    } else {
-        showMsg('密碼錯誤，請重新輸入');
-        document.getElementById('pwdInput').value = '';
-    }
-}
-
-function closeModal(){ document.getElementById('pwdModal').classList.add('hidden'); }
-
-function handleExport(){
-    if(allRecords.length === 0){ showMsg('目前沒有任何作答紀錄可供匯出'); return; }
-    triggerPassword('export');
-}
-
-function exportCSV(){
-    const rows = [['時間','年齡','性別','題目','作答','正確答案','是否正確','該次正確率']];
-    allRecords.forEach(r => rows.push([r.time, r.age, r.gender, r.q, r.chosen, r.correct, r.isRight?'是':'否', r.rate]));
-    
-    let csvContent = "\uFEFF" + rows.map(e => e.map(c => `"${c}"`).join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `租稅挑戰紀錄_${new Date().toLocaleDateString()}.csv`;
-    link.click();
-}
-
-function showMsg(m){ alert(m); }
 </script>
 
 </body>
