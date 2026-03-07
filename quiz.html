@@ -323,7 +323,10 @@ function startGame() {
         alert("請先選擇您的年齡與性別！");
         return;
     }
-    currentQuiz = [...QUESTION_BANK].sort(() => Math.random() - 0.5).slice(0, 3);
+
+    // 這行修正
+    currentQuiz = [...questions].sort(() => Math.random() - 0.5).slice(0, 3);
+
     currentIdx = 0;
     playerAnswers = [];
     
