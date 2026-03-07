@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>租稅小問答 - 專業行動版</title>
     <style>
         :root {
@@ -34,7 +34,8 @@
             margin: 0;
             color: var(--text);
             line-height: 1.6;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent; /* 移除行動裝置點擊灰框 */
+            user-select: none; /* 防止平板長按選取文字 */
         }
 
         .app {
@@ -69,6 +70,7 @@
             justify-content: center;
             padding: 12px 20px;
             font-size: 16px;
+            touch-action: manipulation; /* 優化觸控延遲 */
         }
 
         button:active { transform: scale(0.96); }
@@ -90,11 +92,17 @@
             font-size: 18px;
             font-weight: 500;
             background: white;
-            transition: all 0.2s;
+            transition: background-color 0.2s, border-color 0.2s;
+            touch-action: manipulation;
+        }
+
+        /* 移除平板懸停效果，避免顏色殘留 */
+        @media (hover: hover) {
+            .opt:hover { background: #f1f5f9; }
         }
 
         .progress-container { background: #e2e8f0; border-radius: 10px; overflow: hidden; margin: 15px 0; height: 12px; }
-        .progress-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--primary), #818cf8); }
+        .progress-bar { height: 100%; width: 100%; background: linear-gradient(90deg, var(--primary), #818cf8); transition: width 0.1s linear; }
 
         .review-item { background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--danger); list-style: none; }
 
@@ -272,7 +280,6 @@ function startGame() {
         alert("請先選擇您的年齡與性別！");
         return;
     }
-    // 隨機抽3題
     currentQuiz = [...questions].sort(() => Math.random() - 0.5).slice(0, 3);
     currentIdx = 0;
     playerAnswers = [];
@@ -290,9 +297,15 @@ function renderQuestion() {
     
     const optionsBox = document.getElementById('options');
     optionsBox.innerHTML = '';
+    
     q.options.forEach((optStr, i) => {
         const div = document.createElement('div');
         div.className = 'opt';
+        // 核心修正：確保每一題渲染時都是乾淨的狀態
+        div.style.backgroundColor = 'white';
+        div.style.borderColor = '#e2e8f0';
+        div.style.pointerEvents = 'auto'; 
+        
         div.textContent = optStr;
         div.onclick = () => selectOption(i);
         optionsBox.appendChild(div);
@@ -323,19 +336,25 @@ function selectOption(choiceIdx) {
     clearInterval(timer);
     const q = currentQuiz[currentIdx];
     const opts = document.querySelectorAll('.opt');
+    
+    // 鎖定點擊，防止連續觸發
     opts.forEach(o => o.style.pointerEvents = 'none');
 
     if(choiceIdx !== null) {
         if(choiceIdx === q.correct) {
             opts[choiceIdx].style.borderColor = 'var(--success)';
-            opts[choiceIdx].style.background = '#dcfce7';
+            opts[choiceIdx].style.backgroundColor = '#dcfce7';
         } else {
             opts[choiceIdx].style.borderColor = 'var(--danger)';
-            opts[choiceIdx].style.background = '#fee2e2';
+            opts[choiceIdx].style.backgroundColor = '#fee2e2';
+            // 顯示正確答案
             opts[q.correct].style.borderColor = 'var(--success)';
+            opts[q.correct].style.backgroundColor = '#dcfce7';
         }
     } else {
+        // 超時未答
         opts[q.correct].style.borderColor = 'var(--primary)';
+        opts[q.correct].style.backgroundColor = '#eff6ff';
     }
 
     playerAnswers.push({
@@ -345,11 +364,15 @@ function selectOption(choiceIdx) {
         isRight: choiceIdx === q.correct
     });
 
+    // 稍微延遲進入下一題，讓使用者看清楚答案
     setTimeout(() => {
         currentIdx++;
-        if(currentIdx < 3) renderQuestion();
-        else showResults();
-    }, 1000);
+        if(currentIdx < 3) {
+            renderQuestion();
+        } else {
+            showResults();
+        }
+    }, 1200);
 }
 
 function showResults() {
@@ -428,7 +451,7 @@ function startHold() {
     const btn = document.getElementById('clearBtn');
     btn.classList.add('is-holding');
     holdTimer = setTimeout(() => {
-        if(confirm("確定清空？")) {
+        if(confirm("確定清空所有紀錄嗎？")) {
             allRecords = [];
             localStorage.clear();
             location.reload();
