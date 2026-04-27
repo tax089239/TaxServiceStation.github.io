@@ -1,395 +1,250 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Trophy, Clock, Star, Settings, ChevronRight, CheckCircle, XCircle, Download, Trash2, Home, Gift, X, Sparkles, MapPin, Compass } from 'lucide-react';
-
-// --- 圖片資源配置區 ---
-const IMAGE_ASSETS = {
-  bgArtifact1: "", 
-  bgArtifact2: "",
-  bgPlant: "",
-  target1: "", // 主要目標文物的圖檔
-  other1: "",  // 雜物 1 的圖檔
-  other2: "",  // 雜物 2 的圖檔
-  other3: "",  // 雜物 3 的圖檔
-};
-
-const AssetDisplay = ({ src, emoji, className = "" }) => {
-  if (src) {
-    return <img src={src} alt="artifact" className={`object-contain ${className}`} onError={(e) => e.target.style.display='none'} />;
-  }
-  return <span className={className}>{emoji}</span>;
-};
-
-const GAME_CONFIG = {
-  adminPassword: "admin123", 
-  collectionTarget: 3,        
-  gameTimeLimit: 30,          
-  questionsPerGame: 5,        
-  targetText: "目標：捕捉 3 件游走的古文物！", 
-};
-
-const QUESTION_BANK = [
-  { id: 1, text: "下列哪一項不是我國的主要稅收來源？", options: ["所得稅", "營業稅", "珍珠奶茶稅", "關稅"], answer: "珍珠奶茶稅", hint: "目前台灣並沒有針對單一飲料品項課徵特別稅收喔！" },
-  { id: 2, text: "每年 5 月是申報哪種稅的日子？", options: ["地價稅", "綜合所得稅", "燃料稅", "房屋稅"], answer: "綜合所得稅", hint: "5月是大家最熟悉的報稅季，主要是申報個人所得。" },
-  { id: 3, text: "購物時索取統一發票，主要目的是什麼？", options: ["幫助店家記帳", "增加中獎機會", "防止商家逃漏稅", "以上皆是"], answer: "以上皆是", hint: "發票除了能中獎，最重要的功能是確保稅源透明。" },
-  { id: 4, text: "納稅是國民的義務，這屬於憲法中的規定嗎？", options: ["是", "不是", "看心情", "只有有錢人才要"], answer: "是", hint: "根據憲法第19條，人民有依法律納稅之義務。" },
-  { id: 5, text: "電子發票中獎後，可以自動匯入載具歸戶的帳戶嗎？", options: ["可以", "不可以", "要看運氣", "只限100萬元以上"], answer: "可以", hint: "設定好載具歸戶與領獎帳戶，獎金就會自動匯入，超方便！" },
-  { id: 6, text: "雲端發票除了原本獎項，還有專屬的『雲端發票專屬獎』嗎？", options: ["有", "沒有", "只有過年有", "只限特定店家"], answer: "有", hint: "雲端發票有加碼獎項，中獎機會比紙本發票更多！" },
-];
-
-const ARTIFACT_TYPES = [
-  { id: 'a1', icon: '🏺', img: IMAGE_ASSETS.target1, isTarget: true },
-  { id: 'o1', icon: '🥥', img: IMAGE_ASSETS.other1, isTarget: false },
-  { id: 'o2', icon: '🍃', img: IMAGE_ASSETS.other2, isTarget: false },
-  { id: 'o3', icon: '🐚', img: IMAGE_ASSETS.other3, isTarget: false },
-];
-
-const Fireworks = () => {
-  const canvasRef = useRef(null);
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let animationId;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const particles = [];
-    const colors = ['#8B4513', '#DAA520', '#B8860B', '#CD853F', '#F4A460'];
-    class Particle {
-      constructor(x, y, color) {
-        this.x = x; this.y = y; this.color = color;
-        this.velocity = { x: (Math.random() - 0.5) * 8, y: (Math.random() - 0.5) * 8 };
-        this.alpha = 1; this.friction = 0.95;
-      }
-      draw() {
-        ctx.globalAlpha = this.alpha;
-        ctx.beginPath(); ctx.arc(this.x, this.y, 2, 0, Math.PI * 2, false);
-        ctx.fillStyle = this.color; ctx.fill();
-      }
-      update() {
-        this.velocity.x *= this.friction; this.velocity.y *= this.friction;
-        this.x += this.velocity.x; this.y += this.velocity.y;
-        this.alpha -= 0.01;
-      }
-    }
-    const createFirework = (x, y) => {
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      for (let i = 0; i < 40; i++) particles.push(new Particle(x, y, color));
-    };
-    const animate = () => {
-      animationId = requestAnimationFrame(animate);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particles.forEach((p, i) => { if (p.alpha > 0) { p.update(); p.draw(); } else { particles.splice(i, 1); } });
-      if (Math.random() < 0.05) createFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.5);
-    };
-    animate();
-    return () => cancelAnimationFrame(animationId);
-  }, []);
-  return <canvas ref={canvasRef} className="fixed inset-0 z-50 pointer-events-none" />;
-};
-
-export default function App() {
-  const [view, setView] = useState('home'); 
-  const [records, setRecords] = useState([]);
-  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
-  const [quizSet, setQuizSet] = useState([]);
-  const [userAnswers, setUserAnswers] = useState([]);
-  const [showHint, setShowHint] = useState(false);
-  const [collectedCount, setCollectedCount] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(GAME_CONFIG.gameTimeLimit);
-  const [artifacts, setArtifacts] = useState([]);
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [passwordInput, setPasswordInput] = useState("");
-
-  const appId = typeof __app_id !== 'undefined' ? __app_id : 'tax-archaeology-game';
-
-  useEffect(() => {
-    const saved = localStorage.getItem('tax_game_records');
-    if (saved) setRecords(JSON.parse(saved));
-  }, []);
-
-  const startGame = () => {
-    const shuffled = [...QUESTION_BANK].sort(() => 0.5 - Math.random());
-    setQuizSet(shuffled.slice(0, GAME_CONFIG.questionsPerGame));
-    setCurrentQuizIndex(0);
-    setUserAnswers([]);
-    setShowHint(false);
-    setView('quiz');
-  };
-
-  const handleAnswer = (option) => {
-    const currentQ = quizSet[currentQuizIndex];
-    if (option === currentQ.answer) {
-      const updated = [...userAnswers, { timestamp: new Date().toLocaleString(), question: currentQ.text, isCorrect: true }];
-      setUserAnswers(updated);
-      if (currentQuizIndex + 1 < quizSet.length) {
-        setCurrentQuizIndex(currentQuizIndex + 1);
-        setShowHint(false);
-      } else {
-        localStorage.setItem('tax_game_records', JSON.stringify([...records, ...updated]));
-        setRecords([...records, ...updated]);
-        startCollection();
-      }
-    } else {
-      setShowHint(true);
-    }
-  };
-
-  const startCollection = () => {
-    setCollectedCount(0); 
-    setTimeLeft(GAME_CONFIG.gameTimeLimit); 
-    setView('collection');
-    
-    // 初始化隨機遊走的文物
-    const initialArtifacts = Array.from({ length: 18 }, () => ({
-      id: Math.random(),
-      type: ARTIFACT_TYPES[Math.floor(Math.random() * ARTIFACT_TYPES.length)],
-      x: Math.random() * 80 + 10, // 初始 X (%)
-      y: Math.random() * 50 + 25, // 初始 Y (%)
-      vx: (Math.random() - 0.5) * 0.2, // X 軸速度
-      vy: (Math.random() - 0.5) * 0.2, // Y 軸速度
-      size: Math.random() * 20 + 60, 
-    }));
-    setArtifacts(initialArtifacts);
-  };
-
-  // 文物移動邏輯
-  useEffect(() => {
-    if (view !== 'collection' || timeLeft <= 0 || collectedCount >= GAME_CONFIG.collectionTarget) return;
-
-    let animId;
-    const updateMovement = () => {
-      setArtifacts(prev => prev.map(art => {
-        let nextX = art.x + art.vx;
-        let nextY = art.y + art.vy;
-        let nextVx = art.vx;
-        let nextVy = art.vy;
-
-        // 碰撞邊界檢測 (反彈)
-        if (nextX <= 5 || nextX >= 90) nextVx *= -1;
-        if (nextY <= 20 || nextY >= 85) nextVy *= -1;
-
-        return {
-          ...art,
-          x: nextX,
-          y: nextY,
-          vx: nextVx,
-          vy: nextVy
-        };
-      }));
-      animId = requestAnimationFrame(updateMovement);
-    };
-
-    animId = requestAnimationFrame(updateMovement);
-    return () => cancelAnimationFrame(animId);
-  }, [view, timeLeft, collectedCount]);
-
-  useEffect(() => {
-    let timer;
-    if (view === 'collection' && timeLeft > 0 && collectedCount < GAME_CONFIG.collectionTarget) {
-      timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-    } else if (view === 'collection' && (timeLeft === 0 || collectedCount >= GAME_CONFIG.collectionTarget)) {
-      setView('result');
-    }
-    return () => clearInterval(timer);
-  }, [view, timeLeft, collectedCount]);
-
-  const handleCollect = (item) => {
-    if (item.type.isTarget) setCollectedCount(prev => prev + 1);
-    setArtifacts(prev => prev.filter(i => i.id !== item.id));
-  };
-
-  return (
-    <div className="min-h-screen bg-[#FDF8F1] font-sans text-slate-800 flex flex-col relative overflow-hidden">
-      {view === 'result' && collectedCount >= GAME_CONFIG.collectionTarget && <Fireworks />}
-
-      {/* 背景裝飾 */}
-      <div className="fixed inset-0 pointer-events-none opacity-10 flex items-center justify-center">
-        <div className="absolute top-[10%] left-[5%] animate-float-slow w-24 h-24 flex items-center justify-center">
-           <AssetDisplay src={IMAGE_ASSETS.bgArtifact1} emoji="🏺" className="text-6xl w-full h-full" />
-        </div>
-        <div className="absolute top-[70%] right-[5%] animate-float-fast opacity-50 w-32 h-32 flex items-center justify-center">
-           <AssetDisplay src={IMAGE_ASSETS.bgArtifact2} emoji="🗿" className="text-8xl w-full h-full" />
-        </div>
-      </div>
-
-      {view !== 'collection' && (
-        <header className="w-full bg-white/60 backdrop-blur px-6 py-4 flex justify-between items-center shadow-sm relative z-20">
-          <h1 className="text-xl md:text-2xl font-black text-emerald-800 flex items-center gap-2">
-            <div className="bg-emerald-700 p-1.5 rounded-xl text-white"><Compass size={18} /></div>
-            租稅考古大冒險
-          </h1>
-          <button onClick={() => setView('admin')} className="text-slate-400 hover:text-emerald-700 transition-colors"><Settings /></button>
-        </header>
-      )}
-
-      <main className="flex-1 flex flex-col items-center justify-center p-4 relative z-10">
-        {view === 'home' && (
-          <div className="text-center animate-in fade-in zoom-in duration-700 max-w-md">
-            <div className="relative inline-block mb-6">
-              <div className="w-32 h-32 md:w-48 md:h-48 flex items-center justify-center animate-bounce-gentle select-none drop-shadow-2xl">
-                <AssetDisplay src={IMAGE_ASSETS.target1} emoji="🏺" className="text-8xl md:text-[10rem] w-full h-full" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-48 md:h-48 bg-emerald-400/10 blur-3xl rounded-full -z-10 animate-pulse"></div>
-              </div>
-            </div>
-            <h2 className="text-4xl md:text-6xl font-black text-slate-800 mb-3 tracking-tighter">
-              租稅<span className="text-emerald-700">考古</span>任務
-            </h2>
-            <p className="text-slate-500 text-base md:text-lg font-bold mb-10">挖掘動態文物，探索租稅新知！</p>
-            <button 
-              onClick={startGame}
-              className="group relative bg-emerald-800 hover:bg-emerald-900 text-white text-xl md:text-2xl font-black px-10 md:px-16 py-5 md:py-7 rounded-full shadow-[0_8px_0_rgb(6,78,59)] active:translate-y-2 active:shadow-none transition-all"
-            >
-              開啟探險任務 <ChevronRight className="inline-block ml-1 group-hover:translate-x-2 transition-transform" />
-            </button>
-          </div>
-        )}
-
-        {view === 'quiz' && (
-          <div className="w-full max-w-lg bg-white rounded-[2.5rem] p-6 md:p-10 shadow-2xl animate-in slide-in-from-bottom-10 border-b-[10px] border-emerald-800">
-            <div className="flex justify-between items-center mb-6 md:mb-10">
-              <span className="bg-emerald-50 text-emerald-800 px-4 py-1.5 rounded-xl font-black text-xs md:text-sm">進度 {currentQuizIndex + 1} / {quizSet.length}</span>
-              <div className="w-24 md:w-32 h-2.5 bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-600 transition-all duration-500" style={{ width: `${((currentQuizIndex + 1) / quizSet.length) * 100}%` }}></div>
-              </div>
-            </div>
-            <h3 className="text-xl md:text-2xl font-black text-center mb-8 md:mb-12 leading-relaxed px-2">{quizSet[currentQuizIndex]?.text}</h3>
-            <div className="grid gap-3 md:gap-4">
-              {quizSet[currentQuizIndex]?.options.map((opt, i) => (
-                <button 
-                  key={i} onClick={() => handleAnswer(opt)}
-                  className="w-full p-4 md:p-6 text-left rounded-2xl md:rounded-3xl border-2 border-slate-100 bg-slate-50 hover:border-emerald-500 hover:bg-emerald-50 transition-all font-black text-lg md:text-xl shadow-sm flex items-center"
-                >
-                  <span className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 bg-white text-emerald-800 rounded-lg md:rounded-xl text-center leading-8 md:leading-10 mr-3 md:mr-4 shadow-sm border border-emerald-100 text-sm">
-                    {String.fromCharCode(65 + i)}
-                  </span>
-                  {opt}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {view === 'collection' && (
-          <div className="fixed inset-0 bg-[#f9fbf9] z-50 overflow-hidden">
-            {/* 整合式頂部 UI 面板 */}
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[100] w-[95%] max-w-xl">
-              <div className="bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-2xl border-2 border-emerald-100 p-4 flex flex-col items-center gap-3">
-                <div className="flex items-center justify-between w-full px-2 md:px-6">
-                  <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100 shadow-sm">
-                    <Clock className="text-amber-600 w-6 h-6 md:w-8 md:h-8" />
-                    <span className="text-2xl md:text-3xl font-black text-slate-700 tabular-nums">{timeLeft}s</span>
-                  </div>
-                  <div className="flex gap-2">
-                    {[...Array(GAME_CONFIG.collectionTarget)].map((_, i) => (
-                      <div key={i} className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 ${i < collectedCount ? 'bg-amber-400 border-amber-200 shadow-lg scale-105 rotate-3' : 'bg-white border-slate-100 opacity-40 grayscale'}`}>
-                        <AssetDisplay 
-                          src={IMAGE_ASSETS.target1} 
-                          emoji="🏺" 
-                          className="text-2xl md:text-4xl w-8 h-8 md:w-11 md:h-11" 
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="w-full bg-emerald-800 text-white py-2.5 px-6 rounded-2xl flex items-center justify-center gap-3 shadow-inner">
-                  <Sparkles size={18} className="text-amber-400 animate-pulse" />
-                  <span className="font-black text-base md:text-xl tracking-wider">
-                    {GAME_CONFIG.targetText}
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            {/* 文物遊走區域 */}
-            <div className="absolute inset-0 pt-48 pb-10">
-              {artifacts.map(item => (
-                <button 
-                  key={item.id} 
-                  onClick={() => handleCollect(item)} 
-                  className="absolute p-2 flex items-center justify-center active:scale-95 transition-transform duration-75" 
-                  style={{ 
-                    top: `${item.y}%`, 
-                    left: `${item.x}%`, 
-                    width: `${item.size}px`, 
-                    height: `${item.size}px`,
-                    transform: `translate(-50%, -50%)`
-                  }}
-                >
-                  <div className={`w-full h-full flex items-center justify-center ${item.type.isTarget ? 'drop-shadow-xl scale-110' : 'opacity-40 grayscale-[50%]'}`}>
-                    <AssetDisplay src={item.type.img} emoji={item.type.icon} className="text-5xl md:text-7xl w-full h-full object-contain pointer-events-none" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {view === 'result' && (
-          <div className="text-center p-8 md:p-12 bg-white rounded-[3rem] md:rounded-[4rem] shadow-2xl max-w-sm w-full animate-in zoom-in border-8 border-emerald-50">
-            <div className="w-32 h-32 md:w-40 md:h-40 mx-auto mb-8 flex items-center justify-center">
-               <AssetDisplay 
-                 src={collectedCount >= GAME_CONFIG.collectionTarget ? IMAGE_ASSETS.target1 : null} 
-                 emoji={collectedCount >= GAME_CONFIG.collectionTarget ? '🏺' : '🔍'} 
-                 className="text-8xl md:text-[10rem] w-full h-full" 
-               />
-            </div>
-            <h2 className="text-3xl md:text-4xl font-black mb-3 text-emerald-800">{collectedCount >= GAME_CONFIG.collectionTarget ? '考古大豐收！' : '體力耗盡...'}</h2>
-            <p className="text-slate-500 font-bold mb-8 text-base md:text-lg px-4">
-              {collectedCount >= GAME_CONFIG.collectionTarget ? '你成功捕捉到了三件游動的珍貴文物！' : '文物跑得太快了，下次要看準時機！'}
-            </p>
-            <button onClick={() => setView('home')} className="w-full bg-emerald-800 text-white font-black py-4 md:py-5 rounded-full shadow-[0_6px_0_rgb(6,78,59)] active:translate-y-2 active:shadow-none text-xl md:text-2xl transition-all">重回考古站</button>
-          </div>
-        )}
-
-        {view === 'admin' && (
-          <div className="w-full max-w-2xl bg-white rounded-[2.5rem] p-6 md:p-10 shadow-2xl">
-            <div className="flex justify-between items-center mb-8 border-b pb-4">
-              <h2 className="text-2xl md:text-3xl font-black text-slate-700">管理端控制台</h2>
-              <button onClick={() => setView('home')} className="bg-slate-100 p-2 md:p-3 rounded-full hover:bg-slate-200 transition-colors"><Home size={20} /></button>
-            </div>
-            {!isAdminLoggedIn ? (
-              <div className="text-center py-6">
-                <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} className="w-full p-4 md:p-6 border-4 border-slate-50 bg-slate-50 rounded-2xl mb-6 text-center text-xl md:text-2xl font-bold focus:outline-none focus:border-emerald-200" placeholder="輸入管理員密碼" />
-                <button onClick={() => passwordInput === GAME_CONFIG.adminPassword ? setIsAdminLoggedIn(true) : alert("密碼錯誤")} className="w-full bg-emerald-800 text-white py-4 rounded-2xl font-black text-lg md:text-xl shadow-lg">進入系統</button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="flex-1 bg-emerald-50 p-4 md:p-6 rounded-2xl border-2 border-emerald-100">
-                    <p className="text-emerald-700 font-bold mb-1 text-sm">累積探險次數</p>
-                    <p className="text-3xl md:text-4xl font-black">{records.length}</p>
-                  </div>
-                  <button onClick={() => { if(window.confirm('確定要清除所有考古紀錄嗎？')){localStorage.clear(); setRecords([]);} }} className="px-6 md:px-8 bg-red-50 text-red-500 rounded-2xl border-2 border-red-100 font-bold"><Trash2 size={20} /></button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </main>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes zoom-in { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes slide-in-from-bottom-10 { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>租稅考古探險遊戲</title>
+    <!-- 引入 React 與 Babel (以便在瀏覽器直接解析 JSX) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Lucide 圖示庫 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
         @keyframes bounce-gentle {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(2deg); }
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
         }
         @keyframes float-slow { 
-          0%, 100% { transform: translate(0, 0); } 
-          50% { transform: translate(15px, -10px); } 
+            0%, 100% { transform: translate(0, 0); } 
+            50% { transform: translate(15px, -10px); } 
         }
-        @keyframes float-fast { 
-          0%, 100% { transform: translate(0, 0); } 
-          50% { transform: translate(-15px, 10px); } 
-        }
-        .animate-in { animation-duration: 500ms; animation-fill-mode: both; }
-        .fade-in { animation-name: fade-in; }
-        .zoom-in { animation-name: zoom-in; }
-        .slide-in-from-bottom-10 { animation-name: slide-in-from-bottom-10; }
         .animate-bounce-gentle { animation: bounce-gentle 4s ease-in-out infinite; }
         .animate-float-slow { animation: float-slow 12s ease-in-out infinite; }
-        .animate-float-fast { animation: float-fast 9s ease-in-out infinite; }
-      `}} />
-    </div>
-  );
-}
+        .animate-wiggle { animation: wiggle 2s ease-in-out infinite; }
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg) scale(1); }
+            50% { transform: rotate(5deg) scale(1.05); }
+        }
+    </style>
+</head>
+<body class="bg-[#FDF8F1]">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        // 圖示組件適配器
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const [svg, setSvg] = useState("");
+            useEffect(() => {
+                if (window.lucide) {
+                    const icon = window.lucide.createIcons();
+                }
+            }, []);
+            return <i data-lucide={name} style={{width: size, height: size}} className={className}></i>;
+        };
+
+        // --- 圖片資源配置區 ---
+        const IMAGE_ASSETS = {
+            bgArtifact1: "", 
+            bgArtifact2: "",
+            target1: "", 
+            other1: "",  
+            other2: "",  
+            other3: "",  
+        };
+
+        const AssetDisplay = ({ src, emoji, className = "" }) => {
+            if (src) {
+                return <img src={src} alt="artifact" className={`object-contain ${className}`} onError={(e) => e.target.style.display='none'} />;
+            }
+            return <span className={className}>{emoji}</span>;
+        };
+
+        const GAME_CONFIG = {
+            adminPassword: "admin123", 
+            collectionTarget: 3,        
+            gameTimeLimit: 30,          
+            questionsPerGame: 5,        
+            targetText: "目標：捕捉 3 件游走的古文物！", 
+        };
+
+        const QUESTION_BANK = [
+            { id: 1, text: "下列哪一項不是我國的主要稅收來源？", options: ["所得稅", "營業稅", "珍珠奶茶稅", "關稅"], answer: "珍珠奶茶稅" },
+            { id: 2, text: "每年 5 月是申報哪種稅的日子？", options: ["地價稅", "綜合所得稅", "燃料稅", "房屋稅"], answer: "綜合所得稅" },
+            { id: 3, text: "購物時索取統一發票，主要目的是什麼？", options: ["幫助店家記帳", "增加中獎機會", "防止商家逃漏稅", "以上皆是"], answer: "以上皆是" },
+            { id: 4, text: "納稅是國民的義務，這屬於憲法中的規定嗎？", options: ["是", "不是", "看心情", "只有有錢人才要"], answer: "是" },
+            { id: 5, text: "電子發票中獎後，可以自動匯入載具歸戶的帳戶嗎？", options: ["可以", "不可以", "要看運氣", "只限100萬元以上"], answer: "可以" },
+            { id: 6, text: "雲端發票除了原本獎項，還有專屬的『雲端發票專屬獎』嗎？", options: ["有", "沒有", "只有過年有", "只限特定店家"], answer: "有" },
+        ];
+
+        const ARTIFACT_TYPES = [
+            { id: 'a1', icon: '🏺', img: IMAGE_ASSETS.target1, isTarget: true },
+            { id: 'o1', icon: '🥥', img: IMAGE_ASSETS.other1, isTarget: false },
+            { id: 'o2', icon: '🍃', img: IMAGE_ASSETS.other2, isTarget: false },
+            { id: 'o3', icon: '🐚', img: IMAGE_ASSETS.other3, isTarget: false },
+        ];
+
+        function App() {
+            const [view, setView] = useState('home'); 
+            const [records, setRecords] = useState([]);
+            const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+            const [quizSet, setQuizSet] = useState([]);
+            const [collectedCount, setCollectedCount] = useState(0);
+            const [timeLeft, setTimeLeft] = useState(GAME_CONFIG.gameTimeLimit);
+            const [artifacts, setArtifacts] = useState([]);
+
+            useEffect(() => {
+                const saved = localStorage.getItem('tax_game_records');
+                if (saved) setRecords(JSON.parse(saved));
+                if (window.lucide) window.lucide.createIcons();
+            }, [view]);
+
+            const startGame = () => {
+                const shuffled = [...QUESTION_BANK].sort(() => 0.5 - Math.random());
+                setQuizSet(shuffled.slice(0, GAME_CONFIG.questionsPerGame));
+                setCurrentQuizIndex(0);
+                setView('quiz');
+            };
+
+            const handleAnswer = (option) => {
+                const currentQ = quizSet[currentQuizIndex];
+                if (option === currentQ.answer) {
+                    if (currentQuizIndex + 1 < quizSet.length) {
+                        setCurrentQuizIndex(currentQuizIndex + 1);
+                    } else {
+                        startCollection();
+                    }
+                } else {
+                    alert("答錯囉！再想想看！");
+                }
+            };
+
+            const startCollection = () => {
+                setCollectedCount(0); 
+                setTimeLeft(GAME_CONFIG.gameTimeLimit); 
+                setView('collection');
+                const initialArtifacts = Array.from({ length: 18 }, () => ({
+                    id: Math.random(),
+                    type: ARTIFACT_TYPES[Math.floor(Math.random() * ARTIFACT_TYPES.length)],
+                    x: Math.random() * 80 + 10,
+                    y: Math.random() * 50 + 25,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    size: Math.random() * 20 + 60, 
+                }));
+                setArtifacts(initialArtifacts);
+            };
+
+            useEffect(() => {
+                if (view !== 'collection' || timeLeft <= 0) return;
+                const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+                return () => clearInterval(timer);
+            }, [view, timeLeft]);
+
+            useEffect(() => {
+                if (view !== 'collection' || timeLeft <= 0 || collectedCount >= GAME_CONFIG.collectionTarget) {
+                    if (view === 'collection' && (timeLeft === 0 || collectedCount >= GAME_CONFIG.collectionTarget)) {
+                        setView('result');
+                    }
+                    return;
+                }
+                let animId;
+                const updateMovement = () => {
+                    setArtifacts(prev => prev.map(art => {
+                        let nextX = art.x + art.vx;
+                        let nextY = art.y + art.vy;
+                        let nextVx = art.vx;
+                        let nextVy = art.vy;
+                        if (nextX <= 5 || nextX >= 90) nextVx *= -1;
+                        if (nextY <= 20 || nextY >= 85) nextVy *= -1;
+                        return { ...art, x: nextX, y: nextY, vx: nextVx, vy: nextVy };
+                    }));
+                    animId = requestAnimationFrame(updateMovement);
+                };
+                animId = requestAnimationFrame(updateMovement);
+                return () => cancelAnimationFrame(animId);
+            }, [view, timeLeft, collectedCount]);
+
+            return (
+                <div className="min-h-screen text-slate-800 flex flex-col relative overflow-hidden">
+                    {view === 'home' && (
+                        <div className="flex-1 flex flex-col items-center justify-center p-4">
+                            <div className="animate-bounce-gentle mb-8">
+                                <AssetDisplay emoji="🏺" className="text-9xl" />
+                            </div>
+                            <h1 className="text-5xl font-black mb-4">租稅考古探險</h1>
+                            <button onClick={startGame} className="bg-emerald-700 text-white px-12 py-5 rounded-full text-2xl font-bold shadow-xl hover:bg-emerald-800 transition-all">
+                                開始探險
+                            </button>
+                        </div>
+                    )}
+
+                    {view === 'quiz' && (
+                        <div className="flex-1 flex flex-col items-center justify-center p-4">
+                            <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-md w-full border-b-8 border-emerald-700">
+                                <h2 className="text-2xl font-black mb-6 text-center">{quizSet[currentQuizIndex]?.text}</h2>
+                                <div className="space-y-3">
+                                    {quizSet[currentQuizIndex]?.options.map((opt, i) => (
+                                        <button key={i} onClick={() => handleAnswer(opt)} className="w-full p-4 text-left bg-slate-50 rounded-xl border-2 hover:border-emerald-500 font-bold transition-all">
+                                            {opt}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {view === 'collection' && (
+                        <div className="fixed inset-0 bg-[#f9fbf9] overflow-hidden">
+                            <div className="absolute top-10 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4">
+                                <div className="bg-white/90 p-4 rounded-3xl shadow-xl flex flex-col items-center gap-2 border-2 border-emerald-100">
+                                    <div className="flex justify-between w-full items-center">
+                                        <div className="text-3xl font-black text-amber-600">⏱ {timeLeft}s</div>
+                                        <div className="flex gap-2">
+                                            {[...Array(GAME_CONFIG.collectionTarget)].map((_, i) => (
+                                                <div key={i} className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center ${i < collectedCount ? 'bg-amber-400' : 'bg-white opacity-30'}`}>🏺</div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="w-full bg-emerald-800 text-white text-center py-2 rounded-xl font-bold">
+                                        {GAME_CONFIG.targetText}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="absolute inset-0">
+                                {artifacts.map(item => (
+                                    <button 
+                                        key={item.id} 
+                                        onClick={() => {if(item.type.isTarget) setCollectedCount(c => c+1); setArtifacts(prev => prev.filter(a => a.id !== item.id))}}
+                                        className="absolute p-2 transition-transform active:scale-75"
+                                        style={{ top: `${item.y}%`, left: `${item.x}%`, transform: 'translate(-50%, -50%)' }}
+                                    >
+                                        <AssetDisplay emoji={item.type.icon} className="text-6xl" />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {view === 'result' && (
+                        <div className="flex-1 flex flex-col items-center justify-center p-4">
+                            <div className="bg-white p-12 rounded-[3rem] shadow-2xl text-center border-8 border-emerald-50">
+                                <div className="text-8xl mb-6">{collectedCount >= 3 ? '🏆' : '💀'}</div>
+                                <h2 className="text-4xl font-black mb-4">{collectedCount >= 3 ? '探險大成功！' : '探險失敗'}</h2>
+                                <button onClick={() => setView('home')} className="bg-emerald-800 text-white px-10 py-4 rounded-full text-xl font-bold">回首頁</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
