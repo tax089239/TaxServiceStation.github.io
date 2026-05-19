@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧拼好屋</title>
+
+<style>
+/* ----------------- 色彩設定 ----------------- */
+:root{
+    --primary:#003366;          /* 天空藍 */
+    --primary-dark:#6fa8dc;
+    --secondary:#2c7bb6;        /* 修正：將標題綠改為更深的藍綠，增加辨識度 */
+    --secondary-dark:#8fc97a;
+    --accent:#ffd86b;           
+    --accent-pink:#f59ab2;      
+    --white:#ffffff;
+    --black:#222;
+    --text:#003366;             /* 深藍文字 */
+    --text-dark:#002244;        /* 更深的標題藍 */
+    --success:#28a745;          /* 修正：更深的成功綠 */
+    --danger:#d9534f;           /* 錯誤提示紅 */
+    --bg-gradient: linear-gradient(180deg, #bfe3f7 0%, #d9f0ff 35%, #dff4d2 70%, #b8e39c 100%);
+    --shadow-soft:0 6px 18px rgba(0,0,0,.08);
+}
+
+/* ----------------- 全局樣式 ----------------- */
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+body{ margin:0; min-height:100vh; font-family: "Microsoft JhengHei", "PingFang TC", sans-serif; background:var(--bg-gradient); background-attachment:fixed; text-align:center; color:var(--text); overflow-x:hidden; user-select:none; position:relative; }
+
+/* 背景柔光裝飾 */
+body::before,
+body::after{
+    content:"";
+    position:fixed;
+    width:420px;
+    height:420px;
+    border-radius:50%;
+    z-index:-1;
+    filter:blur(40px);
+    opacity:.28;
+} 
+
+/* 左上天空藍柔光 */
+body::before{
+    top:-120px;
+    left:-120px;
+    background:#bfe3f7;
+}
+
+/* 右下草地綠柔光 */
+body::after{
+    right:-140px;
+    bottom:-140px;
+    background:#cfe8b5;
+}
+
+/* ----------------- Header 標題區 ----------------- */
+header{ background: linear-gradient(to right, rgba(159,211,242,.92), rgba(184,230,255,.92)); backdrop-filter:blur(10px); color:white; padding:24px 18px; box-shadow: 0 8px 20px rgba(0,0,0,.05); border-bottom:4px solid rgba(255,255,255,.5); position:sticky; top:0; z-index:100; }
+    
+/* 主標題 */
+header h1{ margin:0; font-size:1.8rem; letter-spacing:3px; color:white; text-shadow: 0 2px 6px rgba(0,0,0,.15); }
+
+/* ----------------- 控制區塊 ----------------- */
+#controls{ margin:20px auto; background:rgba(255,255,255,.88); padding:14px 26px; border-radius:999px; display:inline-flex; align-items:center; gap:15px; box-shadow:var(--shadow-soft); border:3px solid rgba(255,255,255,.9); backdrop-filter:blur(8px); }
+
+
+/* ----------------- 按鈕通用樣式 ----------------- */
+button{ padding:12px 26px; font-size:16px; border:none; border-radius:999px; background: linear-gradient(to bottom, #7cc7ff, #5daeea); color:white; font-weight:bold; cursor:pointer; box-shadow: 0 5px 0 #4d97cf, 0 8px 18px rgba(93,174,234,.25); transition:all .2s ease; display:flex; align-items:center; justify-content:center; gap:8px; }
+
+/* 滑鼠移入 */
+button:hover{ transform:translateY(-2px); background: linear-gradient(to bottom, #ffd86b, #ffca47); box-shadow: 0 5px 0 #d9aa34, 0 10px 20px rgba(255,202,71,.28); }
+
+/* 按下效果 */
+button:active{ transform:translateY(2px); box-shadow:none;}
+
+/* 禁用狀態 */
+button:disabled{ opacity:.6; cursor:not-allowed;}
+
+
+/* ----------------- 重置按鈕 ----------------- */
+#resetBtn{ background: linear-gradient(to bottom,#f8b4c8,#ee93af); box-shadow: 0 5px 0 #d97b98; }
+
+/* ----------------- 匯出按鈕 ----------------- */
+.export-btn{ background: linear-gradient(to bottom,#9edb8f,#7fcf74); box-shadow: 0 5px 0 #63af59; }
+
+/* ----------------- 卡片通用樣式 ----------------- */
+.card,
+.panel,
+.game-box{
+    background:rgba(255,255,255,.88);
+    border-radius:28px;
+    border:4px solid white;
+    box-shadow:var(--shadow-soft);
+}
+
+/* ----------------- 拼圖版面 ----------------- */
+#game-layout{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:20px;
+    padding:20px;
+    max-width:1280px;
+    margin:0 auto;
+}
+
+/* ----------------- 左右拼圖池 ----------------- */
+.pool{
+    flex:1;
+    min-width:160px;
+    min-height:420px;
+    background:rgba(255,255,255,.72);
+    border-radius:32px;
+    padding:18px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-content:flex-start;
+    gap:12px;
+    border:4px dashed #9fd18b;
+    box-shadow:
+        0 8px 24px rgba(0,0,0,.06);
+    backdrop-filter:blur(6px);
+    transition:.3s;
+    animation:floaty 5s ease-in-out infinite;
+}
+
+/* 滑鼠移入 */
+.pool:hover{background:rgba(255,255,255,.88);}
+
+
+/* ----------------- 中央拼圖區 ----------------- */
+#puzzle-board{
+    flex:0 0 auto;
+    width:80vw;
+    max-width:440px;
+    aspect-ratio:1/1;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);
+    gap:5px;
+    padding:10px;
+    background:rgba(255,255,255,.88);
+    border:8px solid rgba(255,255,255,.95);
+    border-radius:36px;
+    box-shadow:
+        0 12px 30px rgba(109,170,214,.18);
+    position:relative;
+    overflow:hidden;
+    animation:floaty 5s ease-in-out infinite;
+}
+/* ----------------- 參考背景 ----------------- */
+#reference-bg{
+    position:absolute;
+    inset:0;
+    background-size:100% 100%;
+    background-position:center;
+    background-repeat:no-repeat;
+    opacity:.5;
+    pointer-events:none;
+    z-index:0;
+    filter:
+        saturate(.9)
+        brightness(1.05);
+}
+
+/* ----------------- 拼圖格子 ----------------- */
+.slot{
+    background:rgba(255,255,255,.45);
+    width:100%;
+    height:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:14px;
+    border:2px dashed rgba(255,255,255,.65);
+    transition:.25s;
+    z-index:1;
+}
+
+/* 拖曳進入效果 */
+.slot.drag-over{
+    background:rgba(255,216,107,.35);
+    transform:scale(1.03);
+    border-color:#ffd86b;
+}
+
+
+/* ----------------- 拼圖片段 ----------------- */
+.piece{
+    position:relative;
+    cursor:grab;
+    background-repeat:no-repeat;
+    border:3px solid rgba(255,255,255,.95);
+    border-radius:18px;
+    box-shadow:
+        0 6px 14px rgba(0,0,0,.12);
+    touch-action:none;
+    box-sizing:border-box;
+    overflow:hidden;
+    transition:
+        transform .2s,
+        box-shadow .2s;
+}
+
+/* 滑鼠移入 */
+.piece:hover{
+    transform:translateY(-3px);
+    box-shadow:
+        0 10px 20px rgba(0,0,0,.16);
+}
+
+/* 拖曳中 */
+.piece:active{cursor:grabbing; transform:scale(.96);}
+
+/* ----------------- 放錯抖動動畫 ----------------- */
+@keyframes shake{
+    0%{transform:translateX(0);}
+    25%{transform:translateX(-4px) rotate(-1deg);}
+    50%{transform:translateX(4px) rotate(1deg);}
+    75%{transform:translateX(-4px) rotate(-1deg);}
+    100%{transform:translateX(0);}
+}
+
+.shake-anim{ animation:shake .35s ease-in-out;}
+
+/* ----------------- 漂浮動畫 ----------------- */
+@keyframes floaty{
+    0%{ transform:translateY(0px); }
+   50%{ transform:translateY(-6px); }
+  100%{ transform:translateY(0px); }
+}
+
+/* ----------------- 彈窗背景 ----------------- */
+.modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:
+        rgba(166,210,240,.35);
+    z-index:2000;
+    justify-content:center;
+    align-items:center;
+    backdrop-filter:blur(10px);
+}
+
+/* ----------------- 管理員驗證框 ----------------- */
+.auth-box{
+    background:rgba(255,255,255,.95);
+    padding:35px;
+    border-radius:32px;
+    width:320px;
+    border:5px solid #b7e1ff;
+    text-align:center;
+    box-shadow:
+        0 15px 35px rgba(0,0,0,.12);
+}
+
+/* 標題 */
+.auth-box h3{ margin-top:0; color:#6aa9dc; font-size:1.5rem;}
+
+/* 輸入框 */
+.auth-box input{
+    width:100%;
+    padding:14px;
+    margin:15px 0;
+    font-size:1.1rem;
+    text-align:center;
+    border-radius:16px;
+    border:2px solid #d6ecff;
+    background:#f8fdff;
+}
+
+
+/* ----------------- 結果容器 ----------------- */
+.result-container{
+    display:flex;
+    flex-direction:row;
+    gap:40px;
+    width:90%;
+    max-width:1100px;
+    max-height:90vh;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+
+/* ----------------- 海報區 ----------------- */
+.poster-side{
+    flex:1.2;
+    display:flex;
+    justify-content:center;
+}
+
+/* 海報圖片 */
+#posterImage{
+    max-width:100%;
+    max-height:75vh;
+    border-radius:30px;
+    border:8px solid white;
+    box-shadow:
+        0 12px 30px rgba(0,0,0,.12);
+    object-fit:contain;
+}
+
+/* ----------------- 題目區 ----------------- */
+.quiz-side{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+/* 題目卡片 */
+.quizBox{
+    background:rgba(255,255,255,.98);
+    color:var(--text);
+    padding:35px;
+    border-radius:36px;
+    width:100%;
+    max-width:430px;
+    border:5px solid #d7f0c8;
+    box-shadow:
+        0 12px 28px rgba(0,0,0,.10);
+    animation:floaty 5s ease-in-out infinite;
+}
+
+/* 題目標題：使用更深的藍色強化視覺重點 */
+.quizBox h2,
+.quizBox h3 { color: var(--text-dark); margin-top: 0; line-height: 1.5; font-size: 1.4rem; font-weight: 900; }
+
+
+/* 題目文字內容：加大字體並加粗，適合園遊會閱讀 */
+.quizBox p { 
+    line-height: 1.8; 
+    font-size: 1.2rem; 
+    font-weight: 700; 
+    color: var(--text); 
+    margin: 15px 0;
+    text-shadow: 0.5px 0.5px 0px rgba(255,255,255,0.8);
+}
+/* ----------------- 選項按鈕 ----------------- */
+.opt-btn{ display:block; width:100%; margin:14px 0; background:white; color:var(--text-dark); border:3px solid #cfe8ff; padding:16px; font-weight:bold; font-size:1.1rem; border-radius:20px; cursor:pointer; transition:.25s; }
+
+
+/* 滑鼠移入 */
+.opt-btn:hover{
+    background:#7cc7ff;
+    color:white;
+    border-color:#7cc7ff;
+    transform:translateY(-2px);
+}
+
+
+/* ----------------- 平板與手機版 ----------------- */
+@media (max-width:900px){
+    #game-layout{
+        flex-direction:column;
+        align-items:center;
+    }
+    .pool{width:92vw; min-height:120px; flex:none;}
+    #puzzle-board{ width:92vw;}
+
+    .result-container{
+        flex-direction:column;
+        overflow-y:auto;
+        padding:15px;
+    }
+
+    #posterImage{max-height:38vh;}
+
+    .quizBox{padding:24px;}
+}
+/* ----------------- 小手機版 ----------------- */
+@media (max-width:600px){
+    /* 控制列 */
+    #controls{
+        width:92vw;
+        border-radius:28px;
+        padding:16px;
+        flex-wrap:wrap;
+        justify-content:center;
+    }
+
+    /* 按鈕 */
+    button{width:100%;}
+
+    /* 主標題 */
+    header h1{font-size:1.4rem;line-height:1.5;}
+}
+</style>
+</head>
+
+<body>
+<header>
+    <h1>🏠智慧拼好屋</h1>
+</header>
+
+<!-- 控制按鈕區 -->
+<div id="controls">
+    <button onclick="startGame()">開始挑戰</button>
+    <button class="export-btn" id="exportBtn" onclick="requestAuth('export')" title="需要管理員密碼">數據匯出</button>
+    <button id="resetBtn" title="長按並輸入密碼以清空">清空紀錄</button>
+    <input type="file" id="importFile" style="display:none" accept=".csv" onchange="importCSV(event)">
+    <button onclick="requestAuth('import')" title="需要管理員密碼">匯入紀錄</button>
+</div>
+
+<!-- 拼圖區 -->
+<div id="game-layout">
+    <div id="pool-left" class="pool" ondragover="event.preventDefault()" ondrop="handleReturnToPool(event,'left')"></div>
+    <div id="puzzle-board">
+        <div id="reference-bg"></div>
+    </div>
+    <div id="pool-right" class="pool" ondragover="event.preventDefault()" ondrop="handleReturnToPool(event,'right')"></div>
+</div>
+
+<p id="hint-text" style="color:#777; font-weight:bold; margin-top:15px; background:white; display:inline-block; padding:8px 25px; border-radius:25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+    💡 將碎片拖入中央，放對位置才會吸附變大喔！
+</p>
+
+<!-- 管理員密碼驗證彈窗 -->
+<div id="authModal" class="modal-overlay">
+    <div class="auth-box">
+        <h3>🔐 管理員驗證</h3>
+        <p>請輸入權限密碼以繼續</p>
+        <input type="password" id="authPassword" placeholder="請輸入密碼">
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button style="background:#666; box-shadow:0 4px 0 #333;" onclick="closeAuth()">取消</button>
+            <button onclick="verifyAuth()">確認</button>
+        </div>
+    </div>
+</div>
+
+<!-- 遊戲結果與題目彈窗 -->
+<div id="overlay" class="modal-overlay">
+    <div class="result-container">
+        <div class="poster-side">
+            <img id="posterImage" src="" alt="稅務宣導海報">
+        </div>
+        <div class="quiz-side">
+            <h2 style="color:var(--secondary); margin-bottom:20px; font-size: 2rem; text-shadow: 3px 3px 0 #fff;">🎊 闖關完成 🎊</h2>
+            <div class="quizBox">
+                <h3 id="quizTitle" style="color:var(--primary); margin-top:0; line-height:1.5;"></h3>
+                <div id="quizOptions"></div>
+                <p id="quizResult" style="min-height:30px; font-weight:bold; margin:20px 0; font-size: 1.1rem;"></p>
+                <button id="closeBtn" style="display:none; background: linear-gradient(var(--success), #219150); width: 100%; justify-content: center;" onclick="closeOverlay()">下一位 ✨</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================= -->
+<!-- ================== JS ====================== -->
+<!-- ============================================= -->
+<script>
+// =================== 管理員與遊戲設定 ===================
+const ADMIN_PASSWORD = "231600"; // 管理員密碼
+let currentPendingAction = null; // 紀錄等待驗證的動作
+
+const size = 3; // 拼圖格子 3x3
+const missionList = [
+    { topic: "戶籍登記", image: "pintoo1.png", question: "要適用房屋稅1.2%自住優惠稅率要符合什麼條件?", options: ["房屋無出租或營業使用", "所有權人或使用全人本人、配偶或直系親屬實際居住並於該屋辦竣戶籍登記","本人、配偶及未成年子女全國合計持有三戶以內","以上皆是"], answer: 3 },
+    { topic: "戶籍登記", image: "pintoo1.png", question: "113年7月起，要適用房屋稅1.2%自住優惠稅新增什麼條件?", options: ["要實際居住", "所有權人或使用全人本人、配偶或直系親屬於該屋辦竣戶籍登記"], answer: 1 },
+     { topic: "全國單一自住", image: "pintoo2.png", question: "113年7月起，全國單一自用住宅用地稅率調降為多少？", options: ["1.2%", "1%"], answer: 1 },
+    { topic: "全國單一自住", image: "pintoo2.png", question: "113年7月起，全國單一自用住宅用地現值要在新台幣多少以下？", options: ["新台幣155萬7,400元", "沒有限制"], answer: 0 },
+    { topic: "使用情形變更截止日", image: "pintoo3.png", question: "要適用房屋稅優惠稅率或使用情形變更，要在哪一天前完成申請?", options: ["4/30", "3/22"], answer: 1 },
+    { topic: "出租", image: "pintoo4.jpg", question: "將房屋出租並誠實申報租賃所得，租賃收入達當地一般租金標準，房屋稅稅率是多少？", options: ["1.5%~2.4%", "2.4%~3.6%"], answer: 0 },
+    { topic: "公益出租", image: "pintoo4.jpg", question: "將房屋出租並取得公益出租人身分，房屋稅稅率是多少？", options: ["2.4%", "1.2%"], answer: 0 }
+];
+
+let currentData = null, draggedPiece = null, gameRecords = [];
+let startTime, puzzleEndTime, currentAttempts = 0, remainingIndices = [];
+
+// ---------------- 管理員功能：驗證密碼 ----------------
+function requestAuth(action) {
+    currentPendingAction = action;
+    document.getElementById("authModal").style.display = "flex";
+    document.getElementById("authPassword").value = "";
+    document.getElementById("authPassword").focus();
+}
+function closeAuth() { document.getElementById("authModal").style.display = "none"; currentPendingAction = null; }
+function verifyAuth() {
+    const input = document.getElementById("authPassword").value;
+    if (input === ADMIN_PASSWORD) { executeAction(currentPendingAction); closeAuth(); }
+    else { alert("密碼錯誤！"); document.getElementById("authPassword").value = ""; }
+}
+function executeAction(action) {
+    if(action==='export') exportData();
+    if(action==='import') document.getElementById('importFile').click();
+    if(action==='reset'){ if(confirm("確定清空紀錄？")){ gameRecords=[]; localStorage.removeItem('taxGameRecords'); updateUI(); alert("已清空"); } }
+}
+document.getElementById("authPassword").addEventListener("keypress", e=>{if(e.key==="Enter")verifyAuth();});
+
+// =================== 遊戲邏輯 ===================
+function startGame() {
+    if(!remainingIndices.length) remainingIndices=[...Array(missionList.length).keys()].sort(()=>Math.random()-0.5);
+    currentData = missionList[remainingIndices.pop()];
+    startTime=new Date(); currentAttempts=0; initBoard(); updateUI();
+}
+
+function initBoard() {
+    const board = document.getElementById("puzzle-board");
+    board.innerHTML = '<div id="reference-bg"></div>'; 
+    
+    // 背景圖設定：使用 100% 100% 確保不被裁切且與拼圖片段位置對應
+    const bg = document.getElementById("reference-bg");
+    bg.style.backgroundImage = `url(${currentData.image})`;
+    
+    document.getElementById("pool-left").innerHTML = '';
+    document.getElementById("pool-right").innerHTML = '';
+
+    for (let i = 0; i < size * size; i++) {
+        const slot = document.createElement("div");
+        slot.className = "slot"; 
+        slot.dataset.id = i; 
+        slot.addEventListener("dragover", e => { e.preventDefault(); slot.classList.add('drag-over'); });
+        slot.addEventListener("dragleave", () => slot.classList.remove('drag-over'));
+        slot.addEventListener("drop", handleDropToSlot); 
+        board.appendChild(slot);
+    }
+
+    const pieces = [];
+    for (let i = 0; i < size * size; i++) pieces.push(createPiece(i));
+    pieces.sort(() => Math.random() - 0.5).forEach((p, idx) => {
+        const side = (idx % 2 === 0) ? document.getElementById("pool-left") : document.getElementById("pool-right");
+        side.appendChild(p);
+        updatePieceSize(p, false);
+    });
+}
+
+function createPiece(id) {
+    const piece = document.createElement("div");
+    piece.className = "piece"; 
+    piece.draggable = true;
+    piece.dataset.correctId = id;
+
+    const x = id % size, y = Math.floor(id / size);
+    const pPos = (100 / (size - 1));
+    piece.style.backgroundImage = `url(${currentData.image})`;
+    piece.style.backgroundSize = `${size * 100}% ${size * 100}%`; // 與背景對應
+    piece.style.backgroundPosition = `${x * pPos}% ${y * pPos}%`;
+
+    piece.addEventListener("dragstart", () => draggedPiece = piece);
+    piece.addEventListener("touchstart", handleTouchStart, {passive: false});
+    piece.addEventListener("touchmove", handleTouchMove, {passive: false});
+    piece.addEventListener("touchend", handleTouchEnd);
+    return piece;
+}
+
+function updatePieceSize(piece, inBoard) {
+    if (inBoard) {
+        piece.style.width = "100%"; piece.style.height = "100%";
+    } else {
+        const pSize = window.innerWidth < 600 ? 70 : 90;
+        piece.style.width = `${pSize}px`; piece.style.height = `${pSize}px`;
+    }
+}
+
+function handleDropToSlot(e) {
+    e.preventDefault();
+    const slot = e.currentTarget;
+    slot.classList.remove('drag-over');
+    if (slot.children.length > 0 || !draggedPiece) return;
+
+    const isCorrect = draggedPiece.dataset.correctId === slot.dataset.id;
+
+    if (isCorrect) {
+        draggedPiece.style.position = "static";
+        draggedPiece.style.transform = "none";
+        updatePieceSize(draggedPiece, true);
+        slot.appendChild(draggedPiece);
+        checkWin();
+    } else {
+        draggedPiece.classList.add('shake-anim');
+        setTimeout(() => draggedPiece.classList.remove('shake-anim'), 400);
+        if(draggedPiece.style.position === "fixed") {
+            draggedPiece.style.position = "static";
+            draggedPiece.style.transform = "none";
+        }
+    }
+}
+
+function handleReturnToPool(e, side) {
+    e.preventDefault();
+    if (!draggedPiece) return;
+    draggedPiece.style.position = "static";
+    draggedPiece.style.transform = "none";
+    updatePieceSize(draggedPiece, false);
+    document.getElementById(side === 'left' ? 'pool-left' : 'pool-right').appendChild(draggedPiece);
+}
+
+// =================== 觸控操作 ===================
+let touchOffset={x:0,y:0};
+function handleTouchStart(e){ draggedPiece=e.target; const t=e.touches[0]; const r=draggedPiece.getBoundingClientRect(); touchOffset.x=t.clientX-r.left; touchOffset.y=t.clientY-r.top; draggedPiece.style.position="fixed"; draggedPiece.style.zIndex="1000"; draggedPiece.style.opacity="0.8"; moveAt(t.clientX,t.clientY);}
+function moveAt(px,py){ draggedPiece.style.left=(px-touchOffset.x)+'px'; draggedPiece.style.top=(py-touchOffset.y)+'px'; }
+function handleTouchMove(e){ e.preventDefault(); if(!draggedPiece)return; moveAt(e.touches[0].clientX,e.touches[0].clientY); }
+function handleTouchEnd(e){ if(!draggedPiece)return; const t=e.changedTouches[0]; const target=document.elementFromPoint(t.clientX,t.clientY); const slot=target?target.closest(".slot"):null; draggedPiece.style.opacity="1"; if(slot&&slot.children.length===0){ handleDropToSlot({currentTarget:slot,preventDefault:()=>{}}); } else { const sideId=t.clientX<window.innerWidth/2?'pool-left':'pool-right'; draggedPiece.style.position="static"; draggedPiece.style.transform="none"; updatePieceSize(draggedPiece,false); document.getElementById(sideId).appendChild(draggedPiece);} draggedPiece=null; }
+
+// =================== 拼圖完成檢查 ===================
+function checkWin(){
+    const slots=document.querySelectorAll(".slot"); let correctCount=0;
+    slots.forEach(s=>{ const p=s.querySelector(".piece"); if(p&&p.dataset.correctId==s.dataset.id) correctCount++; });
+    if(correctCount===size*size){ puzzleEndTime=new Date(); setTimeout(showQuiz,500); }
+}
+
+function showQuiz(){
+    const overlay=document.getElementById("overlay");
+    document.getElementById("posterImage").src=currentData.image;
+    document.getElementById("quizTitle").innerText=currentData.question;
+    document.getElementById("quizResult").innerText=""; document.getElementById("closeBtn").style.display="none";
+    let html=""; currentData.options.forEach((opt,idx)=>{ html+=`<button class="opt-btn" onclick="checkAnswer(${idx})">${opt}</button>`; });
+    document.getElementById("quizOptions").innerHTML=html; overlay.style.display="flex";
+}
+
+function checkAnswer(idx){
+    currentAttempts++; if(idx===currentData.answer){
+        document.getElementById("quizResult").innerHTML="✅ <span style='color:var(--success)'>答對了！</span>";
+        document.getElementById("closeBtn").style.display="flex";
+        document.querySelectorAll(".opt-btn").forEach(b=>b.disabled=true);
+        const now=new Date();
+        gameRecords.push({ time:now.toLocaleString(), topic:currentData.topic, question:currentData.question, attempts:currentAttempts, puzzleSeconds:Math.floor((puzzleEndTime-startTime)/1000), totalSeconds:Math.floor((now-startTime)/1000)});
+        localStorage.setItem('taxGameRecords',JSON.stringify(gameRecords));
+        updateUI();
+    } else { document.getElementById("quizResult").innerHTML="❌ <span style='color:var(--primary)'>答錯囉！請再試一次。</span>"; }
+}
+function closeOverlay(){ document.getElementById("overlay").style.display="none"; startGame(); }
+
+// =================== 匯出匯入功能 ===================
+function exportData(){
+    if(!gameRecords.length) return;
+    let csv="\ufeff紀錄時間,稅目,題目內容,嘗試次數,拼圖耗時(秒),總體耗時(秒)\n";
+    gameRecords.forEach(r=>csv+=`${r.time},${r.topic},${r.question.replace(/,/g,"，")},${r.attempts},${r.puzzleSeconds},${r.totalSeconds}\n`);
+    const link=document.createElement("a"); link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+    link.download=`稅務報表_${new Date().toLocaleDateString()}.csv`; link.click();
+}
+function importCSV(e){
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+        const rows=ev.target.result.split(/\r?\n/).slice(1); const imported=[];
+        rows.forEach(row=>{ const cols=row.split(","); if(cols.length>=6) imported.push({ time:cols[0], topic:cols[1], question:cols[2], attempts:parseInt(cols[3]), puzzleSeconds:parseInt(cols[4]), totalSeconds:parseInt(cols[5]) }); });
+        gameRecords=imported; localStorage.setItem('taxGameRecords',JSON.stringify(gameRecords)); updateUI(); alert("匯入成功！");
+    };
+    reader.readAsText(file);
+}
+function updateUI(){ const hasRec=gameRecords.length>0; document.getElementById("exportBtn").disabled=!hasRec; document.getElementById("resetBtn").disabled=!hasRec; }
+
+// =================== 長按清空紀錄 ===================
+let resetTimer; const rBtn=document.getElementById("resetBtn");
+const startClear=()=>{ resetTimer=setTimeout(()=>requestAuth('reset'),2000); };
+const stopClear=()=>clearTimeout(resetTimer);
+rBtn.addEventListener("mousedown",startClear); rBtn.addEventListener("mouseup",stopClear);
+rBtn.addEventListener("touchstart",startClear); rBtn.addEventListener("touchend",stopClear);
+
+// =================== 初始化 ===================
+window.onload=()=>{
+    const saved=localStorage.getItem('taxGameRecords'); if(saved) gameRecords=JSON.parse(saved);
+    updateUI(); startGame();
+};
+window.onresize=()=>document.querySelectorAll('.piece').forEach(p=>updatePieceSize(p,p.parentElement.classList.contains('slot')));
+</script>
+</body>
+</html>
