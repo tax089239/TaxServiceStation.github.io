@@ -1,559 +1,370 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>租稅與史前文物時空冒險 - 管理優化版</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>智慧稅趣園遊會 - 地寶追追追</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /*頁面整體設計*/
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #bfe8ff;
+            user-select: none;
+            overflow: hidden;
+        }
+        /*園遊會風格柔和漸層背景*/
+        .sky-meadow-bg {
+            background: linear-gradient(to bottom, #bfe8ff 0%, #dff4ff 50%, #eef9ff 70%, #dcfce7 70%, #bbf7d0 100%);
+            background-size: 100% 100%;
+        }
+        /*雲朵漂浮動畫*/
+        @keyframes floatClouds {
+            0% { transform: translateX(-10%); }
+            100% { transform: translateX(110%); }
+        }
+        .cloud-1 { animation: floatClouds 35s linear infinite; }
+        .cloud-2 { animation: floatClouds 45s linear infinite; animation-delay: -15s; }
+        .cloud-3 { animation: floatClouds 55s linear infinite; animation-delay: -5s; }
+        
+        /* 寶物自轉與微幅漂浮 */
+        @keyframes treasureFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(4deg); }
+        }
+        /*【假寶物動畫】*/
+        .treasure-active {
+            animation: treasureFloat 2.2s ease-in-out infinite;
+            transition: left 3.0s ease-in-out, top 3.0s ease-in-out;
+        }
+        /*【真寶物發光特效】*/
+      @keyframes jadeGlow {
+    0%, 100% {
+        filter:
+            drop-shadow(0 0 8px rgba(255, 215, 0, 1))
+            drop-shadow(0 0 15px rgba(255, 193, 7, 0.8));
+    }
 
-<!-- 匯出 Excel 必備函式庫 -->
-<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
-
-<style>
-/* ===================== 基本樣式與變數 ===================== */
-:root { 
-    --vh: 1vh; 
-    --primary: #0284c7; 
-    --secondary: #f1f5f9;
-    --accent: #10b981;
-    --danger: #ef4444;
-    --text-main: #1e293b;
+    50% {
+        filter:
+            drop-shadow(0 0 15px rgba(255, 215, 0, 1))
+            drop-shadow(0 0 25px rgba(255, 193, 7, 1));
+    }
 }
-
-body { 
-    margin: 0; 
-    font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
-    overflow: hidden; 
-    background: #0f172a; 
-    user-select: none;
-    color: var(--text-main); 
-}
-
-/* ===================== 主舞台 ===================== */
-#stage { 
-    width: 100vw; 
-    height: calc(var(--vh) * 100); 
-    position: relative; 
-    overflow: hidden; 
-    transition: background 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.bg-tax { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); }
-.bg-museum { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); }
-
-/* ===================== 頂部狀態列 ===================== */
-.stat { 
-    position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
-    background: rgba(255, 255, 255, 0.9); padding: 12px 25px; border-radius: 50px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1); font-weight: bold; z-index: 50;
-    display: flex; gap: 15px; align-items: center; backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.8);
-    min-width: 240px; justify-content: space-between;
-}
-.progress-container { 
-    flex-grow: 1; height: 10px; background: #e2e8f0; border-radius: 6px; overflow: hidden; 
-}
-.progress-bar { 
-    height: 100%; background: var(--primary); width: 0%; transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); 
-}
-
-/* ===================== 文物樣式 ===================== */
-.artifact { 
-    position: absolute; cursor: pointer;
-    display: flex; justify-content: center; align-items: center;
-    width: 90px; height: 90px;
-    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));
-    z-index: 20;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.artifact:active { transform: scale(0.9); }
-.artifact img { width: 100px; height: 100px; object-fit: contain; pointer-events: none; }
-/* 圖片失效時的備案 */
-.artifact-fallback { font-size: 50px; }
-
-/* ===================== 特效 ===================== */
-.float-text {
-    position: absolute; font-weight: 900; font-size: 28px;
-    pointer-events: none; animation: floatUp 0.8s ease-out forwards; z-index: 100;
-    text-shadow: 2px 2px 0px white;
-}
-@keyframes floatUp {
-    0% { transform: translate(-50%, 0); opacity: 1; }
-    100% { transform: translate(-50%, -80px); opacity: 0; }
-}
-
-@keyframes shake {
-    0%, 100% { transform: translate(0, 0); }
-    25% { transform: translate(5px, -5px); }
-    50% { transform: translate(-5px, 5px); }
-    75% { transform: translate(5px, 5px); }
-}
-.shake-effect { animation: shake 0.2s ease-in-out; }
-
-/* ===================== 彈窗樣式 ===================== */
-.modal { 
-    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8);
-    display: flex; justify-content: center; align-items: center; z-index: 200;
-    backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.4s;
-}
-.modal.active { opacity: 1; pointer-events: auto; }
-
-.card { 
-    background: white; padding: 40px; border-radius: 32px;
-    width: 85%; max-width: 480px; text-align: center;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.4);
-    transform: translateY(40px); transition: transform 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-    display: flex; flex-direction: column;
-}
-.modal.active .card { transform: translateY(0); }
-
-h1 { color: var(--primary); margin-top: 0; }
-
-button { 
-    padding: 16px; margin: 10px 0; width: 100%; font-size: 18px; 
-    border-radius: 18px; border: 0; cursor: pointer; font-weight: bold;
-    transition: all 0.2s; position: relative;
-}
-button:active { transform: translateY(2px); filter: brightness(0.9); }
-
-.btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 0 #0369a1; }
-.btn-accent { background: var(--accent); color: white; box-shadow: 0 4px 0 #059669; }
-.btn-secondary { background: var(--secondary); color: #475569; }
-.btn-danger { background: var(--danger); color: white; box-shadow: 0 4px 0 #b91c1c; }
-
-#hint { background: #fffbeb; border: 2px dashed #fde68a; padding: 15px; margin-top: 15px; text-align: left; border-radius: 15px; font-size: 14px; color: #92400e; line-height: 1.5; }
-input[type="password"] { width: 100%; padding: 18px; margin: 15px 0; border: 2px solid #e2e8f0; border-radius: 18px; font-size: 20px; text-align: center; box-sizing: border-box; outline: none; transition: border-color 0.3s; }
-input[type="password"]:focus { border-color: var(--primary); }
-
-@media (max-height: 600px) {
-    .card { padding: 20px; max-width: 90%; }
-    h1 { font-size: 24px; margin: 5px; }
-}
-</style>
+        /*【真正寶物動畫】*/
+        .real-target {
+            animation: treasureFloat 1.8s ease-in-out infinite, jadeGlow 1.5s ease-in-out infinite;
+            transition: left 2.5s ease-in-out, top 2.5s ease-in-out;
+        }
+        .scale-up {
+            animation: scaleUpEffect 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes scaleUpEffect {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .shake-element {
+            animation: shake 0.4s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+    </style>
 </head>
-<body onload="init()">
 
-<div class="stat">
-    <span>⏱ <span id="timer">--</span>s</span>
-    <div class="progress-container"><div id="pBar" class="progress-bar"></div></div>
-    <span id="info">準備中...</span>
-</div>
+<body class="sky-meadow-bg text-slate-800 h-screen w-screen overflow-hidden flex flex-col justify-between relative">
 
-<div id="stage" class="bg-tax"></div>
-
-<!-- 開始畫面 -->
-<div id="start" class="modal active">
-    <div class="card">
-        <h1>🏹 租稅時空獵人</h1>
-        <p>通過考驗以開啟時空之門，收集史前文物！</p>
-        <button class="btn-primary" onclick="startGame()">⚡ 開始挑戰</button>
-        <div style="display: flex; gap: 10px; margin-top: 10px; width: 100%;">
-            <button class="btn-secondary" style="font-size: 14px" onclick="triggerImport()">📥 匯入歷史數據</button>
+    <!-- =====================================================
+         【背景裝飾區】
+    ====================================================== -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <!-- 第一朵雲 -->
+        <div class="cloud-1 absolute top-[10%] left-[-10%] w-32 md:w-48 opacity-80">
+            <svg viewBox="0 0 100 60" fill="white"><path d="M20 50 C10 50 10 35 20 35 C20 25 35 20 45 30 C55 20 70 25 70 35 C80 35 80 50 70 50 Z"/></svg>
         </div>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-    </div>
-</div>
-
-<!-- 題目畫面 -->
-<div id="quiz" class="modal">
-    <div class="card">
-        <h3 id="q" style="font-size: 22px; color: var(--primary); margin-bottom: 20px; min-height: 60px;"></h3>
-        <div id="opts" style="width: 100%;"></div>
-        <button id="hintBtn" class="btn-secondary" style="display:none; margin-top: 10px;" onclick="showHint()">💡 解析查看</button>
-        <div id="hint" style="display:none"></div>
-    </div>
-</div>
-
-<!-- 管理員驗證 -->
-<div id="auth" class="modal">
-    <div class="card">
-        <h3>🔒 管理員授權</h3>
-        <p>請輸入密碼以進行機密操作</p>
-        <input type="password" id="adminPwd" placeholder="管理員密碼">
-        <button class="btn-primary" id="authConfirmBtn">確認執行</button>
-        <button class="btn-secondary" onclick="closeAuth()">取消返回</button>
-    </div>
-</div>
-
-<!-- 結算畫面 -->
-<div id="win" class="modal">
-    <div class="card">
-        <h2 style="color: var(--primary); margin-bottom: 10px;">🎉 任務完成！</h2>
-        <div style="background: #f8fafc; padding: 20px; border-radius: 20px; margin: 15px 0;">
-            <p id="finalStat" style="font-size: 18px; line-height: 2.2; margin: 0;"></p>
+        <!-- 第二朵雲 -->
+        <div class="cloud-2 absolute top-[22%] left-[-10%] w-40 md:w-60 opacity-60">
+            <svg viewBox="0 0 100 60" fill="white"><path d="M20 50 C10 50 10 35 20 35 C20 25 35 20 45 30 C55 20 70 25 70 35 C80 35 80 50 70 50 Z"/></svg>
         </div>
-        <button class="btn-accent" onclick="openAuth('export')">📊 匯出學習紀錄報表</button>
-        <button class="btn-danger" id="resetBtn">🗑️ 長按清空紀錄</button>
-        <button class="btn-secondary" onclick="location.reload()">再試一次</button>
     </div>
-</div>
 
-<script>
-// ==========================================================
-// ⚙️ 遊戲核心設定
-// ==========================================================
-const CONFIG = { 
-    exportPassword: "231600",      
-    taxGoal: 3,                      
-    museumGoal: 5,                   
-    timeLimit: 40,                   
-    artifactMoveInterval: 2500,      
-    artifactSpeedStep: 200,          
-    artifactMinInterval: 700,        
-    artifactImages: ["phooto1.png", "phooto2.png", "phooto3.png", "phooto4.png"],
-    fallbackIcons: ["🏺", "🗿", "🦴", "🏹", "🐚"]
-};
+    <!-- =====================================================
+         【提示訊息視窗 Toast】
+    ====================================================== -->
+    <div id="toast-overlay" class="fixed inset-0 flex items-center justify-center z-[99999] bg-slate-900/40 backdrop-blur-sm hidden">
+        <div id="toast-box" class="bg-white border-4 border-amber-400 p-8 rounded-[2rem] max-w-sm w-11/12 text-center shadow-2xl scale-up">
+            <div id="toast-icon" class="text-6xl mb-4">🎈</div>
+            <h3 id="toast-title" class="text-2xl font-black mb-2 text-emerald-600">提示</h3>
+            <p id="toast-message" class="text-slate-600 text-lg mb-6 leading-relaxed font-bold">訊息內容</p>
+            <button id="toast-btn" class="w-full py-3 bg-gradient-to-r from-amber-400 to-orange-500 rounded-2xl font-black text-white text-lg shadow-md active:scale-95 transition-transform">確定</button>
+        </div>
+    </div>
 
-const QUESTIONS = [
-    {q:"房屋稅在哪個月份繳納？", a:"5月", o:["5月","4月","11月"], e:"房屋稅每年5月開徵；地價稅則是11月。"},
-    {q:"單一自住房屋(非豪宅)全國單一稅率為？", a:"1%", o:["1%","1.2%","2%"], e:"113年起，全國單一自住房屋（排除豪宅）稅率由1.2%降為1%。"},
-    {q:"申請自住房屋稅率需具備什麼條件？", a:"辦竣戶籍登記", o:["辦竣戶籍登記","持有5年","本人入住"], e:"113年起新制：房屋必須有本人、配偶或直系親屬「辦竣戶籍登記」才符合自住。"},
-    {q:"土地增值稅在什麼時候需要繳納？", a:"土地所有權移轉時", o:["每年5月","每年11月","土地所有權移轉時"], e:"當土地買賣、贈與或進行所有權移轉時，需繳納土地增值稅。"},
-    {q:"牌照稅逾期繳納，每逾幾日加徵1%滯納金？", a:"3日", o:["1日","3日","7日"], e:"每逾3日加徵1%滯納金，最高加徵至10%。"},
-    {q:"使用牌照稅於每年何時開徵？", a:"4月", o:["4月","5月","11月"], e:"一般自用車輛及機車的使用牌照稅於每年4月開徵。"},
-    {q:"印花稅的憑證不包括下列何者？", a:"一般收據", o:["銀錢收據","合約書","一般收據"], e:"印花稅課徵範圍包含銀錢收據、買賣動產契據、承攬契據與典賣、讓受及分割不動產契據。"}
-];
+    <!-- =====================================================
+         【開始畫面】
+    ====================================================== -->
+    <div id="start-screen" class="absolute inset-0 z-50 flex flex-col justify-center items-center px-6">
+        <div class="z-10 text-center max-w-xl scale-up flex flex-col items-center">
+            <div class="mb-4 bg-white/90 border border-emerald-300 px-4 py-1.5 rounded-full text-xs font-black text-emerald-700 shadow-sm">
+                臺東縣稅務局
+            </div>
+            <h1 class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-amber-500 drop-shadow-sm leading-tight mb-2">
+                地寶追追追
+            </h1>
+            <!-- 活動介紹文字 -->
+            <div class="bg-white/70 backdrop-blur-md p-6 rounded-3xl shadow-lg mb-10 max-w-md">
+                <p class="text-base md:text-lg text-slate-700 font-bold leading-relaxed">
+                    請在漂流的泡泡中尋找神秘文物，<br>
+                    回答智慧稅務挑戰，開啟園遊會神秘寶藏吧！
+                </p>
+            </div>
+            <!-- 開始遊戲按鈕 -->
+            <button onclick="startGame()" class="px-14 py-5 bg-gradient-to-r from-amber-400 via-orange-500 to-amber-400 text-white font-black text-2xl rounded-2xl shadow-[0_8px_0_#c2410c] active:translate-y-2 active:shadow-none transition-all transform hover:scale-105">
+                開始探險 🚀
+            </button>
+        </div>
+    </div>
 
-// ==========================================================
-// 🕹️ 遊戲邏輯與狀態
-// ==========================================================
+    <!-- =====================================================
+         【遊戲主畫面】
+    ====================================================== -->
+    <div id="game-screen" class="absolute inset-0 z-30 flex flex-col hidden">
+        <!-- =================================================
+             【遊戲資訊列】
+        ================================================== -->
+        <div class="p-4 md:p-6 flex justify-between items-center bg-white/80 backdrop-blur-md border-b z-40">
+            <div class="flex flex-col gap-1.5">
+                <!-- 任務名稱 -->
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 bg-emerald-500 text-white text-xs font-black rounded-full shadow-sm">關卡任務</span>
+                    <span id="level-display" class="font-extrabold text-slate-700 text-base">地寶追追追</span>
+                </div>
+                <!-- 進度條 -->
+                <div class="w-32 md:w-48 h-3.5 bg-slate-200 rounded-full overflow-hidden p-[2px] border">
+                    <div id="progress-bar" class="w-0 h-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all rounded-full"></div>
+                </div>
+            </div>
+            <!-- 倒數計時器 -->
+            <div class="flex items-center gap-2 px-5 py-2 bg-amber-500 text-white border-2 border-white rounded-2xl font-black text-lg md:text-xl shadow-md">
+                <span>⏱️</span><span id="timer" class="font-mono">60</span> 秒
+            </div>
+        </div>
+        <!-- =================================================
+             【尋寶區域】-真寶物與假寶物
+        ================================================== -->
+        <div id="game-area" class="flex-1 w-full relative overflow-hidden"></div>
+    </div>
 
-const setVH = () => document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
-window.addEventListener('resize', setVH);
-setVH();
+    <!-- =====================================================
+         【題目問答視窗】
+    ====================================================== -->
+    <div id="question-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div id="question-box" class="bg-white border-4 border-emerald-400 rounded-[2.5rem] max-w-lg w-full p-6 text-center shadow-2xl scale-up">
+            <div class="flex justify-center mb-4">
+                <div class="px-4 py-1.5 bg-emerald-50 border border-emerald-200 rounded-full text-emerald-600 text-sm font-black flex items-center gap-1.5 shadow-sm">
+                    <span>💡</span> 地寶追追追
+                </div>
+            </div>
+            <h2 id="question-text" class="text-xl md:text-2xl font-black text-slate-800 leading-relaxed mb-6"></h2>
+            <div id="options-container" class="flex flex-col gap-3"></div>
+        </div>
+    </div>
 
-let state = { 
-    active: false, 
-    time: CONFIG.timeLimit, 
-    stage: 1, 
-    tax: 0, 
-    museum: 0, 
-    startTime: null, 
-    playerID: crypto.randomUUID().substring(0,8), 
-    details: [], 
-    shuffledQuestions: [], 
-    currentQuestionIndex: 0 
-};
+    <!-- =====================================================
+         【完成畫面】
+    ====================================================== -->
+    <div id="finish-screen" class="absolute inset-0 z-50 flex flex-col justify-center items-center px-6 hidden">
+        <div class="z-10 text-center max-w-md bg-white border-4 border-emerald-400 p-8 rounded-[2.5rem] shadow-2xl scale-up flex flex-col items-center">
+            <div class="inline-block p-5 bg-amber-100 rounded-full border-2 border-amber-300 mb-6 animate-bounce">
+                <svg class="w-16 h-16 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z"></path></svg>
+            </div>
+            <h2 class="text-3xl font-black text-emerald-600 mb-4">🎉 挑戰成功！</h2>
+            <p class="text-slate-600 text-lg font-bold leading-relaxed mb-8">您已正確解答智慧稅務挑戰！</p>
+            <button onclick="resetGame()" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-xl rounded-2xl active:scale-95 transition-transform">下一位 🔄</button>
+        </div>
+    </div>
 
-const DB_NAME = "TAX_ADVENTURE_RECORDS_V1";
+    <script>
+        /* ========================================
+             DOM 元素綁定 
+           ======================================== */
+        const startScreen = document.getElementById("start-screen");
+        const gameScreen = document.getElementById("game-screen");
+        const finishScreen = document.getElementById("finish-screen");
+        const gameArea = document.getElementById("game-area");
+        const timerElement = document.getElementById("timer");
+        const levelDisplay = document.getElementById("level-display");
+        const progressBar = document.getElementById("progress-bar");
+        const questionModal = document.getElementById("question-modal");
+        const questionText = document.getElementById("question-text");
+        const optionsContainer = document.getElementById("options-container");
+        const toastOverlay = document.getElementById("toast-overlay");
+        const toastTitle = document.getElementById("toast-title");
+        const toastMessage = document.getElementById("toast-message");
+        const toastIcon = document.getElementById("toast-icon");
+        const toastBtn = document.getElementById("toast-btn");
 
-const getHistory = () => JSON.parse(localStorage.getItem(DB_NAME) || "[]");
-const saveToHistory = (record) => {
-    const history = getHistory();
-    history.push(record);
-    localStorage.setItem(DB_NAME, JSON.stringify(history));
-};
+        /* ========================================
+             文物圖片設定區 (自動替換完成)
+           ======================================== */
+        const USE_CUSTOM_IMAGE = true; 
+        const ARTIFACT_FILES = ["phooto1.png", "phooto2.png", "phooto3.png", "phooto4.png"];
+        let currentArtifact = ""; 
 
-function init() {
-    updateUI();
-    setupResetButton();
-}
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            try { if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+                if (type === 'tap') { osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.start(now); osc.stop(now + 0.1); }
+                else if (type === 'found') { osc.type = 'sine'; osc.frequency.setValueAtTime(659.25, now); osc.start(now); osc.stop(now + 0.2); }
+                else if (type === 'correct') { osc.type = 'sine'; osc.frequency.setValueAtTime(880, now); osc.start(now); osc.stop(now + 0.3); }
+                else if (type === 'wrong') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(120, now); osc.start(now); osc.stop(now + 0.3); }
+            } catch (e) {}
+        }
 
-function startGame() {
-    document.getElementById("start").classList.remove("active");
-    // 洗牌題目
-    state.shuffledQuestions = [...QUESTIONS].sort(() => Math.random() - 0.5);
-    state.active = true; 
-    state.startTime = Date.now();
-    startTimer(); 
-    showQuiz();
-    updateUI();
-}
+        // 5 種主視覺延伸干擾物：三色氣球、雲端發票手機、太陽花、史前陶罐、普通石頭
+        const fakeSVGItems = [
+            // 1. 三色氣球
+            `<svg viewBox="0 0 100 100" class="w-full h-full">
+                <circle cx="40" cy="40" r="16" fill="#3b82f6"/>
+                <path d="M40 56 L38 68" stroke="#cbd5e1" stroke-width="1.5"/>
+                <circle cx="62" cy="38" r="15" fill="#ec4899"/>
+                <path d="M62 53 L58 68" stroke="#cbd5e1" stroke-width="1.5"/>
+                <circle cx="50" cy="48" r="17" fill="#f59e0b"/>
+                <path d="M50 65 L48 80" stroke="#cbd5e1" stroke-width="1.5"/>
+                <circle cx="48" cy="80" r="1.5" fill="#94a3b8"/>
+            </svg>`,
+            // 2. 智慧稅：雲端發票載具手機
+            `<svg viewBox="0 0 100 100" class="w-full h-full">
+                <rect x="28" y="15" width="44" height="70" rx="8" fill="#1e293b" stroke="#3b82f6" stroke-width="3"/>
+                <rect x="32" y="20" width="36" height="52" rx="4" fill="#f8fafc"/>
+                <circle cx="50" cy="17.5" r="1.5" fill="#475569"/>
+                <rect x="38" y="28" width="24" height="15" fill="#ffffff" stroke="#000" stroke-width="1"/>
+                <line x1="42" y1="30" x2="42" y2="41" stroke="#000" stroke-width="2"/>
+                <line x1="46" y1="30" x2="46" y2="41" stroke="#000" stroke-width="1"/>
+                <line x1="49" y1="30" x2="49" y2="41" stroke="#000" stroke-width="3"/>
+                <line x1="53" y1="30" x2="53" y2="41" stroke="#000" stroke-width="1"/>
+                <line x1="56" y1="30" x2="56" y2="41" stroke="#000" stroke-width="2"/>
+                <line x1="59" y1="30" x2="59" y2="41" stroke="#000" stroke-width="1"/>
+                <path d="M45 62 C42 62 40 60 41 57 C39 56 39 53 42 52 C43 50 47 49 49 51 C51 49 55 51 55 53 C57 53 58 56 56 58 C57 60 55 62 51 62 Z" fill="#38bdf8"/>
+                <circle cx="50" cy="78" r="3" fill="#475569"/>
+            </svg>`,
+            // 3. 園遊會小黃花
+            `<svg viewBox="0 0 100 100" class="w-full h-full">
+                <path d="M50 50 Q48 75 40 90" fill="none" stroke="#22c55e" stroke-width="4" stroke-linecap="round"/>
+                <path d="M48 68 Q32 60 38 52 Q44 60 48 68 Z" fill="#22c55e"/>
+                <circle cx="50" cy="30" r="11" fill="#fbbf24"/>
+                <circle cx="50" cy="70" r="11" fill="#fbbf24"/>
+                <circle cx="30" cy="50" r="11" fill="#fbbf24"/>
+                <circle cx="70" cy="50" r="11" fill="#fbbf24"/>
+                <circle cx="36" cy="36" r="11" fill="#fbbf24"/>
+                <circle cx="64" cy="64" r="11" fill="#fbbf24"/>
+                <circle cx="64" cy="36" r="11" fill="#fbbf24"/>
+                <circle cx="36" cy="64" r="11" fill="#fbbf24"/>
+                <circle cx="50" cy="50" r="14" fill="#ea580c"/>
+            </svg>`,
+            // 4. 史前陶罐
+            `<svg viewBox="0 0 100 100" class="w-full h-full">
+                <path d="M35 25 C35 15 65 15 65 25 L60 32 C75 38 80 62 70 78 C62 90 38 90 30 78 C20 62 25 38 40 32 Z" fill="#b45309" stroke="#78350f" stroke-width="2"/>
+                <path d="M36 32 Q50 38 64 32" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="3 3"/>
+                <path d="M28 55 Q50 65 72 55" fill="none" stroke="#78350f" stroke-width="3"/>
+                <path d="M26 63 Q50 73 74 63" fill="none" stroke="#78350f" stroke-width="2"/>
+            </svg>`,
+            // 5. 普通卵石
+            `<svg viewBox="0 0 100 100" class="w-full h-full">
+                <path d="M25 50 C20 30 40 20 65 25 C85 30 90 55 80 70 C70 85 45 85 30 80 C20 75 30 70 25 50 Z" fill="#64748b" stroke="#475569" stroke-width="3"/>
+                <path d="M40 35 Q55 30 65 40" fill="none" stroke="#94a3b8" stroke-width="2"/>
+            </svg>`
+        ];
 
-function startTimer() { 
-    const timerEl = document.getElementById("timer");
-    const t = setInterval(() => { 
-        if (!state.active) { clearInterval(t); return; } 
-        state.time--; 
-        timerEl.innerText = state.time; 
-        if (state.time <= 0) { 
-            state.active = false; 
-            triggerShake();
-            setTimeout(() => { 
-                alert("⏳ 時間到！挑戰未能及時完成。"); 
-                location.reload(); 
-            }, 500);
-        } 
-    }, 1000); 
-}
+        const questions = [
+            { question: "在智慧稅趣園遊會消費時，使用什麼方式儲存發票最環保，還可以增加專屬中獎機會？", options: ["索取紙本發票", "使用手機條碼載具儲存「雲端發票」", "不要拿發票"], answer: 1 },
+            { question: "使用雲端發票中獎後，可以設定自動匯款嗎？", options: ["可以，設定領獎帳戶即可自動匯入", "不可以，還是要印出來換錢", "只有中 200 元才可以"], answer: 0 },
+            { question: "下列哪一項稅收屬於「地方稅」，由臺東縣稅務局負責徵收？", options: ["房屋稅與地價稅", "綜合所得稅", "關稅"], answer: 0 }
+        ];
 
-function showQuiz() {
-    const q = state.shuffledQuestions[state.currentQuestionIndex];
-    state.current = q;
-    let hasAttemptedThisQ = false;
+        let activeQuestion; let timer = 60; let timerInterval; let targetInterval; let fakeIntervals = []; 
+        let targetElement; let fakeElements = [];
 
-    const modal = document.getElementById("quiz");
-    modal.classList.add("active");
-    document.getElementById("hint").style.display = "none";
-    document.getElementById("hintBtn").style.display = "none";
-    document.getElementById("q").innerText = q.q;
-    
-    const box = document.getElementById("opts"); 
-    box.innerHTML = "";
-    
-    [...q.o].sort(() => Math.random() - 0.5).forEach(opt => {
-        const b = document.createElement("button");
-        b.className = "btn-secondary"; 
-        b.innerText = opt;
-        b.onclick = () => {
-            const isCorrect = opt === q.a;
+        function showCustomToast(title, message, icon, onCloseCallback) {
+            toastTitle.innerText = title; toastMessage.innerText = message; toastIcon.innerText = icon;
+            toastOverlay.classList.remove("hidden");
+            toastBtn.onclick = () => { toastOverlay.classList.add("hidden"); if (onCloseCallback) onCloseCallback(); };
+        }
+
+        function startGame() {
+            startScreen.classList.add("hidden"); finishScreen.classList.add("hidden"); gameScreen.classList.remove("hidden");
+            activeQuestion = questions[Math.floor(Math.random() * questions.length)];
             
-            // 紀錄細節
-            if (!hasAttemptedThisQ || isCorrect) {
-                state.details.push({ 
-                    question: q.q, 
-                    userChoice: opt, 
-                    isCorrect, 
-                    timestamp: new Date().toLocaleTimeString() 
-                });
-                hasAttemptedThisQ = true;
+            // 隨機選一個檔案名
+            currentArtifact = ARTIFACT_FILES[Math.floor(Math.random() * ARTIFACT_FILES.length)];
+            
+            timer = 60; timerElement.innerText = timer;
+            startTimer(); startRound();
+        }
+
+        function startRound() {
+            clearAllGameIntervals(); gameArea.innerHTML = "";
+            levelDisplay.innerText = "地寶追追追"; progressBar.style.width = "0%";
+
+            targetElement = document.createElement("div");
+            targetElement.className = "absolute w-20 h-20 md:w-24 md:h-24 cursor-pointer real-target z-20";
+            // 注入圖片並加上出錯備援
+            targetElement.innerHTML = `<img src="${currentArtifact}" class="w-full h-full object-contain pointer-events-none" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/599/599995.png';">`;
+            setRandomPosition(targetElement);
+            targetElement.onclick = (e) => { e.stopPropagation(); playSound('found'); clearAllGameIntervals(); showQuestion(); };
+            gameArea.appendChild(targetElement);
+
+            for (let i = 0; i < 8; i++) {
+                const fake = document.createElement("div");
+                fake.className = "absolute w-16 h-16 md:w-20 md:h-20 cursor-pointer treasure-active z-10 opacity-90";
+                fake.innerHTML = fakeSVGItems[i % fakeSVGItems.length];
+                setRandomPosition(fake);
+                fake.onclick = (e) => { e.stopPropagation(); playSound('tap'); fake.classList.add("shake-element"); setTimeout(()=>fake.classList.remove("shake-element"), 400); };
+                gameArea.appendChild(fake);
+                fakeIntervals.push(setInterval(() => moveElementRandomly(fake), 3000));
             }
-            
-            if (isCorrect) { 
-                b.className = "btn-accent";
-                state.tax++; 
-                createFloatText(b, "✔️ 正確", "#10b981");
-                state.currentQuestionIndex++;
-                
-                setTimeout(() => {
-                    if (state.tax >= CONFIG.taxGoal) { 
-                        modal.classList.remove("active"); 
-                        enterMuseum(); 
+            targetInterval = setInterval(() => moveElementRandomly(targetElement), 2500);
+        }
+
+        function setRandomPosition(el) { el.style.left = `${Math.random()*80+10}%`; el.style.top = `${Math.random()*65+15}%`; }
+        function moveElementRandomly(el) { if(el) setRandomPosition(el); }
+        function clearAllGameIntervals() { clearInterval(targetInterval); fakeIntervals.forEach(clearInterval); fakeIntervals = []; }
+
+        function showQuestion() {
+            questionText.innerText = activeQuestion.question; optionsContainer.innerHTML = "";
+            activeQuestion.options.forEach((opt, i) => {
+                const btn = document.createElement("button");
+                btn.className = "w-full text-left p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-100 font-bold text-slate-700";
+                btn.innerHTML = `<div class="flex items-center gap-3"><span class="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center">${i+1}</span>${opt}</div>`;
+                btn.onclick = () => {
+                    if(i === activeQuestion.answer) {
+                        playSound('correct'); btn.classList.replace("bg-emerald-50", "bg-emerald-500"); btn.classList.add("text-white");
+                        progressBar.style.width = "100%"; setTimeout(() => { questionModal.classList.add("hidden"); finishGame(); }, 1000);
                     } else {
-                        // 如果題目不夠，重新抽題
-                        if (state.currentQuestionIndex >= state.shuffledQuestions.length) {
-                            state.shuffledQuestions = [...QUESTIONS].sort(() => Math.random() - 0.5);
-                            state.currentQuestionIndex = 0;
-                        }
-                        showQuiz(); 
+                        playSound('wrong'); showCustomToast("再試一次", "答案不對唷，再仔細想想！", "🧐");
                     }
-                    updateUI();
-                }, 600);
-            } else { 
-                b.className = "btn-danger";
-                triggerShake();
-                createFloatText(b, "❌ 錯誤", "#ef4444");
-                document.getElementById("hintBtn").style.display = "block";
-            }
-        };
-        box.appendChild(b);
-    });
-}
-
-function showHint() { 
-    const hintEl = document.getElementById("hint");
-    hintEl.style.display = "block"; 
-    hintEl.innerHTML = `📘 <b>解析：</b>${state.current.e}`;
-}
-
-function enterMuseum() { 
-    state.stage = 2; 
-    document.getElementById("stage").className = "bg-museum"; 
-    updateUI(); 
-    spawnArtifact(); 
-}
-
-function triggerShake() {
-    const s = document.getElementById("stage");
-    s.classList.add("shake-effect");
-    setTimeout(() => s.classList.remove("shake-effect"), 200);
-}
-
-function spawnArtifact() {
-    if (!state.active) return;
-    const stage = document.getElementById("stage"); 
-    const el = document.createElement("div"); 
-    el.className = "artifact";
-    
-    // 優先加載圖片，失敗則使用 Emoji
-    const img = new Image();
-    img.src = CONFIG.artifactImages[Math.floor(Math.random() * CONFIG.artifactImages.length)];
-    img.onload = () => el.appendChild(img);
-    img.onerror = () => {
-        const span = document.createElement("span");
-        span.className = "artifact-fallback";
-        span.innerText = CONFIG.fallbackIcons[Math.floor(Math.random() * CONFIG.fallbackIcons.length)];
-        el.appendChild(span);
-    };
-
-    const size = 90;
-    const setPos = (node) => {
-        const x = Math.random() * (window.innerWidth - size);
-        const y = 80 + Math.random() * (window.innerHeight - size - 100);
-        node.style.left = x + "px"; 
-        node.style.top = y + "px";
-    };
-    setPos(el);
-    
-    el.onclick = (e) => {
-        state.museum++; 
-        createFloatText(null, "💎 +1", "#0284c7", e.clientX, e.clientY);
-        el.remove();
-        if (state.museum >= CONFIG.museumGoal) {
-            endGame(); 
-        } else {
-            spawnArtifact();
+                };
+                optionsContainer.appendChild(btn);
+            });
+            questionModal.classList.remove("hidden");
         }
-        updateUI();
-    };
-    stage.appendChild(el); 
-    
-    const move = () => {
-        if (!state.active || !el.parentNode) return;
-        setPos(el);
-        
-        // 速度隨著收集數量增加
-        const currentInterval = Math.max(
-            CONFIG.artifactMinInterval, 
-            CONFIG.artifactMoveInterval - (state.museum * CONFIG.artifactSpeedStep)
-        );
-        
-        el.style.transition = `all ${currentInterval/1000}s cubic-bezier(0.45, 0.05, 0.55, 0.95)`;
-        setTimeout(move, currentInterval);
-    }; 
-    setTimeout(move, 100);
-}
 
-function createFloatText(anchor, text, color, x, y) {
-    const ft = document.createElement("div");
-    ft.className = "float-text"; ft.innerText = text; ft.style.color = color;
-    if (anchor) {
-        const r = anchor.getBoundingClientRect();
-        ft.style.left = (r.left + r.width/2) + "px"; ft.style.top = r.top + "px";
-    } else {
-        ft.style.left = x + "px"; ft.style.top = y + "px";
-    }
-    document.body.appendChild(ft);
-    setTimeout(() => ft.remove(), 800);
-}
-
-function updateUI() {
-    const info = document.getElementById("info");
-    const pBar = document.getElementById("pBar");
-    if (state.stage === 1) {
-        info.innerText = `稅務考驗：${state.tax}/${CONFIG.taxGoal}`;
-        pBar.style.width = (state.tax / CONFIG.taxGoal) * 100 + "%";
-    } else {
-        info.innerText = `文物收集：${state.museum}/${CONFIG.museumGoal}`;
-        pBar.style.width = (state.museum / CONFIG.museumGoal) * 100 + "%";
-    }
-}
-
-function endGame() {
-    state.active = false;
-    const duration = Math.floor((Date.now() - state.startTime) / 1000);
-    const correctCount = state.tax;
-    
-    saveToHistory({ 
-        playerID: state.playerID, 
-        date: new Date().toLocaleString(), 
-        duration, 
-        correctCount, 
-        artifacts: state.museum,
-        details: state.details 
-    });
-    
-    document.getElementById("finalStat").innerHTML = `
-        🕒 <b>通關時間：</b> ${duration} 秒<br>
-        🏺 <b>收集文物：</b> ${state.museum} 件<br>
-        🎓 <b>答對題數：</b> ${correctCount} 題
-    `;
-    document.getElementById("win").classList.add("active");
-}
-
-// ==========================================================
-// 🛡️ 管理與匯出功能
-// ==========================================================
-
-function openAuth(mode) { 
-    document.getElementById("auth").classList.add("active");
-    const pwdInput = document.getElementById("adminPwd");
-    pwdInput.value = "";
-    pwdInput.focus();
-    
-    document.getElementById("authConfirmBtn").onclick = () => {
-        if (pwdInput.value === CONFIG.exportPassword) {
-            if (mode === 'export') exportExcel();
-            else if (mode === 'clear') { 
-                localStorage.removeItem(DB_NAME); 
-                alert("🗑️ 歷史數據已清空");
-                location.reload(); 
-            }
-            closeAuth();
-        } else {
-            alert("❌ 密碼錯誤");
-            pwdInput.value = "";
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timer--; timerElement.innerText = timer;
+                if (timer <= 0) { clearInterval(timerInterval); clearAllGameIntervals(); resetGame(); }
+            }, 1000);
         }
-    };
-}
-
-function closeAuth() { 
-    document.getElementById("auth").classList.remove("active"); 
-}
-
-function exportExcel() {
-    const history = getHistory();
-    if (!history.length) return alert("目前尚無通關紀錄資料");
-    
-    const exportData = history.map(h => ({ 
-        "玩家ID": h.playerID, 
-        "日期": h.date, 
-        "通關用時(秒)": h.duration, 
-        "答對題數": h.correctCount, 
-        "文物數量": h.artifacts 
-    }));
-    
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "學習紀錄");
-    
-    // 下載
-    const fileName = `TaxAdventure_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-}
-
-function triggerImport() { 
-    document.getElementById("importFile").click(); 
-}
-
-function importData(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-        try {
-            const data = JSON.parse(ev.target.result);
-            if (Array.isArray(data)) { 
-                localStorage.setItem(DB_NAME, JSON.stringify(data)); 
-                alert("✅ 資料匯入完成"); 
-            }
-        } catch(err) { 
-            alert("❌ 格式不正確"); 
-        }
-    };
-    reader.readAsText(file);
-}
-
-function setupResetButton() {
-    const btn = document.getElementById("resetBtn");
-    let pressTimer;
-    
-    const startPress = (e) => {
-        e.preventDefault();
-        btn.style.filter = "brightness(0.7)";
-        pressTimer = setTimeout(() => {
-            openAuth('clear');
-        }, 1500);
-    };
-    
-    const cancelPress = () => {
-        btn.style.filter = "none";
-        clearTimeout(pressTimer);
-    };
-    
-    btn.addEventListener('mousedown', startPress);
-    btn.addEventListener('mouseup', cancelPress);
-    btn.addEventListener('touchstart', startPress);
-    btn.addEventListener('touchend', cancelPress);
-}
-</script>
+        function finishGame() { clearInterval(timerInterval); clearAllGameIntervals(); gameScreen.classList.add("hidden"); finishScreen.classList.remove("hidden"); }
+        function resetGame() { clearInterval(timerInterval); clearAllGameIntervals(); finishScreen.classList.add("hidden"); gameScreen.classList.add("hidden"); startScreen.classList.remove("hidden"); }
+    </script>
 </body>
 </html>
