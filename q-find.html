@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>智慧稅趣園遊會 - 地寶追追追</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
     
     <style>
@@ -77,7 +78,6 @@
 </head>
 
 <body class="sky-meadow-bg text-slate-800 h-screen w-screen overflow-hidden flex flex-col justify-between relative">
-
     <!-- =====================================================
          【背景裝飾區】
     ====================================================== -->
@@ -103,10 +103,15 @@
             <button id="toast-btn" class="w-full py-3 bg-gradient-to-r from-amber-400 to-orange-500 rounded-2xl font-black text-white text-lg shadow-md active:scale-95 transition-transform">確定</button>
         </div>
     </div>
-
+   
+    <div id="admin-btn" class="absolute top-4 right-4 z-[9999]">
+        <button onclick="openAdminLogin()" class="bg-white/90 px-4 py-2 rounded-xl shadow-lg font-bold text-slate-700"> ⚙️ 管理後台 </button>
+    </div>
     <!-- =====================================================
          【開始畫面】
     ====================================================== -->
+    <div class="absolute top-4 right-4 z-50">
+    </div>
     <div id="start-screen" class="absolute inset-0 z-50 flex flex-col justify-center items-center px-6">
         <div class="z-10 text-center max-w-xl scale-up flex flex-col items-center">
             <div class="mb-4 bg-white/90 border border-emerald-300 px-4 py-1.5 rounded-full text-xs font-black text-emerald-700 shadow-sm">
@@ -169,7 +174,7 @@
                     <span>💡</span> 地寶追追追
                 </div>
             </div>
-            <h2 id="question-text" class="text-xl md:text-2xl font-black text-slate-800 leading-relaxed mb-6"></h2>
+            <h2 id="question-text" class="text-xl md:text-4xl font-black text-slate-800 leading-relaxed mb-6"></h2>
             <div id="options-container" class="flex flex-col gap-3"></div>
         </div>
     </div>
@@ -184,10 +189,39 @@
             </div>
             <h2 class="text-3xl font-black text-emerald-600 mb-4">🎉 挑戰成功！</h2>
             <p class="text-slate-600 text-lg font-bold leading-relaxed mb-8">您已正確解答智慧稅務挑戰！</p>
-            <button onclick="resetGame()" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-xl rounded-2xl active:scale-95 transition-transform">下一位 🔄</button>
+            <div class="flex flex-col gap-3 w-full">
+            <button onclick="resetGame()"class="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-black text-xl shadow-lg">下一位 🔄 </button>
+            </div>
         </div>
     </div>
-
+       <div id="admin-login-modal" class="fixed inset-0 bg-black/50 hidden z-[99999] flex items-center justify-center">
+    <div class="bg-white p-6 rounded-3xl w-80">
+        <h2 class="text-xl font-black mb-4"> 管理員登入 </h2>
+        <input 
+            id="admin-password"
+            type="password"
+            placeholder="請輸入密碼"
+            class="w-full border p-3 rounded-xl mb-4">
+        <button onclick="loginAdmin()" class="w-full bg-emerald-500 text-white py-3 rounded-xl font-bold"> 登入 </button>
+        <button onclick="closeAdminLogin()"class="w-full bg-slate-500 text-white py-3 rounded-xl font-bold mt-2">取消 </button>
+        </div>
+    </div>
+    <div id="admin-panel" class="fixed inset-0 bg-black/50 hidden z-[99999] flex items-center justify-center">
+    <div class="bg-white p-8 rounded-3xl w-[500px] max-w-[90%]">
+        <h2 class="text-2xl font-black mb-6">  管理後台 </h2>
+        <div class="mb-6">
+            <div class="text-lg font-bold">
+                完成挑戰人次：<span id="participant-count">0</span>
+            </div>
+        </div>
+        <div class="flex flex-col gap-3">
+            <button onclick="exportExcel()" class="bg-blue-500 text-white py-3 rounded-xl font-bold"> 📊 匯出Excel </button>
+            <button onclick="clearData()" class="bg-red-500 text-white py-3 rounded-xl font-bold"> 🗑️ 清空資料 </button>
+            <button onclick="closeAdminPanel()" class="bg-slate-500 text-white py-3 rounded-xl font-bold"> ❌ </button>
+        </div>
+    </div>
+</div>
+    
     <script>
         /* ========================================
              DOM 元素綁定 
@@ -207,6 +241,7 @@
         const toastMessage = document.getElementById("toast-message");
         const toastIcon = document.getElementById("toast-icon");
         const toastBtn = document.getElementById("toast-btn");
+        const adminBtn = document.getElementById("admin-btn");
 
         /* ========================================
              文物圖片設定區 (自動替換完成)
@@ -290,9 +325,9 @@
             { question: "地價稅納稅義務基準日始幾月幾號?", options: ["6/30", "7/15", "8/31"], answer: 2 }
         ];
 
-        let activeQuestion; let timer = 60; let timerInterval; let targetInterval; let fakeIntervals = []; 
-        let targetElement; let fakeElements = [];
-
+        let activeQuestion = null; let timer = 60; let timerInterval; let targetInterval; let fakeIntervals = []; 
+        let targetElement; let fakeElements = []; let answerAttempts = 0; let answerLogs = JSON.parse( localStorage.getItem("answerLogs") || "[]");
+        
         function showCustomToast(title, message, icon, onCloseCallback) {
             toastTitle.innerText = title; toastMessage.innerText = message; toastIcon.innerText = icon;
             toastOverlay.classList.remove("hidden");
@@ -300,12 +335,10 @@
         }
 
         function startGame() {
+            adminBtn.classList.add("hidden");
             startScreen.classList.add("hidden"); finishScreen.classList.add("hidden"); gameScreen.classList.remove("hidden");
             activeQuestion = questions[Math.floor(Math.random() * questions.length)];
-            
-            // 隨機選一個檔案名
             currentArtifact = ARTIFACT_FILES[Math.floor(Math.random() * ARTIFACT_FILES.length)];
-            
             timer = 60; timerElement.innerText = timer;
             startTimer(); startRound();
         }
@@ -313,50 +346,72 @@
         function startRound() {
             clearAllGameIntervals(); gameArea.innerHTML = "";
             levelDisplay.innerText = "地寶追追追"; progressBar.style.width = "0%";
-
-            targetElement = document.createElement("div");
-            targetElement.className = "absolute w-20 h-20 md:w-24 md:h-24 cursor-pointer real-target z-20";
-            // 注入圖片並加上出錯備援
-            targetElement.innerHTML = `<img src="${currentArtifact}" class="w-full h-full object-contain pointer-events-none" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/599/599995.png';">`;
-            setRandomPosition(targetElement);
+            // ===== 真寶物 =====
+            targetElement = document.createElement("div");targetElement.className = "absolute w-20 h-20 md:w-24 md:h-24 cursor-pointer real-target z-20";
+            targetElement.innerHTML = `<img src="${currentArtifact}" class="w-full h-full object-contain pointer-events-none" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/599/599995.png';">`;
             targetElement.onclick = (e) => { e.stopPropagation(); playSound('found'); clearAllGameIntervals(); showQuestion(); };
-            gameArea.appendChild(targetElement);
-
-            for (let i = 0; i < 8; i++) {
+            setRandomPosition(targetElement); gameArea.appendChild(targetElement);
+            // 立即移動一次
+            moveElementRandomly(targetElement);
+            // ===== 假寶物 =====
+            for (let i = 0; i < 15; i++) {
                 const fake = document.createElement("div");
                 fake.className = "absolute w-16 h-16 md:w-20 md:h-20 cursor-pointer treasure-active z-10 opacity-90";
-                fake.innerHTML = fakeSVGItems[i % fakeSVGItems.length];
-                setRandomPosition(fake);
-                fake.onclick = (e) => { e.stopPropagation(); playSound('tap'); fake.classList.add("shake-element"); setTimeout(()=>fake.classList.remove("shake-element"), 400); };
-                gameArea.appendChild(fake);
-                fakeIntervals.push(setInterval(() => moveElementRandomly(fake), 3000));
-            }
-            targetInterval = setInterval(() => moveElementRandomly(targetElement), 2500);
+                fake.innerHTML = fakeSVGItems[i % fakeSVGItems.length]; setRandomPosition(fake); gameArea.appendChild(fake);
+                // 立即移動一次
+                moveElementRandomly(fake);
+                    fake.onclick = (e) => { e.stopPropagation(); playSound('tap');
+                    fake.classList.add("shake-element");
+                setTimeout(() => {
+                    fake.classList.remove("shake-element"); }, 400); };
+                fakeIntervals.push( setInterval(() => moveElementRandomly(fake), 1500) ); }
+                // 真寶物移動
+                targetInterval = setInterval( () => moveElementRandomly(targetElement), 1000 );
         }
 
-        function setRandomPosition(el) { el.style.left = `${Math.random()*80+10}%`; el.style.top = `${Math.random()*65+15}%`; }
+        function setRandomPosition(el) {
+            const maxX = gameArea.clientWidth - el.offsetWidth;
+            const maxY = gameArea.clientHeight - el.offsetHeight;
+                el.style.left = `${Math.random() * maxX}px`;
+                el.style.top = `${Math.random() * maxY}px`;
+        }
         function moveElementRandomly(el) { if(el) setRandomPosition(el); }
         function clearAllGameIntervals() { clearInterval(targetInterval); fakeIntervals.forEach(clearInterval); fakeIntervals = []; }
 
         function showQuestion() {
+            activeQuestion = questions[Math.floor(Math.random() * questions.length)];
+            answerAttempts = 0;
             questionText.innerText = activeQuestion.question; optionsContainer.innerHTML = "";
             activeQuestion.options.forEach((opt, i) => {
                 const btn = document.createElement("button");
-                btn.className = "w-full text-left p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-100 font-bold text-slate-700";
+                btn.className = "w-full text-left p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-100 font-black text-2xl text-slate-700";
                 btn.innerHTML = `<div class="flex items-center gap-3"><span class="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center">${i+1}</span>${opt}</div>`;
                 btn.onclick = () => {
                     if(i === activeQuestion.answer) {
+                        answerAttempts++;
+                         answerLogs.push({
+                            序號: answerLogs.length + 1,
+                            題目: activeQuestion.question,
+                            作答次數: answerAttempts,
+                            作答時間: new Date().toLocaleString()
+                        });
+                        saveLogs();updateParticipantCount();
                         playSound('correct'); btn.classList.replace("bg-emerald-50", "bg-emerald-500"); btn.classList.add("text-white");
                         progressBar.style.width = "100%"; setTimeout(() => { questionModal.classList.add("hidden"); finishGame(); }, 1000);
                     } else {
-                        playSound('wrong'); showCustomToast("再試一次", "答案不對唷，再仔細想想！", "🧐");
+                        answerAttempts++; playSound('wrong'); showCustomToast("再試一次", "答案不對唷，再仔細想想！", "🧐");
                     }
-                };
+                 };
                 optionsContainer.appendChild(btn);
             });
             questionModal.classList.remove("hidden");
         }
-
+        function exportExcel() {
+            const ws = XLSX.utils.json_to_sheet(answerLogs);
+            const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "答題紀錄" );
+                XLSX.writeFile(wb, `地寶追追追紀錄_${new Date().getTime()}.xlsx`);
+        }
         function startTimer() {
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
@@ -364,8 +419,30 @@
                 if (timer <= 0) { clearInterval(timerInterval); clearAllGameIntervals(); resetGame(); }
             }, 1000);
         }
+        function openAdminLogin() {
+            document.getElementById("admin-login-modal").classList.remove("hidden");}
+        function loginAdmin() {
+            const pwd =document.getElementById("admin-password").value;
+                if (pwd === "231600") {
+                     document.getElementById("admin-password").value = "";
+                    document.getElementById("admin-login-modal").classList.add("hidden");updateParticipantCount();
+                    document.getElementById("admin-panel").classList.remove("hidden");
+                } else {alert("密碼錯誤");
+            }
+        }
+        function closeAdminPanel() {
+            document.getElementById("admin-panel").classList.add("hidden");}
+        function updateParticipantCount() {
+            document.getElementById("participant-count").textContent = answerLogs.length;}
+        function clearData() {
+            if (!confirm("確定清空所有紀錄？")) return;
+            answerLogs = [];localStorage.removeItem("answerLogs");
+            updateParticipantCount();alert("資料已清空");}
+        function closeAdminLogin() { document.getElementById("admin-login-modal").classList.add("hidden");}
+        function saveLogs() {localStorage.setItem("answerLogs",JSON.stringify(answerLogs));}
+        document.getElementById("admin-password").addEventListener("keypress", function(e){if(e.key === "Enter"){loginAdmin();}});
         function finishGame() { clearInterval(timerInterval); clearAllGameIntervals(); gameScreen.classList.add("hidden"); finishScreen.classList.remove("hidden"); }
-        function resetGame() { clearInterval(timerInterval); clearAllGameIntervals(); finishScreen.classList.add("hidden"); gameScreen.classList.add("hidden"); startScreen.classList.remove("hidden"); }
+        function resetGame() { adminBtn.classList.remove("hidden");clearInterval(timerInterval); clearAllGameIntervals(); finishScreen.classList.add("hidden"); gameScreen.classList.add("hidden"); startScreen.classList.remove("hidden"); }
     </script>
 </body>
 </html>
