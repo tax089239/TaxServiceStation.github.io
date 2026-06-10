@@ -137,8 +137,8 @@ button:disabled{ opacity:.6; cursor:not-allowed;}
     max-width:440px;
     aspect-ratio:1/1;
     display:grid;
-    grid-template-columns:repeat(3,1fr);
-    grid-template-rows:repeat(3,1fr);
+    grid-template-columns:repeat(2,1fr);
+    grid-template-rows:repeat(2,1fr);
     gap:5px;
     padding:10px;
     background:rgba(255,255,255,.88);
@@ -459,7 +459,7 @@ button:disabled{ opacity:.6; cursor:not-allowed;}
 const ADMIN_PASSWORD = "231600"; // 管理員密碼
 let currentPendingAction = null; // 紀錄等待驗證的動作
 
-const size = 3; // 拼圖格子 3x3
+const size = 2; // 拼圖格子 
 const missionList = [
     { topic: "戶籍登記", image: "pintoo1.png", question: "要適用房屋稅1.2%自住優惠稅率要符合什麼條件?", options: ["房屋無出租或營業使用", "所有權人或使用全人本人、配偶或直系親屬實際居住並於該屋辦竣戶籍登記","本人、配偶及未成年子女全國合計持有三戶以內","以上皆是"], answer: 3 },
     { topic: "戶籍登記", image: "pintoo1.png", question: "113年7月起，要適用房屋稅1.2%自住優惠稅新增什麼條件?", options: ["要實際居住", "所有權人或使用全人本人、配偶或直系親屬於該屋辦竣戶籍登記"], answer: 1 },
@@ -554,7 +554,7 @@ function updatePieceSize(piece, inBoard) {
     if (inBoard) {
         piece.style.width = "100%"; piece.style.height = "100%";
     } else {
-        const pSize = window.innerWidth < 600 ? 70 : 90;
+        const pSize = window.innerWidth < 600 ? 120 : 160;
         piece.style.width = `${pSize}px`; piece.style.height = `${pSize}px`;
     }
 }
