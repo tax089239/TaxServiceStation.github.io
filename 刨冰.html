@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>夏日刨冰屋：租稅大挑戰</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background-color: #f0f9ff;
+    }
+    .ice-shaved {
+      clip-path: polygon(50% 0%, 100% 80%, 85% 100%, 15% 100%, 0% 80%);
+    }
+    .bowl-shape {
+      clip-path: polygon(0% 0%, 100% 0%, 85% 100%, 15% 100%);
+    }
+    /* 煙火與漂浮動畫 */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+    /* 刨冰掉落動畫 */
+    @keyframes fall-in {
+      0% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+      70% { transform: translateY(10px) scale(1.1); opacity: 1; }
+      100% { transform: translateY(0) scale(1); }
+    }
+    .animate-fall {
+      animation: fall-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800">
+
+  <!-- 導覽列 -->
+  <header class="bg-cyan-600 text-white shadow-md py-4 px-6 flex justify-between items-center z-10">
+    <div class="flex items-center space-x-3">
+      <span class="text-3xl">🍧</span>
+      <h1 class="text-xl md:text-2xl font-black tracking-wider">夏日刨冰屋 <span class="text-yellow-300">租稅大挑戰</span></h1>
+    </div>
+    <div class="flex space-x-2">
+      <button onclick="switchView('game')" id="btn-nav-game" class="bg-cyan-700 hover:bg-cyan-800 px-4 py-2 rounded-full text-sm font-bold flex items-center transition">
+        <i data-lucide="gamepad-2" class="w-4 h-4 mr-1"></i> 開始遊玩
+      </button>
+      <button onclick="switchView('admin')" id="btn-nav-admin" class="bg-slate-700 hover:bg-slate-800 px-4 py-2 rounded-full text-sm font-bold flex items-center transition">
+        <i data-lucide="shield-check" class="w-4 h-4 mr-1"></i> 管理後台
+      </button>
+    </div>
+  </header>
+
+  <!-- 主內容區 -->
+  <main class="flex-grow container mx-auto p-4 max-w-6xl flex flex-col justify-center">
+    
+    <!-- ================= 遊戲區 ================= -->
+    <section id="view-game" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      
+      <!-- 左側：刨冰工作台與動態畫布 -->
+      <div class="lg:col-span-7 bg-white rounded-3xl shadow-xl p-6 flex flex-col justify-between border-4 border-cyan-100">
+        
+        <!-- 進度與名稱顯示 -->
+        <div class="flex justify-between items-center border-b border-dashed border-slate-200 pb-3 mb-4">
+          <div>
+            <span class="text-xs font-bold text-cyan-600 uppercase tracking-widest block">小店營業中</span>
+            <span id="display-ice-name" class="text-lg font-bold text-slate-700">準備製作刨冰...</span>
+          </div>
+          <div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold flex items-center">
+            <span id="shaved-ice-status">開始調配刨冰！</span>
+          </div>
+        </div>
+
+        <!-- 刨冰動態預覽區 -->
+        <div class="relative bg-gradient-to-b from-sky-50 to-cyan-100 rounded-2xl h-80 flex flex-col items-center justify-end pb-8 overflow-hidden border border-sky-100">
+          
+          <!-- 背景雲朵飾品 -->
+          <div class="absolute top-4 left-6 text-4xl opacity-20 animate-float">☁️</div>
+          <div class="absolute top-8 right-8 text-3xl opacity-20 animate-float" style="animation-delay: 1.5s;">☁️</div>
+          <div class="absolute top-16 left-1/3 text-2xl opacity-10 animate-float" style="animation-delay: 0.7s;">🎈</div>
+
+          <!-- 堆疊的刨冰本體 -->
+          <div class="relative w-64 h-64 flex flex-col items-center justify-end z-10">
+            
+            <!-- 4. 頂部裝飾 -->
+            <div id="layer-topping" class="absolute bottom-[130px] z-40 text-5xl transition-all duration-300 opacity-0 transform translate-y-[-20px]">
+              🍒
+            </div>
+
+            <!-- 3. 配料層 -->
+            <div id="layer-condiment" class="absolute bottom-[80px] w-40 h-16 z-30 transition-all duration-300 opacity-0 flex justify-center items-center gap-1">
+              <!-- 動態生成配料小圓點/圖標 -->
+            </div>
+
+            <!-- 2. 果醬層 -->
+            <div id="layer-syrup" class="absolute bottom-[60px] w-48 h-14 z-20 transition-all duration-300 opacity-0 rounded-t-full">
+            </div>
+
+            <!-- 1. 冰底層 -->
+            <div id="layer-base" class="absolute bottom-[40px] w-52 h-28 bg-white border border-slate-100 ice-shaved shadow-inner z-10 transition-all duration-300 opacity-0 flex items-center justify-center">
+              <span class="text-slate-300 text-xs font-medium tracking-widest">SHAVED ICE</span>
+            </div>
+
+            <!-- 0. 碗 -->
+            <div class="absolute bottom-0 w-56 h-14 bg-gradient-to-r from-cyan-400 to-blue-500 bowl-shape shadow-md z-40 border-t-4 border-cyan-300 flex items-center justify-center">
+              <span class="text-white text-xs font-black tracking-widest opacity-60">TAIWAN ICE</span>
+            </div>
+
+          </div>
+
+          <!-- 進行中的操作指引 -->
+          <div id="guide-tip" class="absolute bottom-2 text-xs font-bold text-slate-500 bg-white/80 px-3 py-1 rounded-full shadow-sm">
+            請照黑板順序點擊工作檯上的配料！
+          </div>
+
+        </div>
+
+        <!-- 刨冰按鈕面板 (工作檯分類按鈕) -->
+        <div class="mt-4 space-y-3">
+          <!-- 1. 冰沙基底 -->
+          <div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Step 1. 選擇刨冰基底</span>
+            <div class="grid grid-cols-4 gap-1.5">
+              <button onclick="addIngredient('base', '經典粗冰')" class="ing-btn p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🍧</span>
+                <span class="text-[10px] font-black text-slate-600 block truncate">經典粗冰</span>
+              </button>
+              <button onclick="addIngredient('base', '鮮奶雪花')" class="ing-btn p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">❄️</span>
+                <span class="text-[10px] font-black text-slate-600 block truncate">鮮奶雪花</span>
+              </button>
+              <button onclick="addIngredient('base', '抹茶雪花')" class="ing-btn p-1.5 bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🍵</span>
+                <span class="text-[10px] font-black text-green-700 block truncate">抹茶雪花</span>
+              </button>
+              <button onclick="addIngredient('base', '芒果雪花')" class="ing-btn p-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🥭</span>
+                <span class="text-[10px] font-black text-amber-700 block truncate">芒果雪花</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. 濃郁淋醬 -->
+          <div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Step 2. 澆淋美味淋醬</span>
+            <div class="grid grid-cols-4 gap-1.5">
+              <button onclick="addIngredient('syrup', '草莓果醬')" class="ing-btn p-1.5 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🍓</span>
+                <span class="text-[10px] font-black text-red-700 block truncate">草莓果醬</span>
+              </button>
+              <button onclick="addIngredient('syrup', '古早黑糖')" class="ing-btn p-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🍯</span>
+                <span class="text-[10px] font-black text-amber-800 block truncate">古早黑糖</span>
+              </button>
+              <button onclick="addIngredient('syrup', '特調煉乳')" class="ing-btn p-1.5 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🥛</span>
+                <span class="text-[10px] font-black text-cyan-800 block truncate">特調煉乳</span>
+              </button>
+              <button onclick="addIngredient('syrup', '愛文芒果醬')" class="ing-btn p-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">💛</span>
+                <span class="text-[10px] font-black text-yellow-700 block truncate">愛文芒果醬</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. 精選配料 -->
+          <div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Step 3. 鋪上豐富配料</span>
+            <div class="grid grid-cols-4 gap-1.5">
+              <button onclick="addIngredient('condiment', '慢熬蜜紅豆')" class="ing-btn p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🫘</span>
+                <span class="text-[10px] font-black text-rose-700 block truncate">慢熬蜜紅豆</span>
+              </button>
+              <button onclick="addIngredient('condiment', '九份芋圓')" class="ing-btn p-1.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🍠</span>
+                <span class="text-[10px] font-black text-purple-700 block truncate">九份芋圓</span>
+              </button>
+              <button onclick="addIngredient('condiment', '黑糖珍珠')" class="ing-btn p-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🧋</span>
+                <span class="text-[10px] font-black text-stone-700 block truncate">黑糖珍珠</span>
+              </button>
+              <button onclick="addIngredient('condiment', '清脆椰果')" class="ing-btn p-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🥥</span>
+                <span class="text-[10px] font-black text-emerald-800 block truncate">清脆椰果</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. 豪華頂飾 -->
+          <div>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Step 4. 點綴精緻頂飾</span>
+            <div class="grid grid-cols-4 gap-1.5">
+              <button onclick="addIngredient('topping', '黃金布丁')" class="ing-btn p-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🍮</span>
+                <span class="text-[10px] font-black text-yellow-700 block truncate">黃金布丁</span>
+              </button>
+              <button onclick="addIngredient('topping', '糖漬櫻桃')" class="ing-btn p-1.5 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🍒</span>
+                <span class="text-[10px] font-black text-red-600 block truncate">糖漬櫻桃</span>
+              </button>
+              <button onclick="addIngredient('topping', '芒果切丁')" class="ing-btn p-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🍋</span>
+                <span class="text-[10px] font-black text-amber-700 block truncate">芒果切丁</span>
+              </button>
+              <button onclick="addIngredient('topping', '香草冰淇淋')" class="ing-btn p-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl text-center transition disabled:opacity-50" disabled>
+                <span class="text-xl block">🍨</span>
+                <span class="text-[10px] font-black text-orange-700 block truncate">香草冰淇淋</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="flex space-x-2 pt-2">
+            <button onclick="resetIceMaker()" id="btn-reset-ice" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 rounded-xl text-sm font-bold transition flex items-center justify-center">
+              <i data-lucide="rotate-ccw" class="w-4 h-4 mr-1"></i> 重製刨冰
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 右側：食譜看板、租稅問答 -->
+      <div class="lg:col-span-5 flex flex-col space-y-6">
+        
+        <!-- 卡片一：神祕食譜 (直接顯示) -->
+        <div id="card-recipe" class="bg-amber-50 rounded-3xl shadow-xl p-6 border-4 border-amber-200 relative overflow-hidden">
+          
+          <!-- 黑板粉筆風裝飾 -->
+          <div class="absolute -right-6 -top-6 w-20 h-20 bg-amber-200 rounded-full opacity-35"></div>
+
+          <!-- 進行中神祕食譜階段 -->
+          <div id="cooking-step">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-lg font-black text-amber-900 flex items-center">
+                <i data-lucide="notepad-text" class="w-5 h-5 mr-1.5 text-amber-700"></i> 📝 今日限定神祕食譜
+              </h3>
+              <span class="bg-amber-200 text-amber-900 px-2 py-0.5 rounded text-xs font-bold" id="recipe-name-tag">宇治金時冰</span>
+            </div>
+            
+            <div class="bg-stone-800 text-stone-100 p-4 rounded-xl font-mono text-sm relative shadow-inner">
+              <div class="absolute top-2 right-2 text-stone-600 font-bold text-xs">CHALKBOARD</div>
+              <ul class="space-y-2" id="recipe-steps-list">
+                <!-- 動態注入配方 -->
+              </ul>
+            </div>
+
+            <p class="text-xs text-amber-800/70 mt-3 italic text-center">
+              ※ 請對照左邊的工作檯，按照順序由上而下加入材料喔！
+            </p>
+          </div>
+
+        </div>
+
+        <!-- 卡片二：租稅問題大挑戰 (依序解鎖) -->
+        <div id="card-tax-quiz" class="bg-white rounded-3xl shadow-xl p-6 border-4 border-slate-100 flex-grow flex flex-col justify-between">
+          
+          <!-- 未解鎖鎖定畫面 -->
+          <div id="quiz-locked" class="flex flex-col items-center justify-center py-12 text-slate-400 text-center flex-grow">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-300 animate-pulse">
+              <i data-lucide="lock" class="w-8 h-8"></i>
+            </div>
+            <p class="font-bold">租稅挑戰尚未解鎖</p>
+            <p class="text-xs text-slate-400 mt-1">請先在左邊依照食譜正確做好刨冰喔！</p>
+          </div>
+
+          <!-- 問答進行畫面 -->
+          <div id="quiz-unlocked" class="hidden flex flex-col justify-between h-full space-y-4">
+            
+            <div>
+              <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
+                <span class="text-xs font-black text-rose-500 uppercase tracking-widest flex items-center">
+                  <i data-lucide="help-circle" class="w-3.5 h-3.5 mr-1"></i> 客人的租稅提問
+                </span>
+                <span id="tax-category" class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded text-xs font-bold">消費稅務</span>
+              </div>
+              <h4 id="quiz-question" class="text-base font-bold text-slate-800 leading-relaxed mb-3">
+                <!-- 題目內容 -->
+              </h4>
+            </div>
+
+            <!-- 選項列表 -->
+            <div class="space-y-2" id="quiz-options">
+              <!-- 選項按鈕 -->
+            </div>
+
+            <!-- 提示與反饋區 -->
+            <div id="quiz-feedback" class="hidden p-3 rounded-xl text-xs font-medium transition duration-300">
+              <!-- 答錯或提示內容 -->
+            </div>
+
+          </div>
+
+          <!-- 挑戰成功畫面 -->
+          <div id="quiz-success" class="hidden flex flex-col items-center justify-center text-center py-8 space-y-4 animate-fall">
+            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center shadow-lg">
+              <i data-lucide="party-popper" class="w-10 h-10"></i>
+            </div>
+            <div>
+              <h3 class="text-2xl font-black text-green-700">挑戰大成功！</h3>
+              <p class="text-xs text-slate-500 mt-1">感謝你調配出美味冰品，還幫忙解答了稅務知識！</p>
+            </div>
+
+            <!-- 成果小結 -->
+            <div class="bg-slate-50 p-4 rounded-2xl w-full text-left text-xs space-y-1.5 border border-slate-100">
+              <div class="flex justify-between">
+                <span class="text-slate-400">製作冰品：</span>
+                <span id="summary-ice" class="font-bold text-slate-700">超級芒果冰</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">解答題目：</span>
+                <span id="summary-quiz" class="font-bold text-slate-700 truncate max-w-[200px]">題目</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">解答結果：</span>
+                <span class="font-bold text-emerald-600">正確解答！🌟</span>
+              </div>
+            </div>
+
+            <button onclick="initNewRound()" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-3 rounded-xl font-bold transition shadow-md flex items-center justify-center">
+              <i data-lucide="refresh-cw" class="w-4 h-4 mr-1.5"></i> 接待下一位客人
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+    
+    <!-- ================= 管理者後台區 ================= -->
+    <section id="view-admin" class="hidden space-y-6">
+      
+      <!-- 1. 密碼鎖定畫面 -->
+      <div id="admin-lock-screen" class="max-w-md mx-auto bg-white rounded-3xl shadow-xl p-8 border-4 border-slate-200 text-center space-y-6 my-12 animate-fall">
+        <div class="w-20 h-20 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mx-auto shadow-inner">
+          <i data-lucide="lock" class="w-10 h-10"></i>
+        </div>
+        <div>
+          <h3 class="text-2xl font-black text-slate-800">管理端安全鎖</h3>
+          <p class="text-xs text-slate-400 mt-1">此區域僅限管理員存取，請輸入後台管理密碼。</p>
+        </div>
+        <div class="space-y-3">
+          <input type="password" id="input-admin-password" onkeydown="if(event.key === 'Enter') checkAdminPassword()" placeholder="請輸入密碼..." class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 text-center font-bold tracking-widest text-slate-700">
+          <button onclick="checkAdminPassword()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-3 rounded-xl font-black tracking-wider transition transform active:scale-95 flex items-center justify-center">
+            <i data-lucide="unlock" class="w-4 h-4 mr-1.5"></i> 解鎖後台
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. 解鎖後的實際後台內容 -->
+      <div id="admin-dashboard-content" class="hidden space-y-6">
+        <!-- 頂部功能與統計看板 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fall">
+          
+          <!-- 數據一：總遊玩人數 -->
+          <div class="bg-white p-5 rounded-2xl shadow-md border-b-4 border-indigo-500 flex items-center space-x-4">
+            <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+              <i data-lucide="users" class="w-8 h-8"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-400">總挑戰人數</p>
+              <p id="stat-total-players" class="text-2xl font-black text-slate-700">0 人</p>
+            </div>
+          </div>
+
+          <!-- 數據二：平均錯誤次數 -->
+          <div class="bg-white p-5 rounded-2xl shadow-md border-b-4 border-rose-500 flex items-center space-x-4">
+            <div class="p-3 bg-rose-50 text-rose-600 rounded-xl">
+              <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-400">平均答錯次數</p>
+              <p id="stat-avg-fails" class="text-2xl font-black text-slate-700">0.0 次</p>
+            </div>
+          </div>
+
+          <!-- 數據三：答對率 -->
+          <div class="bg-white p-5 rounded-2xl shadow-md border-b-4 border-green-500 flex items-center space-x-4">
+            <div class="p-3 bg-green-50 text-green-600 rounded-xl">
+              <i data-lucide="check-circle" class="w-8 h-8"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-400">首題答對率</p>
+              <p id="stat-perfect-rate" class="text-2xl font-black text-slate-700">0%</p>
+            </div>
+          </div>
+
+          <!-- 數據四：後台控制項 -->
+          <div class="bg-slate-800 p-4 rounded-2xl shadow-md flex flex-col justify-between space-y-2 text-white">
+            <p class="text-xs font-bold text-slate-300">資料控制面板</p>
+            <div class="grid grid-cols-3 gap-1.5">
+              <button onclick="generateMockData()" class="bg-slate-700 hover:bg-slate-600 text-[10px] py-2 px-1 rounded-lg font-bold transition flex flex-col items-center justify-center">
+                <i data-lucide="database-backup" class="w-3.5 h-3.5 mb-0.5"></i> 模擬數據
+              </button>
+              <button onclick="clearAllData()" class="bg-red-700 hover:bg-red-600 text-[10px] py-2 px-1 rounded-lg font-bold transition flex flex-col items-center justify-center">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5 mb-0.5"></i> 清空資料
+              </button>
+              <button onclick="adminLogout()" class="bg-amber-600 hover:bg-amber-500 text-[10px] py-2 px-1 rounded-lg font-bold transition flex flex-col items-center justify-center">
+                <i data-lucide="log-out" class="w-3.5 h-3.5 mb-0.5"></i> 安全登出
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 資料明細表格與匯出 -->
+        <div class="bg-white rounded-3xl shadow-xl p-6 border border-slate-100">
+          
+          <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+            <div>
+              <h3 class="text-xl font-black text-slate-800 flex items-center">
+                <i data-lucide="table-properties" class="w-5 h-5 mr-1.5 text-cyan-600"></i> 租稅挑戰明細後台資料表
+              </h3>
+              <p class="text-xs text-slate-400 mt-1">展示所有玩家的刨冰統計、回答問題及錯誤統計，資料皆儲存於瀏覽器內。</p>
+            </div>
+            
+            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-bold text-sm tracking-wide shadow-md transition transform active:scale-95 flex items-center justify-center">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-1.5"></i> 匯出至 EXCEL (CSV 格式)
+            </button>
+          </div>
+
+          <!-- 桌機端表格 -->
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 text-xs font-black uppercase tracking-wider border-b border-slate-200">
+                  <th class="py-4 px-4 text-center w-16">序號</th>
+                  <th class="py-4 px-4">製作冰品</th>
+                  <th class="py-4 px-4">挑戰問題</th>
+                  <th class="py-4 px-4">最終正確答案</th>
+                  <th class="py-4 px-4 text-center">錯誤次數</th>
+                  <th class="py-4 px-4">完成時間</th>
+                </tr>
+              </thead>
+              <tbody id="admin-table-body" class="divide-y divide-slate-100 text-sm">
+                <!-- 動態注入表格資料 -->
+              </tbody>
+            </table>
+            <div id="no-data-indicator" class="hidden p-12 text-center text-slate-400">
+              <i data-lucide="folder-open" class="w-12 h-12 mx-auto text-slate-300 mb-2"></i>
+              <p class="font-bold">尚無遊玩統計資料</p>
+              <p class="text-xs text-slate-400 mt-1">您可以點擊上方的「模擬數據」快速產生測試資料喔！</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- 客製化確認 Modal 彈窗 -->
+  <div id="custom-confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border-4 border-slate-100 text-center space-y-4 animate-fall">
+      <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto">
+        <i data-lucide="alert-triangle" class="w-8 h-8 animate-pulse"></i>
+      </div>
+      <div>
+        <h4 class="text-lg font-black text-slate-800" id="confirm-title">確認操作</h4>
+        <p class="text-xs text-slate-400 mt-1.5" id="confirm-message">您確定要執行此操作嗎？此動作將無法復原。</p>
+      </div>
+      <div class="flex space-x-2 pt-2">
+        <button onclick="closeConfirmModal(false)" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-xs transition">
+          取消
+        </button>
+        <button onclick="closeConfirmModal(true)" id="confirm-yes-btn" class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-xs transition">
+          確定執行
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 簡易提示吐司 -->
+  <div id="toast-message" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-4 py-2.5 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50">
+    提示訊息
+  </div>
+
+  <!-- 底部版權 -->
+  <footer class="bg-slate-100 text-slate-400 text-xs text-center py-4 border-t border-slate-200">
+    <p>© 僅限臺東縣稅務局租稅宣導使用。</p>
+  </footer>
+
+  <script>
+    // ==========================================
+    // 1. 全域變數與資料初始化
+    // ==========================================
+    let gameState = {
+      currentIceName: '',
+      expectedRecipe: [], // 目前所需的步驟順序
+      currentSteps: [],   // 玩家已經點選的步驟
+      currentQuiz: null,  // 當前問答
+      failCount: 0,       // 當前答錯次數 (仍於背景統計並計入導出數據)
+      isCooking: false
+    };
+
+    // 後台解鎖狀態
+    let isAdminAuthenticated = false;
+
+    // 歷史紀錄資料庫 (先從 localStorage 讀取，沒有就保持空)
+    let historyRecords = JSON.parse(localStorage.getItem('ice_tax_records')) || [];
+
+    // 精準配對工作區與按鈕標籤的刨冰配方資料庫
+    const RECIPES = [
+      {
+        name: "經典芒果布丁雪花冰",
+        sequence: ["芒果雪花", "愛文芒果醬", "清脆椰果", "黃金布丁"],
+        emojiSeq: ["🥭", "💛", "🥥", "🍮"]
+      },
+      {
+        name: "宇治金時紅豆冰淇淋冰",
+        sequence: ["抹茶雪花", "古早黑糖", "慢熬蜜紅豆", "香草冰淇淋"],
+        emojiSeq: ["🍵", "🍯", "🫘", "🍨"]
+      },
+      {
+        name: "雙料黑糖珍珠芋圓粗冰",
+        sequence: ["經典粗冰", "古早黑糖", "九份芋圓", "黑糖珍珠"],
+        emojiSeq: ["🍧", "🍯", "🍠", "🧋"]
+      },
+      {
+        name: "煉乳紅豆布丁雪花冰",
+        sequence: ["鮮奶雪花", "特調煉乳", "慢熬蜜紅豆", "黃金布丁"],
+        emojiSeq: ["❄️", "🥛", "🫘", "🍮"]
+      },
+      {
+        name: "豪華草莓芒果椰果雪花冰",
+        sequence: ["鮮奶雪花", "草莓果醬", "清脆椰果", "芒果切丁"],
+        emojiSeq: ["❄️", "🍓", "🥥", "🍋"]
+      },
+      {
+        name: "黃金芒果冰淇淋雪花冰",
+        sequence: ["芒果雪花", "愛文芒果醬", "九份芋圓", "香草冰淇淋"],
+        emojiSeq: ["🥭", "💛", "🍠", "🍨"]
+      },
+      {
+        name: "抹茶紅豆珍珠櫻桃冰",
+        sequence: ["抹茶雪花", "特調煉乳", "黑糖珍珠", "糖漬櫻桃"],
+        emojiSeq: ["🍵", "🥛", "🧋", "🍒"]
+      }
+    ];
+
+    // 租稅問答資料庫
+    const TAX_QUIZZES = [
+      {
+        category: "統一發票",
+        question: "在商店消費使用什麼工具來儲存雲端發票，可以減少紙張浪費，還能享有「雲端發票專屬獎」額外中獎機會？",
+        options: ["手機條碼載具", "傳統紙本手抄明細", "塑膠包裝袋", "商品說明書"],
+        correctIndex: 0,
+        tip: "提示：可在財政部電子發票整合服務平台申請，由斜線「/」開頭的8碼英數字元就是它喔！"
+      },
+      {
+        category: "房屋稅",
+        question: "房屋稅要用優惠稅率需要設立戶籍嗎？",
+        options: ["不需要", "需要"],
+        correctIndex: 1,
+        tip: "提示：房屋稅要使用優惠稅率'必須'要有直系親屬設立戶籍，並全國限三戶使用。"
+      },
+      {
+        category: "國稅與地方稅",
+        question: "請問下列哪一項稅目屬於「地方稅」（由各縣市地方稅捐稽徵機關負責徵收）？",
+        options: ["關稅", "綜合所得稅", "房屋稅", "營業稅"],
+        correctIndex: 2,
+        tip: "提示：國稅如所得稅、營業稅歸中央；而房屋稅、地價稅、牌照稅則屬於地方政府的財源。"
+      },
+      {
+        category: "使用牌照稅",
+        question: "小明買了一輛排氣量2000cc的燃油家用轎車，他每年4月份必須向地方稅務局繳納什麼稅，才能合法開車上路？",
+        options: ["奢侈娛樂稅", "印花稅", "關稅", "使用牌照稅"],
+        correctIndex: 3,
+        tip: "提示：每年4月開徵（營業用車輛分4月及10月兩期），是針對使用公共道路車輛課徵的稅。"
+      },
+      {
+        category: "納稅人權利",
+        question: "為了保障納稅者權利，政府制定了什麼專法，並在各稅捐稽徵機關設有「納稅者權利保護官」來協助民眾？",
+        options: ["消費者保護法", "納稅者權利保護法", "個人資料保護法", "租稅大赦暫行條例"],
+        correctIndex: 1,
+        tip: "提示：簡稱「納保法」，旨在實現課稅公平、落實正當法律程序，並保障納稅人的生存權。"
+      },
+      {
+        category: "印花稅",
+        question: "收到銀錢收據（例如收到現金房租、現金工程款）並開立憑證時，應按規定貼用或繳納什麼稅？",
+        options: ["印花稅", "遺產稅", "贈與稅", "貨物稅"],
+        correctIndex: 0,
+        tip: "提示：印花稅屬於憑證稅，銀錢收據、買賣動產契據、承攬契據及典賣讓受分割不動產契據都是課徵範圍。"
+      }
+    ];
+
+    // ==========================================
+    // 2. 音效系統 (Web Audio API - 無需外部檔案)
+    // ==========================================
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new AudioCtx();
+      }
+    }
+
+    function playSound(type) {
+      try {
+        initAudio();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const now = audioCtx.currentTime;
+        
+        if (type === 'drop') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(150, now + 0.15);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'shave') {
+          const bufferSize = audioCtx.sampleRate * 0.3;
+          const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+          }
+          const noise = audioCtx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = audioCtx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.value = 1000;
+          const gain = audioCtx.createGain();
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(audioCtx.destination);
+          noise.start(now);
+          noise.stop(now + 0.3);
+        } else if (type === 'success') {
+          const osc1 = audioCtx.createOscillator();
+          const osc2 = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(523.25, now);
+          osc1.frequency.setValueAtTime(659.25, now + 0.1);
+          
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(1046.5, now + 0.15);
+          
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+          
+          osc1.connect(gain);
+          osc2.connect(gain);
+          gain.connect(audioCtx.destination);
+          
+          osc1.start(now);
+          osc1.stop(now + 0.4);
+          osc2.start(now + 0.15);
+          osc2.stop(now + 0.4);
+        } else if (type === 'fail') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.linearRampToValueAtTime(90, now + 0.25);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        }
+      } catch (e) {
+        console.warn("無法啟動 AudioContext:", e);
+      }
+    }
+
+    // ==========================================
+    // 3. 遊戲核心邏輯
+    // ==========================================
+
+    function initNewRound() {
+      const randomRecipe = RECIPES[Math.floor(Math.random() * RECIPES.length)];
+      gameState.currentIceName = randomRecipe.name;
+      gameState.expectedRecipe = randomRecipe.sequence;
+      gameState.currentSteps = [];
+      
+      gameState.currentQuiz = TAX_QUIZZES[Math.floor(Math.random() * TAX_QUIZZES.length)];
+      gameState.failCount = 0;
+
+      document.getElementById('display-ice-name').innerText = `正在調配：${gameState.currentIceName}`;
+      document.getElementById('recipe-name-tag').innerText = randomRecipe.name;
+      
+      const listEl = document.getElementById('recipe-steps-list');
+      listEl.innerHTML = '';
+      randomRecipe.sequence.forEach((item, index) => {
+        const emoji = randomRecipe.emojiSeq[index];
+        listEl.innerHTML += `
+          <li class="flex items-center space-x-2" id="recipe-li-${index}">
+            <span class="w-5 h-5 bg-stone-700 text-stone-300 rounded-full flex items-center justify-center text-xs font-bold">${index + 1}</span>
+            <span class="text-stone-400 text-lg">${emoji}</span>
+            <span class="recipe-text text-stone-300 font-bold" data-item="${item}">${item}</span>
+            <span class="status-marker text-xs ml-auto text-stone-500">⏳ 等待中</span>
+          </li>
+        `;
+      });
+
+      document.getElementById('quiz-unlocked').classList.add('hidden');
+      document.getElementById('quiz-success').classList.add('hidden');
+      document.getElementById('quiz-locked').classList.remove('hidden');
+
+      resetIceLayersVisual();
+      
+      enableIceButtons(true);
+      document.getElementById('shaved-ice-status').innerText = "開始調配刨冰！";
+      document.getElementById('guide-tip').innerText = "請照黑板順序點擊工作檯上的配料！";
+    }
+
+    function resetIceLayersVisual() {
+      const b = document.getElementById('layer-base');
+      const s = document.getElementById('layer-syrup');
+      const c = document.getElementById('layer-condiment');
+      const t = document.getElementById('layer-topping');
+
+      b.style.opacity = '0';
+      b.className = "absolute bottom-[40px] w-52 h-28 bg-white border border-slate-100 ice-shaved shadow-inner z-10 transition-all duration-300 flex items-center justify-center";
+      b.innerHTML = '<span class="text-slate-300 text-xs font-medium tracking-widest">SHAVED ICE</span>';
+
+      s.style.opacity = '0';
+      s.className = "absolute bottom-[60px] w-48 h-14 z-20 transition-all duration-300 rounded-t-full";
+
+      c.style.opacity = '0';
+      c.innerHTML = '';
+
+      t.style.opacity = '0';
+    }
+
+    function enableIceButtons(enable) {
+      const buttons = document.querySelectorAll('.ing-btn');
+      buttons.forEach(btn => btn.disabled = !enable);
+    }
+
+    function addIngredient(type, name) {
+      const nextExpectedIndex = gameState.currentSteps.length;
+      const expectedName = gameState.expectedRecipe[nextExpectedIndex];
+
+      if (name !== expectedName) {
+        playSound('fail');
+        showToast(`哎呀！食譜的第 ${nextExpectedIndex + 1} 步應該是「${expectedName}」喔！`);
+        return;
+      }
+
+      gameState.currentSteps.push(name);
+      
+      if (type === 'base') {
+        playSound('shave');
+      } else {
+        playSound('drop');
+      }
+
+      const li = document.getElementById(`recipe-li-${nextExpectedIndex}`);
+      li.querySelector('.status-marker').innerHTML = "✅ 完成";
+      li.querySelector('.status-marker').className = "status-marker text-xs ml-auto text-green-500 font-bold";
+      li.querySelector('.recipe-text').className = "recipe-text text-stone-500 font-bold line-through";
+
+      updateIceVisual(type, name);
+
+      if (gameState.currentSteps.length === gameState.expectedRecipe.length) {
+        document.getElementById('shaved-ice-status').innerText = "刨冰完成！請回答租稅問題";
+        document.getElementById('guide-tip').innerText = "請回答右側客人的問題來送出刨冰！";
+        unlockTaxQuiz();
+      } else {
+        const nextStepName = gameState.expectedRecipe[gameState.currentSteps.length];
+        document.getElementById('guide-tip').innerText = `好極了！下一步請加入：${nextStepName}`;
+      }
+    }
+
+    function updateIceVisual(type, name) {
+      if (type === 'base') {
+        const b = document.getElementById('layer-base');
+        b.style.opacity = '1';
+        b.className = "absolute bottom-[40px] w-52 h-28 ice-shaved shadow-inner z-10 transition-all duration-300 flex items-center justify-center animate-fall";
+        
+        if (name === '鮮奶雪花') {
+          b.classList.add('bg-amber-50/95', 'border-amber-100');
+          b.innerHTML = '<span class="text-amber-300 text-[10px] font-black tracking-widest">MELT SNOW</span>';
+        } else if (name === '抹茶雪花') {
+          b.classList.add('bg-emerald-100/90', 'border-emerald-200');
+          b.innerHTML = '<span class="text-emerald-500 text-[10px] font-black tracking-widest">MATCHA ICE</span>';
+        } else if (name === '芒果雪花') {
+          b.classList.add('bg-yellow-100/90', 'border-yellow-200');
+          b.innerHTML = '<span class="text-amber-500 text-[10px] font-black tracking-widest">MANGO SNOW</span>';
+        } else {
+          // 經典粗冰
+          b.classList.add('bg-sky-100/80', 'border-sky-200');
+          b.innerHTML = '<span class="text-sky-300 text-[10px] font-black tracking-widest">CRUSHED ICE</span>';
+        }
+      } 
+      else if (type === 'syrup') {
+        const s = document.getElementById('layer-syrup');
+        s.style.opacity = '1';
+        s.className = "absolute bottom-[60px] w-48 h-14 z-20 transition-all duration-300 rounded-t-full animate-fall";
+        if (name === '草莓果醬') {
+          s.classList.add('bg-red-500/80');
+        } else if (name === '古早黑糖') {
+          s.classList.add('bg-amber-900/85');
+        } else if (name === '特調煉乳') {
+          s.classList.add('bg-white/90', 'border-b-2', 'border-sky-50');
+        } else if (name === '愛文芒果醬') {
+          s.classList.add('bg-yellow-500/85');
+        }
+      } 
+      else if (type === 'condiment') {
+        const c = document.getElementById('layer-condiment');
+        c.style.opacity = '1';
+        c.className = "absolute bottom-[80px] w-40 h-16 z-30 transition-all duration-300 flex justify-center items-center gap-1.5 animate-fall";
+        if (name === '慢熬蜜紅豆') {
+          c.innerHTML = '<span class="text-xl">🫘</span><span class="text-xl">🫘</span><span class="text-xl">🫘</span>';
+        } else if (name === '九份芋圓') {
+          c.innerHTML = '<span class="text-xl">🍠</span><span class="text-xl">🍠</span><span class="text-xl">🍠</span>';
+        } else if (name === '黑糖珍珠') {
+          c.innerHTML = '<span class="text-xl">🧋</span><span class="text-xl">🧋</span><span class="text-xl">🧋</span>';
+        } else if (name === '清脆椰果') {
+          c.innerHTML = '<span class="text-xl">🥥</span><span class="text-xl">🥥</span><span class="text-xl">🥥</span>';
+        }
+      } 
+      else if (type === 'topping') {
+        const t = document.getElementById('layer-topping');
+        t.style.opacity = '1';
+        t.className = "absolute bottom-[130px] z-40 text-5xl transition-all duration-300 transform translate-y-0 animate-fall";
+        if (name === '黃金布丁') {
+          t.innerText = '🍮';
+        } else if (name === '糖漬櫻桃') {
+          t.innerText = '🍒';
+        } else if (name === '芒果切丁') {
+          t.innerText = '🍋';
+        } else if (name === '香草冰淇淋') {
+          t.innerText = '🍨';
+        }
+      }
+    }
+
+    function resetIceMaker() {
+      gameState.currentSteps = [];
+      resetIceLayersVisual();
+      
+      const listEl = document.getElementById('recipe-steps-list');
+      const items = listEl.querySelectorAll('li');
+      items.forEach((li, index) => {
+        li.querySelector('.status-marker').innerHTML = "⏳ 等待中";
+        li.querySelector('.status-marker').className = "status-marker text-xs ml-auto text-stone-500";
+        li.querySelector('.recipe-text').className = "recipe-text text-stone-300 font-bold";
+      });
+
+      document.getElementById('shaved-ice-status').innerText = "刨冰重置，請重新製作！";
+      document.getElementById('guide-tip').innerText = `請加入第一步：${gameState.expectedRecipe[0]}`;
+      playSound('drop');
+    }
+
+    function unlockTaxQuiz() {
+      document.getElementById('quiz-locked').classList.add('hidden');
+      document.getElementById('quiz-unlocked').classList.remove('hidden');
+
+      const quiz = gameState.currentQuiz;
+      document.getElementById('tax-category').innerText = quiz.category;
+      document.getElementById('quiz-question').innerText = quiz.question;
+
+      const optionsContainer = document.getElementById('quiz-options');
+      optionsContainer.innerHTML = '';
+      quiz.options.forEach((opt, idx) => {
+        optionsContainer.innerHTML += `
+          <button onclick="submitAnswer(${idx})" class="quiz-opt-btn w-full text-left p-3.5 bg-slate-50 hover:bg-cyan-50 border border-slate-200 hover:border-cyan-400 rounded-xl font-medium text-sm transition flex items-center space-x-2">
+            <span class="w-6 h-6 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-xs font-bold shrink-0">${String.fromCharCode(65 + idx)}</span>
+            <span class="text-slate-700">${opt}</span>
+          </button>
+        `;
+      });
+
+      const feedback = document.getElementById('quiz-feedback');
+      feedback.classList.add('hidden');
+    }
+
+    function submitAnswer(selectedIndex) {
+      const quiz = gameState.currentQuiz;
+      const feedback = document.getElementById('quiz-feedback');
+      
+      if (selectedIndex === quiz.correctIndex) {
+        playSound('success');
+        savePlayerRecord(selectedIndex);
+
+        document.getElementById('quiz-unlocked').classList.add('hidden');
+        const successCard = document.getElementById('quiz-success');
+        successCard.classList.remove('hidden');
+
+        document.getElementById('summary-ice').innerText = gameState.currentIceName;
+        document.getElementById('summary-quiz').innerText = quiz.question;
+
+      } else {
+        playSound('fail');
+        gameState.failCount++;
+
+        feedback.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
+        feedback.classList.add('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200');
+        feedback.innerHTML = `
+          <p class="font-bold flex items-center mb-1"><i data-lucide="x-circle" class="w-4 h-4 mr-1"></i> 選項 ${String.fromCharCode(65 + selectedIndex)} 是錯誤的喔！</p>
+          <p>${quiz.tip}</p>
+        `;
+        lucide.createIcons();
+      }
+    }
+
+    function savePlayerRecord(correctIndex) {
+      const now = new Date();
+      const timeString = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      
+      const newRecord = {
+        id: historyRecords.length + 1,
+        iceName: gameState.currentIceName,
+        question: gameState.currentQuiz.question,
+        answer: gameState.currentQuiz.options[correctIndex],
+        failCount: gameState.failCount,
+        timestamp: timeString
+      };
+
+      historyRecords.unshift(newRecord);
+      localStorage.setItem('ice_tax_records', JSON.stringify(historyRecords));
+      
+      renderAdminDashboard();
+    }
+
+    // ==========================================
+    // 4. 管理者後台與安全認證邏輯
+    // ==========================================
+
+    // 解鎖管理後台
+    function checkAdminPassword() {
+      const pwdInput = document.getElementById('input-admin-password');
+      if (pwdInput.value === '231600') {
+        isAdminAuthenticated = true;
+        pwdInput.value = '';
+        showToast("解鎖成功！歡迎進入管理後台");
+        
+        // 渲染後台 UI 切換
+        document.getElementById('admin-lock-screen').classList.add('hidden');
+        document.getElementById('admin-dashboard-content').classList.remove('hidden');
+        
+        renderAdminDashboard();
+      } else {
+        playSound('fail');
+        showToast("密碼錯誤！請重新輸入");
+        pwdInput.value = '';
+      }
+    }
+
+    // 登出管理後台
+    function adminLogout() {
+      isAdminAuthenticated = false;
+      document.getElementById('admin-dashboard-content').classList.add('hidden');
+      document.getElementById('admin-lock-screen').classList.remove('hidden');
+      switchView('game');
+      showToast("已成功安全登出管理端！");
+    }
+
+    // 渲染後台數據與表格
+    function renderAdminDashboard() {
+      if (!isAdminAuthenticated) return;
+
+      const totalPlayers = historyRecords.length;
+      document.getElementById('stat-total-players').innerText = `${totalPlayers} 人`;
+
+      if (totalPlayers > 0) {
+        const sumFails = historyRecords.reduce((sum, rec) => sum + rec.failCount, 0);
+        const avgFails = (sumFails / totalPlayers).toFixed(1);
+        document.getElementById('stat-avg-fails').innerText = `${avgFails} 次`;
+
+        const perfectCount = historyRecords.filter(rec => rec.failCount === 0).length;
+        const perfectRate = Math.round((perfectCount / totalPlayers) * 100);
+        document.getElementById('stat-perfect-rate').innerText = `${perfectRate}%`;
+      } else {
+        document.getElementById('stat-avg-fails').innerText = "0.0 次";
+        document.getElementById('stat-perfect-rate').innerText = "0%";
+      }
+
+      const tbody = document.getElementById('admin-table-body');
+      const noData = document.getElementById('no-data-indicator');
+      
+      tbody.innerHTML = '';
+      
+      if (historyRecords.length === 0) {
+        noData.classList.remove('hidden');
+      } else {
+        noData.classList.add('hidden');
+        historyRecords.forEach((rec, idx) => {
+          const displayId = historyRecords.length - idx;
+          tbody.innerHTML += `
+            <tr class="hover:bg-slate-50 transition">
+              <td class="py-4 px-4 text-center font-bold text-slate-400">${displayId}</td>
+              <td class="py-4 px-4 text-slate-600">
+                <span class="inline-block bg-sky-50 text-sky-700 text-xs px-2.5 py-1 rounded-md font-semibold">${escapeHtml(rec.iceName)}</span>
+              </td>
+              <td class="py-4 px-4 text-slate-600 max-w-xs truncate" title="${escapeHtml(rec.question)}">${escapeHtml(rec.question)}</td>
+              <td class="py-4 px-4 text-slate-700 font-medium">${escapeHtml(rec.answer)}</td>
+              <td class="py-4 px-4 text-center">
+                <span class="${rec.failCount > 0 ? 'bg-rose-50 text-rose-600' : 'bg-green-50 text-green-600'} text-xs font-black px-2.5 py-1 rounded-full">
+                  ${rec.failCount} 次
+                </span>
+              </td>
+              <td class="py-4 px-4 text-xs text-slate-400 font-mono">${rec.timestamp}</td>
+            </tr>
+          `;
+        });
+      }
+      lucide.createIcons();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function generateMockData() {
+      const ices = [
+        "經典芒果布丁雪花冰", "宇治金時紅豆冰淇淋冰", "雙料黑糖珍珠芋圓粗冰", 
+        "煉乳紅豆布丁雪花冰", "豪華草莓芒果椰果雪花冰", "黃金芒果冰淇淋雪花冰"
+      ];
+      const sampleRecords = [];
+      const now = new Date();
+
+      for (let i = 0; i < 6; i++) {
+        const randQuiz = TAX_QUIZZES[Math.floor(Math.random() * TAX_QUIZZES.length)];
+        const randIce = ices[Math.floor(Math.random() * ices.length)];
+        const failC = Math.floor(Math.random() * 4);
+        
+        const pastDate = new Date(now);
+        pastDate.setMinutes(now.getMinutes() - (i * 25 + 12));
+        const timeStr = `${pastDate.getFullYear()}/${String(pastDate.getMonth() + 1).padStart(2, '0')}/${String(pastDate.getDate()).padStart(2, '0')} ${String(pastDate.getHours()).padStart(2, '0')}:${String(pastDate.getMinutes()).padStart(2, '0')}`;
+
+        sampleRecords.push({
+          id: i + 1,
+          iceName: randIce,
+          question: randQuiz.question,
+          answer: randQuiz.options[randQuiz.correctIndex],
+          failCount: failC,
+          timestamp: timeStr
+        });
+      }
+
+      historyRecords = sampleRecords;
+      localStorage.setItem('ice_tax_records', JSON.stringify(historyRecords));
+      renderAdminDashboard();
+      showToast("成功導入 6 筆測試數據！");
+    }
+
+    // ==========================================
+    // 自訂的 Confirm Modal 機制
+    // ==========================================
+    let confirmCallback = null;
+
+    function showCustomConfirm(title, message, callback) {
+      document.getElementById('confirm-title').innerText = title;
+      document.getElementById('confirm-message').innerText = message;
+      confirmCallback = callback;
+      
+      const modal = document.getElementById('custom-confirm-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeConfirmModal(result) {
+      const modal = document.getElementById('custom-confirm-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      
+      if (result && confirmCallback) {
+        confirmCallback();
+      }
+      confirmCallback = null;
+    }
+
+    function clearAllData() {
+      showCustomConfirm(
+        "確定清空資料？", 
+        "您確定要刪除所有答題歷史紀錄嗎？所有統計成果與 CSV 數據將被清空且無法復原。", 
+        function() {
+          historyRecords = [];
+          localStorage.removeItem('ice_tax_records');
+          renderAdminDashboard();
+          showToast("已清空所有歷史資料！");
+        }
+      );
+    }
+
+    function exportToExcel() {
+      if (historyRecords.length === 0) {
+        showToast("目前沒有任何數據可以匯出喔！");
+        return;
+      }
+
+      const headers = ["序號", "製作刨冰品項", "回答題目", "最終答案", "答錯次數", "完成時間"];
+      
+      const rows = historyRecords.map((rec, index) => {
+        const displayId = historyRecords.length - index;
+        return [
+          displayId,
+          `"${rec.iceName.replace(/"/g, '""')}"`,
+          `"${rec.question.replace(/"/g, '""')}"`,
+          `"${rec.answer.replace(/"/g, '""')}"`,
+          rec.failCount,
+          `"${rec.timestamp}"`
+        ];
+      });
+
+      let csvContent = headers.join(",") + "\n";
+      rows.forEach(row => {
+        csvContent += row.join(",") + "\n";
+      });
+
+      const BOM = "\uFEFF";
+      const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+      
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `夏日刨冰屋_租稅挑戰結果表_${new Date().toISOString().slice(0,10)}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast("已成功匯出 CSV 檔（可用 Excel 開啟）！");
+    }
+
+    // ==========================================
+    // 5. 導覽、介面切換與提示工具
+    // ==========================================
+    
+    function switchView(viewName) {
+      initAudio();
+      const gameView = document.getElementById('view-game');
+      const adminView = document.getElementById('view-admin');
+      const btnGame = document.getElementById('btn-nav-game');
+      const btnAdmin = document.getElementById('btn-nav-admin');
+
+      if (viewName === 'game') {
+        gameView.classList.remove('hidden');
+        adminView.classList.add('hidden');
+        btnGame.className = "bg-cyan-700 hover:bg-cyan-800 px-4 py-2 rounded-full text-sm font-bold flex items-center transition ring-2 ring-white";
+        btnAdmin.className = "bg-slate-700 hover:bg-slate-800 px-4 py-2 rounded-full text-sm font-bold flex items-center transition";
+      } else {
+        gameView.classList.add('hidden');
+        adminView.classList.remove('hidden');
+        btnGame.className = "bg-cyan-700 hover:bg-cyan-800 px-4 py-2 rounded-full text-sm font-bold flex items-center transition";
+        btnAdmin.className = "bg-slate-700 hover:bg-slate-800 px-4 py-2 rounded-full text-sm font-bold flex items-center transition ring-2 ring-white";
+        
+        // 依據解鎖狀態顯示對應畫面
+        if (isAdminAuthenticated) {
+          document.getElementById('admin-lock-screen').classList.add('hidden');
+          document.getElementById('admin-dashboard-content').classList.remove('hidden');
+          renderAdminDashboard();
+        } else {
+          document.getElementById('admin-lock-screen').classList.remove('hidden');
+          document.getElementById('admin-dashboard-content').classList.add('hidden');
+          setTimeout(() => {
+            document.getElementById('input-admin-password').focus();
+          }, 100);
+        }
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-message');
+      toast.innerText = msg;
+      toast.style.opacity = '1';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+      }, 3000);
+    }
+
+    window.onload = function() {
+      lucide.createIcons();
+      initNewRound();
+      renderAdminDashboard();
+    }
+  </script>
+</body>
+</html>
