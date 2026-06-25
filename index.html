@@ -3,175 +3,304 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌟 租稅大冒險｜宣導活動入口</title>
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>🌟 租稅｜宣導活動入口</title>
 <style>
 /* ============================= */
-/* 一、全頁面基本設定 */
+/* 0. 跨瀏覽器樣式重置 (Reset & Normalization) */
+/* ============================= */
+*, *::before, *::after {
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+/* ============================= */
+/* 一、全頁面基本設定 (美式復古黃金嘉年華斜紋) */
 /* ============================= */
 body {
-    font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
-    background: linear-gradient(135deg, #fff9e6 0%, #ffe4e1 100%);
+    /* 廣泛相容系統字型堆疊，確保 iOS/Android/Windows 顯示一致 */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    
+    /* 美式復古暖沙色與卡士達黃經典斜條紋背景 */
+    background-color: #fceecb;
+    background-image: -webkit-repeating-linear-gradient(
+        45deg,
+        #fceecb,
+        #fceecb 30px,
+        #f7dfa3 30px,
+        #f7dfa3 60px
+    );
+    background-image: repeating-linear-gradient(
+        45deg,
+        #fceecb,
+        #fceecb 30px,
+        #f7dfa3 30px,
+        #f7dfa3 60px
+    );
     margin: 0;
+    
+    /* 彈性垂直置中 */
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
     justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
     align-items: center;    
-    height: 100vh;
-    overflow: hidden;
+    
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
     position: relative;
-}
-/* ============================= */
-/* 二、背景泡泡 */
-/* ============================= */
-.bubble {
-     position: absolute;
-     background: rgba(255, 255, 255, 0.6);
-     border-radius: 50%;
-     z-index: 0;
-     pointer-events: none;
-     box-shadow: 0 0 15px rgba(255, 200, 200, 0.5);
-     animation: floatUp linear infinite;
-}
-
-@keyframes floatUp {
-     0% { transform: translateY(0px); opacity: 0.9; }
-     50% { opacity: 0.7; }
-     100% { transform: translateY(-120vh); opacity: 0; }
+    padding: 40px 0;
 }
 
 /* ============================= */
-/* 三、中央主卡片區塊 */
+/* 二、中央主卡片區塊 (經典美式粗框海報風) */
 /* ============================= */
 main {
     position: relative;
     z-index: 10;
     text-align: center;
+    width: 100%;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
 }      
 .container {      
-    background: rgba(255, 255, 255, 0.95);
-    padding: 50px 40px;
+    background: #ffffff;
+    padding: 50px 35px;
     border-radius: 30px;
-    border: 5px solid #ffcfd2;
-    box-shadow: 0 15px 35px rgba(255, 182, 193, 0.4);
-    max-width: 350px;
-    width: 90%;
+    /* 美式復古標誌性的深藍色粗框與更立體的硬派投影 */
+    border: 6px solid #2c3e50; 
+    box-shadow: 12px 12px 0px #2c3e50;
+    max-width: 960px; /* 寬度容納橫向三格 */
+    width: 92%;
+    position: relative;
 }
 
 /* ============================= */
-/* 四、標題與圖示 */
+/* 三、遊戲副標籤 */
 /* ============================= */
-.header-icon {
-    font-size: 60px;
-    margin-bottom: 10px;
-    display: block;
-}
-
-h1 {
-    color: #ff6b6b;
-    font-size: 28px;
-    margin-bottom: 35px;
+/* 美式遊戲副標籤 (STAGE SELECT) */
+.stage-tag {
+    display: inline-block;
+    background: #f1c40f;
+    color: #2c3e50;
+    font-weight: 900;
+    font-size: 16px;
+    padding: 8px 22px;
+    border: 3px solid #2c3e50;
+    border-radius: 10px;
+    text-transform: uppercase;
     letter-spacing: 2px;
-    text-shadow: 1px 1px 0px #fff;
- }
+    box-shadow: 4px 4px 0px #2c3e50;
+    margin-bottom: 30px;
+    transform: rotate(-1.5deg);
+}
 
 /* ============================= */
-/* 五、按鈕樣式（升級遊戲風格） */
+/* 四、橫向三格網格配置 (相容彈性設計) */
+/* ============================= */
+.button-grid {
+    display: -ms-grid;
+    display: grid;
+    -ms-grid-columns: (1fr)[3];
+    grid-template-columns: repeat(3, 1fr); /* 預設橫向三格 */
+    gap: 20px; /* 格子間距 */
+    margin: 15px 0;
+}
+
+/* 針對平板、中螢幕調整為兩格，維持閱讀性 */
+@media (max-width: 768px) {
+    .button-grid {
+        -ms-grid-columns: (1fr)[2];
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+}
+
+/* 針對小螢幕手機調整為單格，方便手指點擊 */
+@media (max-width: 480px) {
+    .button-grid {
+        -ms-grid-columns: 1fr;
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+}
+
+/* ============================= */
+/* 五、按鈕樣式（美式亮眼配色與跨端最佳化） */
 /* ============================= */
 .btn {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
     align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
     justify-content: center;
-    margin: 18px 0;
-    padding: 18px;
+    padding: 20px 15px;
     text-decoration: none;
-    color: #2c3e50;
     border-radius: 20px;
-    font-size: 20px;
-    font-weight: bold;
-    transition: all 0.25s ease;
-    box-shadow: 0 6px 0 rgba(0,0,0,0.12), 0 12px 20px rgba(0,0,0,0.1);
+    font-size: 19px;
+    font-weight: 900; /* 更粗的字體使美式風格更強烈 */
+    border: 3px solid #2c3e50; /* 美式黑/深藍粗框線 */
     position: relative;
     top: 0;
+    min-height: 76px; /* 確保按鈕高度一致 */
+    
+    /* 消除行動端點擊時產生的預設高亮半透明灰色背景 (iOS / Android WebKit) */
+    -webkit-tap-highlight-color: transparent;
+    
+    /* 防止使用者快速連續點擊按鈕時選取按鈕內的文字 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    
+    /* 增加前綴的轉化平滑度 */
+    -webkit-transition: -webkit-transform 0.2s ease, -webkit-filter 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease, -webkit-transform 0.2s ease, -webkit-filter 0.2s ease;
 }
 
 .btn span { 
     margin-right: 10px; 
-    font-size: 24px; 
+    font-size: 26px; 
+    -ms-flex-negative: 0; 
+    flex-shrink: 0;
 }
 
-/* ===== 各按鈕配色（統一設計系統） ===== */
+/* ===== 美式復古熱情飽和色系 ===== */
 
-/* 橘色：問答 */
-.btn-quiz {background: #ff9f43;border-bottom: 6px solid #d97904; }
+/* 1. 芥末黃 (問答) */
+.btn-quiz { 
+    background: #f1c40f; 
+    color: #2c3e50;
+    border-bottom: 7px solid #d4ac0d; 
+    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
+}
 
-/* 藍色：卡牌 */
-.btn-card {background: #48dbfb;border-bottom: 6px solid #1fa4c9;}
+/* 2. 丹寧藍 (卡牌) */
+.btn-card { 
+    background: #3498db; 
+    color: #ffffff;
+    border-bottom: 7px solid #2980b9; 
+    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
+}
 
-/* 綠色：尋寶1 */
-.btn-find {background: #2ecc71;border-bottom: 6px solid #239b56;}
+/* 3. 活力草綠 (尋寶1) */
+.btn-find { 
+    background: #2ecc71; 
+    color: #ffffff;
+    border-bottom: 7px solid #27ae60; 
+    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
+}
 
-/* 深藍：尋寶2 */
-.btn-find2 {background: #3498db;border-bottom: 6px solid #21618c;}
+/* 4. 復古紫 (拼圖) */
+.btn-pintoo { 
+    background: #9b59b6; 
+    color: #ffffff;
+    border-bottom: 7px solid #8e44ad; 
+    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
+}
 
-/* 紫色：拼圖 */
-.btn-pintoo {background: #9b59b6;border-bottom: 6px solid #6c3483;}
+/* 5. 夕陽橘 (尋寶2) */
+.btn-find2 { 
+    background: #e67e22; 
+    color: #ffffff;
+    border-bottom: 7px solid #d35400; 
+    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
+}
 
-/* ===== 動態效果 ===== */
+/* 6. 櫻桃紅 (發票大富翁) */
+.btn-monopoly { 
+    background: #e74c3c; 
+    color: #ffffff;
+    border-bottom: 7px solid #c0392b; 
+    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
+}
 
+/* 7. 復古湖水綠 (預留1 / 未來新關卡) */
+.btn-placeholder1 { 
+    background: #1abc9c; 
+    color: #ffffff;
+    border-bottom: 7px solid #16a085; 
+    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
+}
+
+/* 8. 復古糖果桃粉 (預留2 / 未來新關卡) */
+.btn-placeholder2 { 
+    background: #fd79a8; 
+    color: #ffffff;
+    border-bottom: 7px solid #e84393; 
+    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
+}
+
+/* 9. 復古深靛藍 (預留3 / 未來新關卡) */
+.btn-placeholder3 { 
+    background: #5f27cd; 
+    color: #ffffff;
+    border-bottom: 7px solid #341f97; 
+    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
+    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
+}
+
+/* 未解鎖按鈕特殊半透明與鎖頭氣氛 */
+.btn-placeholder1, .btn-placeholder2, .btn-placeholder3 {
+    filter: saturate(0.95);
+}
+
+/* ===== 滑鼠懸停與點擊動態效果 ===== */
 .btn:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 0 12px 25px rgba(0,0,0,0.18);
+    -webkit-transform: translateY(-4px);
+    transform: translateY(-4px);
+    -webkit-filter: brightness(1.08);
     filter: brightness(1.08);
+    box-shadow: 0 10px 0 rgba(44, 62, 80, 0.35);
 }
 
 .btn:active {
-    transform: translateY(4px) scale(0.98);
-    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
-    border-bottom-width: 2px;
-}
-
-/* ============================= */
-/* 六、底部提示文字 */
-/* ============================= */
-.footer-text {
-    margin-top: 25px;
-    font-size: 14px;
-    color: #a0a0a0;
+    -webkit-transform: translateY(4px);
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 rgba(44, 62, 80, 0.25);
+    border-bottom-width: 3px;
 }
 </style>
 </head>
 <body>
 
-<!-- 背景泡泡 -->
-<script>    
-const bubbleCount = 25;
-for(let i=0; i<bubbleCount; i++){
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    const size = Math.random()*120 + 40; 
-    bubble.style.width = size + 'px';
-    bubble.style.height = size + 'px'; 
-    bubble.style.left = Math.random()*90 + 5 + '%';
-    bubble.style.bottom = (-Math.random()*100 - 100) + 'px';
-    bubble.style.animationDuration = (Math.random()*6 + 8) + 's';
-    bubble.style.animationDelay = (Math.random()*5) + 's';
-    document.body.appendChild(bubble);
-}
-</script>
-
 <main>
     <div class="container">
-        <span class="header-icon">🌈</span>
-        <h1>租稅大冒險</h1>
-        <!-- 按鈕會由 JavaScript 動態生成 -->
-        <p class="footer-text">一起學習正確的稅務知識吧！</p>
+        <!-- 移除主標題「租稅」，直接以美式遊戲副標籤開頭 -->
+        <div class="stage-tag">STAGE SELECT</div>
+        
+        <!-- 按鈕網格容器：由 JavaScript 動態生成按鈕並放入處 -->
+        <div class="button-grid"></div>
     </div>
 </main>
 
 <script>
-// 取得容器
-const container = document.querySelector('.container');
+// 取得按鈕網格容器
+const gridContainer = document.querySelector('.button-grid');
 
-// 函式：新增按鈕
+// 函式：新增按鈕至網格中
 function addButton(text, emoji, href, btnClass) {
     const btn = document.createElement('a');
     btn.href = href;
@@ -182,9 +311,7 @@ function addButton(text, emoji, href, btnClass) {
     btn.appendChild(span);
     btn.appendChild(document.createTextNode(' ' + text));
 
-    // 插入到 footer-text 之前，保持底部文字在最下方
-    const footer = container.querySelector('.footer-text');
-    container.insertBefore(btn, footer);
+    gridContainer.appendChild(btn);
 }
 
 // 定義按鈕資料
@@ -194,11 +321,15 @@ const buttons = [
     {text: '地寶追追追', emoji:'🔎', href:'q-find.html', cls:'btn-find'},
     {text: '智慧拼好屋', emoji:'🧩', href:'pintoo.html', cls:'btn-pintoo'},
     {text: '尋寶挑戰2', emoji:'🔍', href:'q-find-2.html', cls:'btn-find2'},
-    // 以後新增按鈕只要在這裡加一筆
-    // {text: '新的遊戲', emoji:'🎮', href:'newgame.html', cls:'btn-game'},
+    {text: '刨冰大挑戰', emoji:'🧊', href:'ice.html', cls:'btn-monopoly'},
+    
+    // 已預先套用飽和復古色的新關卡
+    {text: '神秘新關卡', emoji:'🔒', href:'#', cls:'btn-placeholder1'},
+    {text: '神秘新關卡', emoji:'🔒', href:'#', cls:'btn-placeholder2'},
+    {text: '神秘新關卡', emoji:'🔒', href:'#', cls:'btn-placeholder3'},
 ];
 
-// 生成按鈕
+// 生成按鈕並填入網格
 buttons.forEach(b => addButton(b.text, b.emoji, b.href, b.cls));
 </script>
 
