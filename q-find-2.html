@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>租稅考古探險遊戲</title>
-    <!-- 引入 React 與 Babel (以便在瀏覽器直接解析 JSX) -->
+    <!-- 引入 React 與 Babel -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- [修正] 升級 Babel CDN 以確保正確轉譯您的 JSX -->
+    <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 Lucide 圖示庫 -->
@@ -28,7 +29,6 @@
             0%, 100% { transform: rotate(-5deg) scale(1); }
             50% { transform: rotate(5deg) scale(1.05); }
         }
-        /* 防止未載入前顯示原始 JSX 標籤 */
         [id="root"]:empty::before {
             content: "遊戲考古中，請稍候...";
             display: flex;
@@ -44,10 +44,10 @@
 <body class="bg-[#FDF8F1]">
     <div id="root"></div>
 
-    <script type="text/babel">
+    <!-- [修正] 加入 data-presets="react" 確保瀏覽器能識別 JSX -->
+    <script type="text/babel" data-presets="react">
         const { useState, useEffect, useRef } = React;
         
-        // 圖示組件適配器
         const Icon = ({ name, size = 24, className = "" }) => {
             const iconRef = useRef(null);
             useEffect(() => {
@@ -58,15 +58,7 @@
             return <i data-lucide={name} ref={iconRef} style={{width: size, height: size}} className={className}></i>;
         };
 
-        // --- 圖片資源配置區 ---
-        const IMAGE_ASSETS = {
-            bgArtifact1: "", 
-            bgArtifact2: "",
-            target1: "", 
-            other1: "",  
-            other2: "",  
-            other3: "",  
-        };
+        const IMAGE_ASSETS = { bgArtifact1: "", bgArtifact2: "", target1: "", other1: "", other2: "", other3: "" };
 
         const AssetDisplay = ({ src, emoji, className = "" }) => {
             if (src) {
