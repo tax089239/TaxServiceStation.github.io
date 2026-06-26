@@ -38,15 +38,31 @@
     .animate-fall {
       animation: fall-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     }
+    .stage-pill {
+      transition: all 0.25s ease;
+    }
+    .stage-pill-active {
+      background: #0891b2;
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(8, 145, 178, 0.25);
+    }
+    .stage-pill-done {
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .stage-pill-idle {
+      background: #f1f5f9;
+      color: #64748b;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 
   <!-- 導覽列 -->
-  <header class="bg-cyan-600 text-white shadow-md py-4 px-6 flex justify-between items-center z-10">
+  <header class="bg-cyan-600 text-white shadow-md py-3 px-6 flex justify-between items-center z-10">
     <div class="flex items-center space-x-3">
       <span class="text-3xl">🍧</span>
-      <h1 class="text-xl md:text-2xl font-black tracking-wider">夏日刨冰屋 <span class="text-yellow-300">租稅大挑戰</span></h1>
+      <h1 class="text-2xl md:text-3xl font-black tracking-wider">夏日刨冰屋 <span class="text-yellow-300">租稅大挑戰</span></h1>
     </div>
     <div class="flex space-x-2">
       <button onclick="switchView('game')" id="btn-nav-game" class="bg-cyan-700 hover:bg-cyan-800 px-4 py-2 rounded-full text-sm font-bold flex items-center transition">
@@ -59,278 +75,202 @@
   </header>
 
   <!-- 主內容區 -->
-  <main class="flex-grow container mx-auto p-4 max-w-6xl flex flex-col justify-center">
+  <main class="flex-grow container mx-auto p-2 max-w-[1500px] flex flex-col justify-center overflow-hidden">
     
     <!-- ================= 遊戲區 ================= -->
-    <section id="view-game" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-      
-      <!-- 左側：刨冰工作台與動態畫布 -->
-      <div class="lg:col-span-7 bg-white rounded-3xl shadow-xl p-6 flex flex-col justify-between border-4 border-cyan-100">
-        
-        <!-- 進度與名稱顯示 -->
-        <div class="flex justify-between items-center border-b border-dashed border-slate-200 pb-3 mb-4">
-          <div>
-            <span class="text-xs font-bold text-cyan-600 uppercase tracking-widest block">小店營業中</span>
-            <span id="display-ice-name" class="text-lg font-bold text-slate-700">準備製作刨冰...</span>
+    <section id="view-game" class="grid grid-cols-12 gap-3 items-stretch h-[calc(100vh-118px)] min-h-[560px] max-h-[760px] overflow-hidden">
+
+      <!-- 二階段流程指示 -->
+      <div class="col-span-12 bg-white/90 rounded-2xl shadow-md border border-cyan-100 px-4 py-2 flex items-center justify-between gap-3 shrink-0">
+        <div class="flex items-center gap-3 min-w-0">
+          <span class="text-2xl">🍧</span>
+          <div class="min-w-0">
+            <p class="text-[11px] font-black text-cyan-600 tracking-widest uppercase">筆電橫式闖關流程</p>
+            <h2 id="stage-title" class="text-2xl font-black text-slate-800 truncate">第 1 階段：製作刨冰</h2>
           </div>
-          <div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold flex items-center">
+        </div>
+        <div class="flex items-center gap-2 text-lg font-black shrink-0">
+          <span id="stage-pill-cook" class="stage-pill stage-pill-active px-3 py-1.5 rounded-full">1 製作刨冰</span>
+          <span class="text-slate-300">→</span>
+          <span id="stage-pill-quiz" class="stage-pill stage-pill-idle px-3 py-1.5 rounded-full">2 回答租稅問題</span>
+        </div>
+      </div>
+
+      <!-- 左邊主題：食譜 -->
+      <div id="card-recipe" class="col-span-3 bg-amber-50 rounded-3xl shadow-xl p-4 border-4 border-amber-200 relative overflow-hidden flex flex-col min-h-0">
+        <div class="absolute -right-6 -top-6 w-12 h-12 bg-amber-200 rounded-full opacity-35"></div>
+        <div id="cooking-step" class="flex flex-col h-full min-h-0">
+          <div class="mb-2">
+            <h3 class="text-3xl font-black text-amber-900 flex items-center">
+              <i data-lucide="notepad-text" class="w-7 h-7 mr-2 text-amber-700"></i> 📝 食譜
+            </h3>
+            <span class="inline-block bg-amber-200 text-amber-900 px-2 py-0.5 rounded text-lg font-black mt-2 max-w-full truncate" id="recipe-name-tag">宇治金時冰</span>
+          </div>
+          <div class="bg-stone-800 text-stone-100 p-4 rounded-xl font-mono text-xl relative shadow-inner flex-1 min-h-0 flex items-center">
+            <div class="absolute top-2 right-2 text-stone-600 font-bold text-[10px]">CHALKBOARD</div>
+            <ul class="space-y-5 w-full" id="recipe-steps-list">
+              <!-- 動態注入配方 -->
+            </ul>
+          </div>
+          <p class="text-lg text-amber-800/70 mt-3 italic text-center font-bold">
+            ※ 請照順序加入材料。
+          </p>
+        </div>
+      </div>
+
+      <!-- 中間主題：配料選擇 -->
+      <div id="card-ingredients" class="col-span-5 bg-white rounded-3xl shadow-xl p-4 flex flex-col border-4 border-cyan-100 min-h-0">
+        <div class="flex justify-between items-center border-b border-dashed border-slate-200 pb-2 mb-3 shrink-0">
+          <div class="min-w-0">
+            <span class="text-base font-bold text-cyan-600 uppercase tracking-widest block">小店營業中</span>
+            <span id="display-ice-name" class="text-2xl font-black text-slate-700 truncate block">準備製作刨冰...</span>
+          </div>
+          <div class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-lg font-bold flex items-center shrink-0">
             <span id="shaved-ice-status">開始調配刨冰！</span>
           </div>
         </div>
-
-        <!-- 刨冰動態預覽區 -->
-        <div class="relative bg-gradient-to-b from-sky-50 to-cyan-100 rounded-2xl h-80 flex flex-col items-center justify-end pb-8 overflow-hidden border border-sky-100">
-          
-          <!-- 背景雲朵飾品 -->
-          <div class="absolute top-4 left-6 text-4xl opacity-20 animate-float">☁️</div>
-          <div class="absolute top-8 right-8 text-3xl opacity-20 animate-float" style="animation-delay: 1.5s;">☁️</div>
-          <div class="absolute top-16 left-1/3 text-2xl opacity-10 animate-float" style="animation-delay: 0.7s;">🎈</div>
-
-          <!-- 堆疊的刨冰本體 -->
-          <div class="relative w-64 h-64 flex flex-col items-center justify-end z-10">
-            
-            <!-- 4. 頂部裝飾 -->
-            <div id="layer-topping" class="absolute bottom-[130px] z-40 text-5xl transition-all duration-300 opacity-0 transform translate-y-[-20px]">
-              🍒
-            </div>
-
-            <!-- 3. 配料層 -->
-            <div id="layer-condiment" class="absolute bottom-[80px] w-40 h-16 z-30 transition-all duration-300 opacity-0 flex justify-center items-center gap-1">
-              <!-- 動態生成配料小圓點/圖標 -->
-            </div>
-
-            <!-- 2. 果醬層 -->
-            <div id="layer-syrup" class="absolute bottom-[60px] w-48 h-14 z-20 transition-all duration-300 opacity-0 rounded-t-full">
-            </div>
-
-            <!-- 1. 冰底層 -->
-            <div id="layer-base" class="absolute bottom-[40px] w-52 h-28 bg-white border border-slate-100 ice-shaved shadow-inner z-10 transition-all duration-300 opacity-0 flex items-center justify-center">
-              <span class="text-slate-300 text-xs font-medium tracking-widest">SHAVED ICE</span>
-            </div>
-
-            <!-- 0. 碗 -->
-            <div class="absolute bottom-0 w-56 h-14 bg-gradient-to-r from-cyan-400 to-blue-500 bowl-shape shadow-md z-40 border-t-4 border-cyan-300 flex items-center justify-center">
-              <span class="text-white text-xs font-black tracking-widest opacity-60">TAIWAN ICE</span>
-            </div>
-
-          </div>
-
-          <!-- 進行中的操作指引 -->
-          <div id="guide-tip" class="absolute bottom-2 text-xs font-bold text-slate-500 bg-white/80 px-3 py-1 rounded-full shadow-sm">
-            請照黑板順序點擊工作檯上的配料！
-          </div>
-
-        </div>
-
+        <div class="flex-1 min-h-0 flex flex-col justify-center">
         <!-- 刨冰按鈕面板 (工作檯分類按鈕) -->
-        <div class="mt-4 space-y-3">
+        <div class="space-y-3">
           <!-- 1. 冰沙基底 -->
           <div>
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Step 1. 選擇刨冰基底</span>
+            <span class="text-lg font-black text-slate-500 uppercase tracking-wider block mb-1">Step 1. 選擇刨冰基底</span>
             <div class="grid grid-cols-4 gap-1.5">
-              <button onclick="addIngredient('base', '經典粗冰')" class="ing-btn p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🍧</span>
-                <span class="text-[10px] font-black text-slate-600 block truncate">經典粗冰</span>
+              <button onclick="addIngredient('base', '經典粗冰')" class="ing-btn p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🍧</span>
+                <span class="text-base font-black text-slate-600 block truncate">經典粗冰</span>
               </button>
-              <button onclick="addIngredient('base', '鮮奶雪花')" class="ing-btn p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">❄️</span>
-                <span class="text-[10px] font-black text-slate-600 block truncate">鮮奶雪花</span>
+              <button onclick="addIngredient('base', '鮮奶雪花')" class="ing-btn p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">❄️</span>
+                <span class="text-base font-black text-slate-600 block truncate">鮮奶雪花</span>
               </button>
-              <button onclick="addIngredient('base', '抹茶雪花')" class="ing-btn p-1.5 bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🍵</span>
-                <span class="text-[10px] font-black text-green-700 block truncate">抹茶雪花</span>
+              <button onclick="addIngredient('base', '抹茶雪花')" class="ing-btn p-2 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🍵</span>
+                <span class="text-base font-black text-green-700 block truncate">抹茶雪花</span>
               </button>
-              <button onclick="addIngredient('base', '芒果雪花')" class="ing-btn p-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🥭</span>
-                <span class="text-[10px] font-black text-amber-700 block truncate">芒果雪花</span>
+              <button onclick="addIngredient('base', '芒果雪花')" class="ing-btn p-2 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🥭</span>
+                <span class="text-base font-black text-amber-700 block truncate">芒果雪花</span>
               </button>
             </div>
           </div>
 
           <!-- 2. 濃郁淋醬 -->
           <div>
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Step 2. 澆淋美味淋醬</span>
+            <span class="text-lg font-black text-slate-500 uppercase tracking-wider block mb-1">Step 2. 澆淋美味淋醬</span>
             <div class="grid grid-cols-4 gap-1.5">
-              <button onclick="addIngredient('syrup', '草莓果醬')" class="ing-btn p-1.5 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🍓</span>
-                <span class="text-[10px] font-black text-red-700 block truncate">草莓果醬</span>
+              <button onclick="addIngredient('syrup', '草莓果醬')" class="ing-btn p-2 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🍓</span>
+                <span class="text-base font-black text-red-700 block truncate">草莓果醬</span>
               </button>
-              <button onclick="addIngredient('syrup', '古早黑糖')" class="ing-btn p-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🍯</span>
-                <span class="text-[10px] font-black text-amber-800 block truncate">古早黑糖</span>
+              <button onclick="addIngredient('syrup', '古早黑糖')" class="ing-btn p-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🍯</span>
+                <span class="text-base font-black text-amber-800 block truncate">古早黑糖</span>
               </button>
-              <button onclick="addIngredient('syrup', '特調煉乳')" class="ing-btn p-1.5 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🥛</span>
-                <span class="text-[10px] font-black text-cyan-800 block truncate">特調煉乳</span>
+              <button onclick="addIngredient('syrup', '特調煉乳')" class="ing-btn p-2 bg-sky-50 hover:bg-sky-100 border border-sky-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🥛</span>
+                <span class="text-base font-black text-cyan-800 block truncate">特調煉乳</span>
               </button>
-              <button onclick="addIngredient('syrup', '愛文芒果醬')" class="ing-btn p-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">💛</span>
-                <span class="text-[10px] font-black text-yellow-700 block truncate">愛文芒果醬</span>
+              <button onclick="addIngredient('syrup', '愛文芒果醬')" class="ing-btn p-2 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">💛</span>
+                <span class="text-base font-black text-yellow-700 block truncate">愛文芒果醬</span>
               </button>
             </div>
           </div>
 
           <!-- 3. 精選配料 -->
           <div>
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Step 3. 鋪上豐富配料</span>
+            <span class="text-lg font-black text-slate-500 uppercase tracking-wider block mb-1">Step 3. 鋪上豐富配料</span>
             <div class="grid grid-cols-4 gap-1.5">
-              <button onclick="addIngredient('condiment', '慢熬蜜紅豆')" class="ing-btn p-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🫘</span>
-                <span class="text-[10px] font-black text-rose-700 block truncate">慢熬蜜紅豆</span>
+              <button onclick="addIngredient('condiment', '慢熬蜜紅豆')" class="ing-btn p-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🫘</span>
+                <span class="text-base font-black text-rose-700 block truncate">慢熬蜜紅豆</span>
               </button>
-              <button onclick="addIngredient('condiment', '九份芋圓')" class="ing-btn p-1.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🍠</span>
-                <span class="text-[10px] font-black text-purple-700 block truncate">九份芋圓</span>
+              <button onclick="addIngredient('condiment', '九份芋圓')" class="ing-btn p-2 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🍠</span>
+                <span class="text-base font-black text-purple-700 block truncate">九份芋圓</span>
               </button>
-              <button onclick="addIngredient('condiment', '黑糖珍珠')" class="ing-btn p-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🧋</span>
-                <span class="text-[10px] font-black text-stone-700 block truncate">黑糖珍珠</span>
+              <button onclick="addIngredient('condiment', '黑糖珍珠')" class="ing-btn p-2 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🧋</span>
+                <span class="text-base font-black text-stone-700 block truncate">黑糖珍珠</span>
               </button>
-              <button onclick="addIngredient('condiment', '清脆椰果')" class="ing-btn p-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🥥</span>
-                <span class="text-[10px] font-black text-emerald-800 block truncate">清脆椰果</span>
+              <button onclick="addIngredient('condiment', '清脆椰果')" class="ing-btn p-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🥥</span>
+                <span class="text-base font-black text-emerald-800 block truncate">清脆椰果</span>
               </button>
             </div>
           </div>
 
           <!-- 4. 豪華頂飾 -->
           <div>
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Step 4. 點綴精緻頂飾</span>
+            <span class="text-lg font-black text-slate-500 uppercase tracking-wider block mb-1">Step 4. 點綴精緻頂飾</span>
             <div class="grid grid-cols-4 gap-1.5">
-              <button onclick="addIngredient('topping', '黃金布丁')" class="ing-btn p-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🍮</span>
-                <span class="text-[10px] font-black text-yellow-700 block truncate">黃金布丁</span>
+              <button onclick="addIngredient('topping', '黃金布丁')" class="ing-btn p-2 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🍮</span>
+                <span class="text-base font-black text-yellow-700 block truncate">黃金布丁</span>
               </button>
-              <button onclick="addIngredient('topping', '糖漬櫻桃')" class="ing-btn p-1.5 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🍒</span>
-                <span class="text-[10px] font-black text-red-600 block truncate">糖漬櫻桃</span>
+              <button onclick="addIngredient('topping', '糖漬櫻桃')" class="ing-btn p-2 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🍒</span>
+                <span class="text-base font-black text-red-600 block truncate">糖漬櫻桃</span>
               </button>
-              <button onclick="addIngredient('topping', '芒果切丁')" class="ing-btn p-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🍋</span>
-                <span class="text-[10px] font-black text-amber-700 block truncate">芒果切丁</span>
+              <button onclick="addIngredient('topping', '芒果切丁')" class="ing-btn p-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🍋</span>
+                <span class="text-base font-black text-amber-700 block truncate">芒果切丁</span>
               </button>
-              <button onclick="addIngredient('topping', '香草冰淇淋')" class="ing-btn p-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl text-center transition disabled:opacity-50" disabled>
-                <span class="text-xl block">🍨</span>
-                <span class="text-[10px] font-black text-orange-700 block truncate">香草冰淇淋</span>
+              <button onclick="addIngredient('topping', '香草冰淇淋')" class="ing-btn p-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg text-center transition disabled:opacity-50" disabled>
+                <span class="text-3xl block">🍨</span>
+                <span class="text-base font-black text-orange-700 block truncate">香草冰淇淋</span>
               </button>
             </div>
           </div>
           
-          <div class="flex space-x-2 pt-2">
-            <button onclick="resetIceMaker()" id="btn-reset-ice" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-2.5 rounded-xl text-sm font-bold transition flex items-center justify-center">
+          <div class="flex space-x-2 pt-1">
+            <button onclick="resetIceMaker()" id="btn-reset-ice" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-3 rounded-xl text-xl font-bold transition flex items-center justify-center">
               <i data-lucide="rotate-ccw" class="w-4 h-4 mr-1"></i> 重製刨冰
             </button>
           </div>
         </div>
 
-      </div>
-
-      <!-- 右側：食譜看板、租稅問答 -->
-      <div class="lg:col-span-5 flex flex-col space-y-6">
-        
-        <!-- 卡片一：神祕食譜 (直接顯示) -->
-        <div id="card-recipe" class="bg-amber-50 rounded-3xl shadow-xl p-6 border-4 border-amber-200 relative overflow-hidden">
-          
-          <!-- 黑板粉筆風裝飾 -->
-          <div class="absolute -right-6 -top-6 w-20 h-20 bg-amber-200 rounded-full opacity-35"></div>
-
-          <!-- 進行中神祕食譜階段 -->
-          <div id="cooking-step">
-            <div class="flex justify-between items-center mb-3">
-              <h3 class="text-lg font-black text-amber-900 flex items-center">
-                <i data-lucide="notepad-text" class="w-5 h-5 mr-1.5 text-amber-700"></i> 📝 今日限定神祕食譜
-              </h3>
-              <span class="bg-amber-200 text-amber-900 px-2 py-0.5 rounded text-xs font-bold" id="recipe-name-tag">宇治金時冰</span>
-            </div>
-            
-            <div class="bg-stone-800 text-stone-100 p-4 rounded-xl font-mono text-sm relative shadow-inner">
-              <div class="absolute top-2 right-2 text-stone-600 font-bold text-xs">CHALKBOARD</div>
-              <ul class="space-y-2" id="recipe-steps-list">
-                <!-- 動態注入配方 -->
-              </ul>
-            </div>
-
-            <p class="text-xs text-amber-800/70 mt-3 italic text-center">
-              ※ 請對照左邊的工作檯，按照順序由上而下加入材料喔！
-            </p>
-          </div>
 
         </div>
-
-        <!-- 卡片二：租稅問題大挑戰 (依序解鎖) -->
-        <div id="card-tax-quiz" class="bg-white rounded-3xl shadow-xl p-6 border-4 border-slate-100 flex-grow flex flex-col justify-between">
-          
-          <!-- 未解鎖鎖定畫面 -->
-          <div id="quiz-locked" class="flex flex-col items-center justify-center py-12 text-slate-400 text-center flex-grow">
-            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-3 text-slate-300 animate-pulse">
-              <i data-lucide="lock" class="w-8 h-8"></i>
-            </div>
-            <p class="font-bold">租稅挑戰尚未解鎖</p>
-            <p class="text-xs text-slate-400 mt-1">請先在左邊依照食譜正確做好刨冰喔！</p>
-          </div>
-
-          <!-- 問答進行畫面 -->
-          <div id="quiz-unlocked" class="hidden flex flex-col justify-between h-full space-y-4">
-            
-            <div>
-              <div class="flex justify-between items-center border-b border-slate-100 pb-2 mb-2">
-                <span class="text-xs font-black text-rose-500 uppercase tracking-widest flex items-center">
-                  <i data-lucide="help-circle" class="w-3.5 h-3.5 mr-1"></i> 客人的租稅提問
-                </span>
-                <span id="tax-category" class="bg-rose-50 text-rose-600 px-2 py-0.5 rounded text-xs font-bold">消費稅務</span>
-              </div>
-              <h4 id="quiz-question" class="text-base font-bold text-slate-800 leading-relaxed mb-3">
-                <!-- 題目內容 -->
-              </h4>
-            </div>
-
-            <!-- 選項列表 -->
-            <div class="space-y-2" id="quiz-options">
-              <!-- 選項按鈕 -->
-            </div>
-
-            <!-- 提示與反饋區 -->
-            <div id="quiz-feedback" class="hidden p-3 rounded-xl text-xs font-medium transition duration-300">
-              <!-- 答錯或提示內容 -->
-            </div>
-
-          </div>
-
-          <!-- 挑戰成功畫面 -->
-          <div id="quiz-success" class="hidden flex flex-col items-center justify-center text-center py-8 space-y-4 animate-fall">
-            <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center shadow-lg">
-              <i data-lucide="party-popper" class="w-10 h-10"></i>
-            </div>
-            <div>
-              <h3 class="text-2xl font-black text-green-700">挑戰大成功！</h3>
-              <p class="text-xs text-slate-500 mt-1">感謝你調配出美味冰品，還幫忙解答了稅務知識！</p>
-            </div>
-
-            <!-- 成果小結 -->
-            <div class="bg-slate-50 p-4 rounded-2xl w-full text-left text-xs space-y-1.5 border border-slate-100">
-              <div class="flex justify-between">
-                <span class="text-slate-400">製作冰品：</span>
-                <span id="summary-ice" class="font-bold text-slate-700">超級芒果冰</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-400">解答題目：</span>
-                <span id="summary-quiz" class="font-bold text-slate-700 truncate max-w-[200px]">題目</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-slate-400">解答結果：</span>
-                <span class="font-bold text-emerald-600">正確解答！🌟</span>
-              </div>
-            </div>
-
-            <button onclick="initNewRound()" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-3 rounded-xl font-bold transition shadow-md flex items-center justify-center">
-              <i data-lucide="refresh-cw" class="w-4 h-4 mr-1.5"></i> 接待下一位客人
-            </button>
-          </div>
-
-        </div>
-
       </div>
 
+      <!-- 右邊主題：刨冰圖示｜圖與文字上下分離，避免遮擋 -->
+      <div id="card-ice-preview" class="col-span-4 bg-white rounded-3xl shadow-xl p-4 border-4 border-sky-100 flex flex-col min-h-0 overflow-hidden">
+        <h3 class="text-3xl font-black text-sky-800 flex items-center mb-3 shrink-0">
+          <i data-lucide="sparkles" class="w-7 h-7 mr-2 text-sky-600"></i> 🍧 刨冰圖示
+        </h3>
+
+        <!-- 上方只放刨冰圖，不放提示文字，避免碗或冰品蓋到字 -->
+        <div class="relative bg-gradient-to-b from-sky-50 to-cyan-100 rounded-2xl flex-1 min-h-[270px] flex items-center justify-center overflow-hidden border border-sky-100">
+          <div class="absolute top-4 left-6 text-4xl opacity-20 animate-float">☁️</div>
+          <div class="absolute top-8 right-8 text-3xl opacity-20 animate-float" style="animation-delay: 1.5s;">☁️</div>
+          <div class="absolute top-16 left-1/3 text-2xl opacity-10 animate-float" style="animation-delay: 0.7s;">🎈</div>
+
+          <div class="relative w-64 h-64 flex flex-col items-center justify-end z-10 origin-bottom">
+            <div id="layer-topping" class="absolute bottom-[130px] z-40 text-5xl transition-all duration-300 opacity-0 transform translate-y-[-20px]">🍒</div>
+            <div id="layer-condiment" class="absolute bottom-[80px] w-40 h-16 z-30 transition-all duration-300 opacity-0 flex justify-center items-center gap-1"></div>
+            <div id="layer-syrup" class="absolute bottom-[60px] w-48 h-14 z-20 transition-all duration-300 opacity-0 rounded-t-full"></div>
+            <div id="layer-base" class="absolute bottom-[40px] w-52 h-28 bg-white border border-slate-100 ice-shaved shadow-inner z-10 transition-all duration-300 opacity-0 flex items-center justify-center">
+              <span class="text-slate-300 text-xs font-medium tracking-widest">SHAVED ICE</span>
+            </div>
+            <div class="absolute bottom-0 w-56 h-14 bg-gradient-to-r from-cyan-400 to-blue-500 bowl-shape shadow-md z-40 border-t-4 border-cyan-300 flex items-center justify-center">
+              <span class="text-white text-xs font-black tracking-widest opacity-60">TAIWAN ICE</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 下方獨立文字資訊區：不與刨冰圖層重疊 -->
+        <div class="mt-3 bg-sky-50 border-4 border-sky-100 rounded-2xl p-4 text-center shrink-0">
+          <p class="text-lg font-black text-sky-600 tracking-widest">目前冰品</p>
+          <p id="preview-ice-name" class="text-2xl font-black text-slate-800 leading-tight mt-1">準備製作刨冰</p>
+          <div id="guide-tip" class="mt-3 text-xl font-black text-slate-600 bg-white px-4 py-2 rounded-full shadow-sm text-center leading-snug">
+            請照食譜順序點擊中間配料！
+          </div>
+        </div>
+      </div>
+
+      <!-- 第二階段改為浮出視窗，不占用三欄版面 -->
     </section>
     
     <!-- ================= 管理者後台區 ================= -->
@@ -338,7 +278,7 @@
       
       <!-- 1. 密碼鎖定畫面 -->
       <div id="admin-lock-screen" class="max-w-md mx-auto bg-white rounded-3xl shadow-xl p-8 border-4 border-slate-200 text-center space-y-6 my-12 animate-fall">
-        <div class="w-20 h-20 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mx-auto shadow-inner">
+        <div class="w-12 h-12 bg-slate-100 text-slate-500 rounded-full flex items-center justify-center mx-auto shadow-inner">
           <i data-lucide="lock" class="w-10 h-10"></i>
         </div>
         <div>
@@ -456,6 +396,65 @@
 
   </main>
 
+
+  <!-- 第二階段：租稅問題浮出視窗｜長輩友善大型作答版 -->
+  <div id="card-tax-quiz" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md hidden items-center justify-center z-40 p-3 md:p-6">
+    <div class="bg-white rounded-[1.75rem] shadow-2xl border-4 border-cyan-200 w-[96vw] max-w-[980px] h-auto max-h-[86vh] overflow-hidden animate-fall flex flex-col">
+      <div class="bg-cyan-600 text-white px-6 py-4 flex items-center justify-between shrink-0">
+        <div>
+          <p class="text-base md:text-lg font-black tracking-widest text-cyan-100">第 2 階段</p>
+          <h3 class="text-3xl md:text-4xl font-black leading-tight">回答租稅問題</h3>
+        </div>
+        <div class="bg-white/20 px-4 py-2 rounded-full text-lg md:text-xl font-black">請點選答案</div>
+      </div>
+
+      <div class="p-5 md:p-6 flex-1 min-h-0">
+        <div id="quiz-locked" class="flex flex-col items-center justify-center h-full text-slate-400 text-center">
+          <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300 animate-pulse">
+            <i data-lucide="lock" class="w-10 h-10"></i>
+          </div>
+          <p class="text-3xl font-black">租稅挑戰尚未解鎖</p>
+          <p class="text-xl text-slate-400 mt-2">請先依照食譜正確做好刨冰喔！</p>
+        </div>
+
+        <div id="quiz-unlocked" class="hidden grid grid-cols-12 gap-4 h-full items-stretch">
+          <div class="col-span-12 lg:col-span-5 bg-rose-50 rounded-3xl p-5 md:p-6 border-4 border-rose-100 flex flex-col justify-center min-h-0">
+            <div class="flex justify-between items-center border-b-4 border-rose-100 pb-3 mb-4 gap-3">
+              <span class="text-xl md:text-2xl font-black text-rose-600 flex items-center">
+                <i data-lucide="help-circle" class="w-6 h-6 mr-2"></i> 租稅提問
+              </span>
+              <span id="tax-category" class="bg-white text-rose-600 px-3 py-1.5 rounded-full text-lg md:text-xl font-black whitespace-nowrap">消費稅務</span>
+            </div>
+            <h4 id="quiz-question" class="text-2xl md:text-3xl xl:text-[34px] font-black text-slate-800 leading-snug text-center lg:text-left"></h4>
+          </div>
+
+          <div class="col-span-12 lg:col-span-7 flex flex-col justify-center min-h-0">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="quiz-options"></div>
+            <div id="quiz-feedback" class="hidden mt-4 p-4 rounded-2xl text-xl md:text-2xl font-black leading-relaxed transition duration-300"></div>
+          </div>
+        </div>
+
+        <div id="quiz-success" class="hidden flex flex-col items-center justify-center text-center h-full space-y-6 animate-fall">
+          <div class="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center shadow-lg">
+            <i data-lucide="party-popper" class="w-12 h-12"></i>
+          </div>
+          <div>
+            <h3 class="text-4xl md:text-5xl font-black text-green-700">挑戰大成功！</h3>
+            <p class="text-xl md:text-2xl text-slate-500 mt-4 font-bold">感謝你完成刨冰，也答對租稅問題！</p>
+          </div>
+          <div class="bg-slate-50 p-5 rounded-3xl w-full max-w-3xl text-left text-xl md:text-2xl space-y-4 border-4 border-slate-100">
+            <div class="flex justify-between gap-4"><span class="text-slate-400 shrink-0">製作冰品：</span><span id="summary-ice" class="font-black text-slate-700 text-right">超級芒果冰</span></div>
+            <div class="flex justify-between gap-4"><span class="text-slate-400 shrink-0">解答結果：</span><span class="font-black text-emerald-600">正確解答！🌟</span></div>
+            <div class="hidden"><span id="summary-quiz">題目</span></div>
+          </div>
+          <button onclick="initNewRound()" class="w-full max-w-3xl bg-cyan-600 hover:bg-cyan-700 text-white py-4 rounded-3xl text-2xl md:text-3xl font-black transition shadow-md flex items-center justify-center">
+            <i data-lucide="refresh-cw" class="w-8 h-8 mr-2"></i> 接待下一位客人
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 客製化確認 Modal 彈窗 -->
   <div id="custom-confirm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border-4 border-slate-100 text-center space-y-4 animate-fall">
@@ -483,7 +482,7 @@
   </div>
 
   <!-- 底部版權 -->
-  <footer class="bg-slate-100 text-slate-400 text-xs text-center py-4 border-t border-slate-200">
+  <footer class="bg-slate-100 text-slate-400 text-xs text-center py-2 border-t border-slate-200 shrink-0">
     <p>© 僅限臺東縣稅務局租稅宣導使用。</p>
   </footer>
 
@@ -497,7 +496,8 @@
       currentSteps: [],   // 玩家已經點選的步驟
       currentQuiz: null,  // 當前問答
       failCount: 0,       // 當前答錯次數 (仍於背景統計並計入導出數據)
-      isCooking: false
+      isCooking: false,
+      stage: 'cook' // cook：製作刨冰；quiz：回答租稅問題
     };
 
     // 後台解鎖狀態
@@ -690,6 +690,43 @@
     // 3. 遊戲核心邏輯
     // ==========================================
 
+    function updateStageUI(stage) {
+      gameState.stage = stage;
+      const cookPill = document.getElementById('stage-pill-cook');
+      const quizPill = document.getElementById('stage-pill-quiz');
+      const title = document.getElementById('stage-title');
+      const recipeCard = document.getElementById('card-recipe');
+      const ingredientCard = document.getElementById('card-ingredients');
+      const previewCard = document.getElementById('card-ice-preview');
+      const quizCard = document.getElementById('card-tax-quiz');
+
+      if (stage === 'cook') {
+        title.innerText = '第 1 階段：製作刨冰';
+        cookPill.className = 'stage-pill stage-pill-active px-3 py-1.5 rounded-full';
+        quizPill.className = 'stage-pill stage-pill-idle px-3 py-1.5 rounded-full';
+        recipeCard.classList.remove('hidden');
+        ingredientCard.classList.remove('hidden');
+        previewCard.classList.remove('hidden');
+        quizCard.classList.add('hidden');
+        quizCard.classList.remove('flex');
+      } else if (stage === 'quiz') {
+        title.innerText = '第 2 階段：回答租稅問題';
+        cookPill.className = 'stage-pill stage-pill-done px-3 py-1.5 rounded-full';
+        quizPill.className = 'stage-pill stage-pill-active px-3 py-1.5 rounded-full';
+        recipeCard.classList.remove('hidden');
+        ingredientCard.classList.remove('hidden');
+        previewCard.classList.remove('hidden');
+        quizCard.classList.remove('hidden');
+        quizCard.classList.add('flex');
+      }
+      lucide.createIcons();
+    }
+
+    function startTaxStage() {
+      updateStageUI('quiz');
+      unlockTaxQuiz();
+    }
+
     function initNewRound() {
       const randomRecipe = RECIPES[Math.floor(Math.random() * RECIPES.length)];
       gameState.currentIceName = randomRecipe.name;
@@ -698,8 +735,10 @@
       
       gameState.currentQuiz = TAX_QUIZZES[Math.floor(Math.random() * TAX_QUIZZES.length)];
       gameState.failCount = 0;
+      updateStageUI('cook');
 
       document.getElementById('display-ice-name').innerText = `正在調配：${gameState.currentIceName}`;
+      document.getElementById('preview-ice-name').innerText = gameState.currentIceName;
       document.getElementById('recipe-name-tag').innerText = randomRecipe.name;
       
       const listEl = document.getElementById('recipe-steps-list');
@@ -708,10 +747,10 @@
         const emoji = randomRecipe.emojiSeq[index];
         listEl.innerHTML += `
           <li class="flex items-center space-x-2" id="recipe-li-${index}">
-            <span class="w-5 h-5 bg-stone-700 text-stone-300 rounded-full flex items-center justify-center text-xs font-bold">${index + 1}</span>
-            <span class="text-stone-400 text-lg">${emoji}</span>
-            <span class="recipe-text text-stone-300 font-bold" data-item="${item}">${item}</span>
-            <span class="status-marker text-xs ml-auto text-stone-500">⏳ 等待中</span>
+            <span class="w-9 h-9 bg-stone-700 text-stone-300 rounded-full flex items-center justify-center text-xl font-black shrink-0">${index + 1}</span>
+            <span class="text-stone-400 text-3xl shrink-0">${emoji}</span>
+            <span class="recipe-text text-stone-300 font-black text-2xl" data-item="${item}">${item}</span>
+            <span class="status-marker text-lg ml-auto text-stone-500 font-black shrink-0">⏳</span>
           </li>
         `;
       });
@@ -752,6 +791,7 @@
     }
 
     function addIngredient(type, name) {
+      if (gameState.stage !== 'cook') return;
       const nextExpectedIndex = gameState.currentSteps.length;
       const expectedName = gameState.expectedRecipe[nextExpectedIndex];
 
@@ -770,16 +810,17 @@
       }
 
       const li = document.getElementById(`recipe-li-${nextExpectedIndex}`);
-      li.querySelector('.status-marker').innerHTML = "✅ 完成";
-      li.querySelector('.status-marker').className = "status-marker text-xs ml-auto text-green-500 font-bold";
-      li.querySelector('.recipe-text').className = "recipe-text text-stone-500 font-bold line-through";
+      li.querySelector('.status-marker').innerHTML = "✅";
+      li.querySelector('.status-marker').className = "status-marker text-lg ml-auto text-green-500 font-black shrink-0";
+      li.querySelector('.recipe-text').className = "recipe-text text-stone-500 font-black text-2xl line-through";
 
       updateIceVisual(type, name);
 
       if (gameState.currentSteps.length === gameState.expectedRecipe.length) {
-        document.getElementById('shaved-ice-status').innerText = "刨冰完成！請回答租稅問題";
-        document.getElementById('guide-tip').innerText = "請回答右側客人的問題來送出刨冰！";
-        unlockTaxQuiz();
+        document.getElementById('shaved-ice-status').innerText = "刨冰完成！請回答浮出視窗問題";
+        document.getElementById('guide-tip').innerText = "第 2 階段已開啟，請在浮出視窗作答！";
+        enableIceButtons(false);
+        startTaxStage();
       } else {
         const nextStepName = gameState.expectedRecipe[gameState.currentSteps.length];
         document.getElementById('guide-tip').innerText = `好極了！下一步請加入：${nextStepName}`;
@@ -852,19 +893,25 @@
     }
 
     function resetIceMaker() {
+      if (gameState.stage === 'quiz') {
+        showToast('已進入第 2 階段，請完成租稅問答後再接待下一位客人。');
+        return;
+      }
       gameState.currentSteps = [];
       resetIceLayersVisual();
       
       const listEl = document.getElementById('recipe-steps-list');
       const items = listEl.querySelectorAll('li');
       items.forEach((li, index) => {
-        li.querySelector('.status-marker').innerHTML = "⏳ 等待中";
-        li.querySelector('.status-marker').className = "status-marker text-xs ml-auto text-stone-500";
-        li.querySelector('.recipe-text').className = "recipe-text text-stone-300 font-bold";
+        li.querySelector('.status-marker').innerHTML = "⏳";
+        li.querySelector('.status-marker').className = "status-marker text-lg ml-auto text-stone-500 font-black shrink-0";
+        li.querySelector('.recipe-text').className = "recipe-text text-stone-300 font-black text-2xl";
       });
 
       document.getElementById('shaved-ice-status').innerText = "刨冰重置，請重新製作！";
       document.getElementById('guide-tip').innerText = `請加入第一步：${gameState.expectedRecipe[0]}`;
+      enableIceButtons(true);
+      updateStageUI('cook');
       playSound('drop');
     }
 
@@ -880,9 +927,9 @@
       optionsContainer.innerHTML = '';
       quiz.options.forEach((opt, idx) => {
         optionsContainer.innerHTML += `
-          <button onclick="submitAnswer(${idx})" class="quiz-opt-btn w-full text-left p-3.5 bg-slate-50 hover:bg-cyan-50 border border-slate-200 hover:border-cyan-400 rounded-xl font-medium text-sm transition flex items-center space-x-2">
-            <span class="w-6 h-6 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-xs font-bold shrink-0">${String.fromCharCode(65 + idx)}</span>
-            <span class="text-slate-700">${opt}</span>
+          <button onclick="submitAnswer(${idx})" class="quiz-opt-btn w-full min-h-[74px] md:min-h-[86px] text-left p-4 md:p-5 bg-slate-50 hover:bg-cyan-50 border-4 border-slate-200 hover:border-cyan-400 rounded-2xl font-black text-xl md:text-2xl xl:text-[28px] transition flex items-center gap-3 md:gap-4 shadow-sm active:scale-[0.98]">
+            <span class="w-11 h-11 md:w-12 md:h-12 bg-cyan-600 text-white rounded-full flex items-center justify-center text-2xl md:text-3xl font-black shrink-0 shadow">${String.fromCharCode(65 + idx)}</span>
+            <span class="text-slate-800 leading-snug">${opt}</span>
           </button>
         `;
       });
@@ -913,7 +960,7 @@
         feedback.classList.remove('hidden', 'bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
         feedback.classList.add('bg-rose-50', 'text-rose-700', 'border', 'border-rose-200');
         feedback.innerHTML = `
-          <p class="font-bold flex items-center mb-1"><i data-lucide="x-circle" class="w-4 h-4 mr-1"></i> 選項 ${String.fromCharCode(65 + selectedIndex)} 是錯誤的喔！</p>
+          <p class="font-black flex items-center mb-3"><i data-lucide="x-circle" class="w-8 h-8 mr-2"></i> 再想想看！選項 ${String.fromCharCode(65 + selectedIndex)} 還不是正確答案喔！</p>
           <p>${quiz.tip}</p>
         `;
         lucide.createIcons();
