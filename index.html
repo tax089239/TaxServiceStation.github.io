@@ -1,337 +1,287 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="X-UA-Compatible" content="ie=edge">
-<title>🌟 租稅｜宣導活動入口</title>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>0716租稅小達人！程式設計大挑戰</title>
 <style>
-/* ============================= */
-/* 0. 跨瀏覽器樣式重置 (Reset & Normalization) */
-/* ============================= */
-*, *::before, *::after {
-    box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-}
-
-/* ============================= */
-/* 一、全頁面基本設定 (美式復古黃金嘉年華斜紋) */
-/* ============================= */
-body {
-    /* 廣泛相容系統字型堆疊，確保 iOS/Android/Windows 顯示一致 */
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    
-    /* 美式復古暖沙色與卡士達黃經典斜條紋背景 */
-    background-color: #fceecb;
-    background-image: -webkit-repeating-linear-gradient(
-        45deg,
-        #fceecb,
-        #fceecb 30px,
-        #f7dfa3 30px,
-        #f7dfa3 60px
-    );
-    background-image: repeating-linear-gradient(
-        45deg,
-        #fceecb,
-        #fceecb 30px,
-        #f7dfa3 30px,
-        #f7dfa3 60px
-    );
-    margin: 0;
-    
-    /* 彈性垂直置中 */
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-pack: center;
-    -ms-flex-pack: center;
-    justify-content: center;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center;    
-    
-    min-height: 100vh;
-    overflow-x: hidden;
-    overflow-y: auto;
-    position: relative;
-    padding: 40px 0;
-}
-
-/* ============================= */
-/* 二、中央主卡片區塊 (經典美式粗框海報風) */
-/* ============================= */
-main {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    width: 100%;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-pack: center;
-    -ms-flex-pack: center;
-    justify-content: center;
-}      
-.container {      
-    background: #ffffff;
-    padding: 50px 35px;
-    border-radius: 30px;
-    /* 美式復古標誌性的深藍色粗框與更立體的硬派投影 */
-    border: 6px solid #2c3e50; 
-    box-shadow: 12px 12px 0px #2c3e50;
-    max-width: 960px; /* 寬度容納橫向三格 */
-    width: 92%;
-    position: relative;
-}
-
-/* ============================= */
-/* 三、遊戲副標籤 */
-/* ============================= */
-/* 美式遊戲副標籤 (STAGE SELECT) */
-.stage-tag {
-    display: inline-block;
-    background: #f1c40f;
-    color: #2c3e50;
-    font-weight: 900;
-    font-size: 16px;
-    padding: 8px 22px;
-    border: 3px solid #2c3e50;
-    border-radius: 10px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    box-shadow: 4px 4px 0px #2c3e50;
-    margin-bottom: 30px;
-    transform: rotate(-1.5deg);
-}
-
-/* ============================= */
-/* 四、橫向三格網格配置 (相容彈性設計) */
-/* ============================= */
-.button-grid {
-    display: -ms-grid;
-    display: grid;
-    -ms-grid-columns: (1fr)[3];
-    grid-template-columns: repeat(3, 1fr); /* 預設橫向三格 */
-    gap: 20px; /* 格子間距 */
-    margin: 15px 0;
-}
-
-/* 針對平板、中螢幕調整為兩格，維持閱讀性 */
-@media (max-width: 768px) {
-    .button-grid {
-        -ms-grid-columns: (1fr)[2];
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-    }
-}
-
-/* 針對小螢幕手機調整為單格，方便手指點擊 */
-@media (max-width: 480px) {
-    .button-grid {
-        -ms-grid-columns: 1fr;
-        grid-template-columns: 1fr;
-        gap: 14px;
-    }
-}
-
-/* ============================= */
-/* 五、按鈕樣式（美式亮眼配色與跨端最佳化） */
-/* ============================= */
-.btn {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-    -ms-flex-align: center;
-    align-items: center;
-    -webkit-box-pack: center;
-    -ms-flex-pack: center;
-    justify-content: center;
-    padding: 20px 15px;
-    text-decoration: none;
-    border-radius: 20px;
-    font-size: 19px;
-    font-weight: 900; /* 更粗的字體使美式風格更強烈 */
-    border: 3px solid #2c3e50; /* 美式黑/深藍粗框線 */
-    position: relative;
-    top: 0;
-    min-height: 76px; /* 確保按鈕高度一致 */
-    
-    /* 消除行動端點擊時產生的預設高亮半透明灰色背景 (iOS / Android WebKit) */
-    -webkit-tap-highlight-color: transparent;
-    
-    /* 防止使用者快速連續點擊按鈕時選取按鈕內的文字 */
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    
-    /* 增加前綴的轉化平滑度 */
-    -webkit-transition: -webkit-transform 0.2s ease, -webkit-filter 0.2s ease, box-shadow 0.2s ease;
-    transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease, -webkit-transform 0.2s ease, -webkit-filter 0.2s ease;
-}
-
-.btn span { 
-    margin-right: 10px; 
-    font-size: 26px; 
-    -ms-flex-negative: 0; 
-    flex-shrink: 0;
-}
-
-/* ===== 美式復古熱情飽和色系 ===== */
-
-/* 1. 芥末黃 (問答) */
-.btn-quiz { 
-    background: #f1c40f; 
-    color: #2c3e50;
-    border-bottom: 7px solid #d4ac0d; 
-    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
-}
-
-/* 2. 丹寧藍 (卡牌) */
-.btn-card { 
-    background: #3498db; 
-    color: #ffffff;
-    border-bottom: 7px solid #2980b9; 
-    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
-}
-
-/* 3. 活力草綠 (尋寶1) */
-.btn-find { 
-    background: #2ecc71; 
-    color: #ffffff;
-    border-bottom: 7px solid #27ae60; 
-    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
-}
-
-/* 4. 復古紫 (拼圖) */
-.btn-pintoo { 
-    background: #9b59b6; 
-    color: #ffffff;
-    border-bottom: 7px solid #8e44ad; 
-    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
-}
-
-/* 5. 夕陽橘 (尋寶2) */
-.btn-find2 { 
-    background: #e67e22; 
-    color: #ffffff;
-    border-bottom: 7px solid #d35400; 
-    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
-}
-
-/* 6. 櫻桃紅 (發票大富翁) */
-.btn-monopoly { 
-    background: #e74c3c; 
-    color: #ffffff;
-    border-bottom: 7px solid #c0392b; 
-    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
-}
-
-/* 7. 復古湖水綠 (預留1 / 未來新關卡) */
-.btn-placeholder1 { 
-    background: #1abc9c; 
-    color: #ffffff;
-    border-bottom: 7px solid #16a085; 
-    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
-}
-
-/* 8. 復古糖果桃粉 (預留2 / 未來新關卡) */
-.btn-placeholder2 { 
-    background: #fd79a8; 
-    color: #ffffff;
-    border-bottom: 7px solid #e84393; 
-    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
-}
-
-/* 9. 復古深靛藍 (預留3 / 未來新關卡) */
-.btn-placeholder3 { 
-    background: #5f27cd; 
-    color: #ffffff;
-    border-bottom: 7px solid #341f97; 
-    box-shadow: 0 6px 0 rgba(44, 62, 80, 0.25);
-    text-shadow: 1px 1px 0px rgba(0,0,0,0.25);
-}
-
-/* 未解鎖按鈕特殊半透明與鎖頭氣氛 */
-.btn-placeholder1, .btn-placeholder2, .btn-placeholder3 {
-    filter: saturate(0.95);
-}
-
-/* ===== 滑鼠懸停與點擊動態效果 ===== */
-.btn:hover {
-    -webkit-transform: translateY(-4px);
-    transform: translateY(-4px);
-    -webkit-filter: brightness(1.08);
-    filter: brightness(1.08);
-    box-shadow: 0 10px 0 rgba(44, 62, 80, 0.35);
-}
-
-.btn:active {
-    -webkit-transform: translateY(4px);
-    transform: translateY(4px);
-    box-shadow: 0 2px 0 rgba(44, 62, 80, 0.25);
-    border-bottom-width: 3px;
-}
-</style>
-</head>
-<body>
-
-<main>
-    <div class="container">
-        <!-- 移除主標題「租稅」，直接以美式遊戲副標籤開頭 -->
-        <div class="stage-tag">STAGE SELECT</div>
-        
-        <!-- 按鈕網格容器：由 JavaScript 動態生成按鈕並放入處 -->
-        <div class="button-grid"></div>
-    </div>
-</main>
-
+:root{--bg:#f7f4ed;--ink:#18231d;--muted:#6f776f;--accent:#bf5b3f;--line:rgba(24,35,29,.12)}
+*{box-sizing:border-box}body{margin:0;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:var(--ink);background:radial-gradient(circle at 8% 0%,rgba(191,91,63,.16),transparent 28rem),radial-gradient(circle at 100% 15%,rgba(52,115,91,.15),transparent 30rem),var(--bg)}
+.shell{width:min(1240px,calc(100% - 32px));margin:auto}header{padding:68px 0 28px}.eyebrow{color:var(--accent);font-weight:900;letter-spacing:.18em;font-size:12px}h1{font-size:clamp(42px,7vw,84px);line-height:1;letter-spacing:-.055em;margin:14px 0}.intro{max-width:720px;color:var(--muted);font-size:18px;line-height:1.8}
+.controls{position:sticky;top:0;z-index:20;padding:14px 0 18px;background:rgba(247,244,237,.9);backdrop-filter:blur(10px)}.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center}input{flex:1 1 260px;height:46px;border:1px solid var(--line);border-radius:999px;padding:0 16px;font-size:15px}.filters{display:flex;gap:8px;flex-wrap:wrap}button{border:1px solid var(--line);background:white;border-radius:999px;padding:10px 14px;font-weight:800;cursor:pointer}button.active{background:var(--ink);color:white}#count{margin-top:14px;color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;padding:24px 0 80px}.card{overflow:hidden;border:1px solid var(--line);border-radius:24px;background:rgba(255,255,255,.85);box-shadow:0 16px 45px rgba(28,39,32,.08);transition:.25s}.card:hover{transform:translateY(-5px);box-shadow:0 25px 60px rgba(28,39,32,.13)}.card.hidden{display:none}.card>a{text-decoration:none;color:inherit}
+.thumb-wrap{position:relative;aspect-ratio:16/10;overflow:hidden;background:linear-gradient(135deg,#dbe4dc,#f1d7ca)}.thumb{position:relative;z-index:3;width:100%;height:100%;object-fit:cover}iframe{position:absolute;z-index:2;inset:0;width:160%;height:160%;border:0;transform:scale(.625);transform-origin:top left;pointer-events:none;background:#fff}.fallback{position:absolute;z-index:1;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px}.fallback b{font-size:32px}.fallback span{font-size:20px;font-weight:900}.fallback small{color:var(--muted)}.overlay{position:absolute;z-index:4;inset:0;display:grid;place-items:center;background:rgba(16,27,21,.48);color:white;font-weight:900;opacity:0;transition:.2s}.card:hover .overlay{opacity:1}
+.meta{display:flex;align-items:center;gap:12px;padding:18px}.id{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;background:#eadfd2;color:var(--accent);font-weight:900}h2{margin:0;font-size:21px}p{margin:4px 0 0;color:var(--muted)}.go{margin-left:auto;color:var(--ink);font-size:13px;font-weight:900;text-decoration:none;border-bottom:1px solid}#empty{display:none;text-align:center;padding:60px;color:var(--muted)}footer{border-top:1px solid var(--line);padding:24px 0 36px;color:var(--muted);font-size:13px}
+@media(max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:660px){.grid{grid-template-columns:1fr}.filters{flex-wrap:nowrap;overflow:auto}}
+</style></head><body>
+<header class="shell"><div class="eyebrow">STUDENT WEB GALLERY</div><h1>0716租稅小達人！程式設計大挑戰</h1><p class="intro">共 24 件 Canva 網站作品。可依主題篩選，或輸入編號、姓名與主題快速搜尋；點擊縮圖即可前往完整作品。</p></header>
+<section class="controls"><div class="shell"><div class="toolbar"><input id="search" placeholder="搜尋編號、姓名或主題…"><div class="filters"><button class="filter active" data-topic="全部">全部</button><button class="filter" data-topic="地價稅">地價稅</button><button class="filter" data-topic="娛樂稅">娛樂稅</button><button class="filter" data-topic="房屋稅">房屋稅</button><button class="filter" data-topic="雲端發票">雲端發票</button><button class="filter" data-topic="牌照稅">牌照稅</button></div></div><div id="count">顯示 24 件作品</div></div></section>
+<main class="shell"><section class="grid">
+<article class="card" data-topic="地價稅" data-search="A01 宋毓宸 地價稅">
+<a href="https://hsuan.my.canva.site/cdv3zxxy903nh9s5" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3zxxy903nh9s5" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3zxxy903nh9s5||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3zxxy903nh9s5?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3zxxy903nh9s5&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A01 宋毓宸 地價稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv3zxxy903nh9s5" title="A01 宋毓宸" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A01</b><span>宋毓宸</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A01</div><div><h2>宋毓宸</h2><p>地價稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv3zxxy903nh9s5" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="娛樂稅" data-search="A02 宋翊銘 娛樂稅">
+<a href="https://hsuan.my.canva.site/cdv43836nnxkjvag" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv43836nnxkjvag" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv43836nnxkjvag||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv43836nnxkjvag?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv43836nnxkjvag&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A02 宋翊銘 娛樂稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv43836nnxkjvag" title="A02 宋翊銘" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A02</b><span>宋翊銘</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A02</div><div><h2>宋翊銘</h2><p>娛樂稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv43836nnxkjvag" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="房屋稅" data-search="A03 鄭子紳 房屋稅">
+<a href="https://hsuan.my.canva.site/cdv1t8n6hw0fc6y6" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv1t8n6hw0fc6y6" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv1t8n6hw0fc6y6||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv1t8n6hw0fc6y6?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv1t8n6hw0fc6y6&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A03 鄭子紳 房屋稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv1t8n6hw0fc6y6" title="A03 鄭子紳" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A03</b><span>鄭子紳</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A03</div><div><h2>鄭子紳</h2><p>房屋稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv1t8n6hw0fc6y6" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="雲端發票" data-search="A04 鄭碩緯 雲端發票">
+<a href="https://hsuan.my.canva.site/cdv4105n6j6svz94" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv4105n6j6svz94" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv4105n6j6svz94||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv4105n6j6svz94?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv4105n6j6svz94&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A04 鄭碩緯 雲端發票" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv4105n6j6svz94" title="A04 鄭碩緯" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A04</b><span>鄭碩緯</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A04</div><div><h2>鄭碩緯</h2><p>雲端發票</p></div><a class="go" href="https://hsuan.my.canva.site/cdv4105n6j6svz94" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="牌照稅" data-search="A07 余承勳 牌照稅">
+<a href="https://hsuan.my.canva.site/cdv4g7zzwvjvz314" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv4g7zzwvjvz314" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv4g7zzwvjvz314||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv4g7zzwvjvz314?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv4g7zzwvjvz314&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A07 余承勳 牌照稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv4g7zzwvjvz314" title="A07 余承勳" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A07</b><span>余承勳</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A07</div><div><h2>余承勳</h2><p>牌照稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv4g7zzwvjvz314" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="娛樂稅" data-search="A08 余宛錞 娛樂稅">
+<a href="https://hsuan.my.canva.site/cdv3aw6k9k7jtrnc" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3aw6k9k7jtrnc" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3aw6k9k7jtrnc||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3aw6k9k7jtrnc?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3aw6k9k7jtrnc&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A08 余宛錞 娛樂稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv3aw6k9k7jtrnc" title="A08 余宛錞" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A08</b><span>余宛錞</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A08</div><div><h2>余宛錞</h2><p>娛樂稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv3aw6k9k7jtrnc" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="娛樂稅" data-search="A09 李侑恩 娛樂稅">
+<a href="https://hsuan.my.canva.site/cdv49z737ppc6hks" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv49z737ppc6hks" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv49z737ppc6hks||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv49z737ppc6hks?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv49z737ppc6hks&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A09 李侑恩 娛樂稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv49z737ppc6hks" title="A09 李侑恩" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A09</b><span>李侑恩</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A09</div><div><h2>李侑恩</h2><p>娛樂稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv49z737ppc6hks" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="地價稅" data-search="A10 俞信佑 地價稅">
+<a href="https://hsuan.my.canva.site/cdv3vp0pg71dregx" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3vp0pg71dregx" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3vp0pg71dregx||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3vp0pg71dregx?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3vp0pg71dregx&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A10 俞信佑 地價稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv3vp0pg71dregx" title="A10 俞信佑" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A10</b><span>俞信佑</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A10</div><div><h2>俞信佑</h2><p>地價稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv3vp0pg71dregx" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="雲端發票" data-search="A12 楊昕澄 雲端發票">
+<a href="https://hsuan.my.canva.site/cdv4jjmhkq760bvm" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv4jjmhkq760bvm" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv4jjmhkq760bvm||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv4jjmhkq760bvm?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv4jjmhkq760bvm&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A12 楊昕澄 雲端發票" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv4jjmhkq760bvm" title="A12 楊昕澄" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A12</b><span>楊昕澄</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A12</div><div><h2>楊昕澄</h2><p>雲端發票</p></div><a class="go" href="https://hsuan.my.canva.site/cdv4jjmhkq760bvm" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="牌照稅" data-search="A13 詹亞澄 牌照稅">
+<a href="https://hsuan.my.canva.site/cdv3ssspw8r45dw5" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3ssspw8r45dw5" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3ssspw8r45dw5||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3ssspw8r45dw5?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3ssspw8r45dw5&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A13 詹亞澄 牌照稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv3ssspw8r45dw5" title="A13 詹亞澄" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A13</b><span>詹亞澄</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A13</div><div><h2>詹亞澄</h2><p>牌照稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv3ssspw8r45dw5" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="房屋稅" data-search="A14 吳珞辰 房屋稅">
+<a href="https://hsuan.my.canva.site/cdv0nkrzrn1bjzss" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv0nkrzrn1bjzss" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv0nkrzrn1bjzss||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv0nkrzrn1bjzss?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv0nkrzrn1bjzss&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A14 吳珞辰 房屋稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv0nkrzrn1bjzss" title="A14 吳珞辰" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A14</b><span>吳珞辰</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A14</div><div><h2>吳珞辰</h2><p>房屋稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv0nkrzrn1bjzss" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="房屋稅" data-search="A15 黃千洵 房屋稅">
+<a href="https://hsuan.my.canva.site/cdv48r2b05es970c" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv48r2b05es970c" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv48r2b05es970c||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv48r2b05es970c?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv48r2b05es970c&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A15 黃千洵 房屋稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv48r2b05es970c" title="A15 黃千洵" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A15</b><span>黃千洵</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A15</div><div><h2>黃千洵</h2><p>房屋稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv48r2b05es970c" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="牌照稅" data-search="A16 林育萱 牌照稅">
+<a href="https://hsuan.my.canva.site/cdv1easbfva0062c" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv1easbfva0062c" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv1easbfva0062c||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv1easbfva0062c?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv1easbfva0062c&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A16 林育萱 牌照稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv1easbfva0062c" title="A16 林育萱" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A16</b><span>林育萱</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A16</div><div><h2>林育萱</h2><p>牌照稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv1easbfva0062c" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="娛樂稅" data-search="A17 林子喆 娛樂稅">
+<a href="https://hsuan.my.canva.site/cdv3g7bt3g1g7abm" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3g7bt3g1g7abm" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3g7bt3g1g7abm||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3g7bt3g1g7abm?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3g7bt3g1g7abm&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A17 林子喆 娛樂稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv3g7bt3g1g7abm" title="A17 林子喆" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A17</b><span>林子喆</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A17</div><div><h2>林子喆</h2><p>娛樂稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv3g7bt3g1g7abm" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="牌照稅" data-search="A18 周秉辰 牌照稅">
+<a href="https://hsuan.my.canva.site/cdv2s5bg3d02fws4" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv2s5bg3d02fws4" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv2s5bg3d02fws4||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv2s5bg3d02fws4?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv2s5bg3d02fws4&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A18 周秉辰 牌照稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv2s5bg3d02fws4" title="A18 周秉辰" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A18</b><span>周秉辰</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A18</div><div><h2>周秉辰</h2><p>牌照稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv2s5bg3d02fws4" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="地價稅" data-search="A19 胡之綺 地價稅">
+<a href="https://hsuan.my.canva.site/cdv3xmgdprscxbaq" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3xmgdprscxbaq" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3xmgdprscxbaq||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3xmgdprscxbaq?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3xmgdprscxbaq&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A19 胡之綺 地價稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv3xmgdprscxbaq" title="A19 胡之綺" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A19</b><span>胡之綺</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A19</div><div><h2>胡之綺</h2><p>地價稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv3xmgdprscxbaq" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="雲端發票" data-search="A20 胡育寧 雲端發票">
+<a href="https://hsuan.my.canva.site/cdv3rvnactq6fsnt" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3rvnactq6fsnt" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3rvnactq6fsnt||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3rvnactq6fsnt?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3rvnactq6fsnt&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A20 胡育寧 雲端發票" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv3rvnactq6fsnt" title="A20 胡育寧" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A20</b><span>胡育寧</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A20</div><div><h2>胡育寧</h2><p>雲端發票</p></div><a class="go" href="https://hsuan.my.canva.site/cdv3rvnactq6fsnt" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="房屋稅" data-search="A23 黃靖茗 房屋稅">
+<a href="https://hsuan.my.canva.site/cdv2wenc7t4tfkem" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv2wenc7t4tfkem" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv2wenc7t4tfkem||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv2wenc7t4tfkem?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv2wenc7t4tfkem&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A23 黃靖茗 房屋稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv2wenc7t4tfkem" title="A23 黃靖茗" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A23</b><span>黃靖茗</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A23</div><div><h2>黃靖茗</h2><p>房屋稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv2wenc7t4tfkem" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="房屋稅" data-search="A24 林尹翔 房屋稅">
+<a href="https://hsuan.my.canva.site/cdv4vdkg50jygw7e" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv4vdkg50jygw7e" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv4vdkg50jygw7e||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv4vdkg50jygw7e?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv4vdkg50jygw7e&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A24 林尹翔 房屋稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv4vdkg50jygw7e" title="A24 林尹翔" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A24</b><span>林尹翔</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A24</div><div><h2>林尹翔</h2><p>房屋稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv4vdkg50jygw7e" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="房屋稅" data-search="A25 林伊恩 房屋稅">
+<a href="https://hsuan.my.canva.site/cdv3j32hkns8bfsy" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3j32hkns8bfsy" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3j32hkns8bfsy||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3j32hkns8bfsy?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3j32hkns8bfsy&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A25 林伊恩 房屋稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv3j32hkns8bfsy" title="A25 林伊恩" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A25</b><span>林伊恩</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A25</div><div><h2>林伊恩</h2><p>房屋稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv3j32hkns8bfsy" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="牌照稅" data-search="A26 莊庭萱 牌照稅">
+<a href="https://hsuan.my.canva.site/cdv3e0y4fk8x2ydv" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3e0y4fk8x2ydv" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3e0y4fk8x2ydv||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3e0y4fk8x2ydv?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3e0y4fk8x2ydv&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A26 莊庭萱 牌照稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv3e0y4fk8x2ydv" title="A26 莊庭萱" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A26</b><span>莊庭萱</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A26</div><div><h2>莊庭萱</h2><p>牌照稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv3e0y4fk8x2ydv" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="娛樂稅" data-search="A27 王信驊 娛樂稅">
+<a href="https://hsuan.my.canva.site/cdv5f1ym9ncwzs7q" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv5f1ym9ncwzs7q" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv5f1ym9ncwzs7q||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv5f1ym9ncwzs7q?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv5f1ym9ncwzs7q&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A27 王信驊 娛樂稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv5f1ym9ncwzs7q" title="A27 王信驊" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A27</b><span>王信驊</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A27</div><div><h2>王信驊</h2><p>娛樂稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv5f1ym9ncwzs7q" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="地價稅" data-search="A28 李玥嫻 地價稅">
+<a href="https://hsuan.my.canva.site/cdv3jz4qjk9n2ww7" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3jz4qjk9n2ww7" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv3jz4qjk9n2ww7||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3jz4qjk9n2ww7?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv3jz4qjk9n2ww7&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A28 李玥嫻 地價稅" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv3jz4qjk9n2ww7" title="A28 李玥嫻" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A28</b><span>李玥嫻</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A28</div><div><h2>李玥嫻</h2><p>地價稅</p></div><a class="go" href="https://hsuan.my.canva.site/cdv3jz4qjk9n2ww7" target="_blank">前往瀏覽</a></div>
+</article>
+<article class="card" data-topic="雲端發票" data-search="A29 李玥璇 雲端發票">
+<a href="https://hsuan.my.canva.site/cdv1qm4tm73jnr51" target="_blank" rel="noopener noreferrer">
+<div class="thumb-wrap">
+<img class="thumb" src="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv1qm4tm73jnr51" data-sources="https://image.thum.io/get/width/1200/crop/750/noanimate/https://hsuan.my.canva.site/cdv1qm4tm73jnr51||https://s.wordpress.com/mshots/v1/https%3A%2F%2Fhsuan.my.canva.site%2Fcdv1qm4tm73jnr51?w=1200||https://api.microlink.io/?url=https%3A%2F%2Fhsuan.my.canva.site%2Fcdv1qm4tm73jnr51&screenshot=true&meta=false&embed=screenshot.url" data-index="0" alt="A29 李玥璇 雲端發票" loading="lazy" onerror="nextSource(this)">
+<iframe src="https://hsuan.my.canva.site/cdv1qm4tm73jnr51" title="A29 李玥璇" loading="lazy" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+<div class="fallback"><b>A29</b><span>李玥璇</span><small>點擊開啟作品</small></div>
+<div class="overlay">開啟網站 ↗</div>
+</div>
+</a>
+<div class="meta"><div class="id">A29</div><div><h2>李玥璇</h2><p>雲端發票</p></div><a class="go" href="https://hsuan.my.canva.site/cdv1qm4tm73jnr51" target="_blank">前往瀏覽</a></div>
+</article></section><div id="empty">找不到符合條件的作品。</div></main>
+<footer><div class="shell">© <span id="year"></span> 0716租稅小達人！程式設計大挑戰</div></footer>
 <script>
-// 取得按鈕網格容器
-const gridContainer = document.querySelector('.button-grid');
-
-// 函式：新增按鈕至網格中
-function addButton(text, emoji, href, btnClass) {
-    const btn = document.createElement('a');
-    btn.href = href;
-    btn.className = 'btn ' + btnClass;
-
-    const span = document.createElement('span');
-    span.textContent = emoji;
-    btn.appendChild(span);
-    btn.appendChild(document.createTextNode(' ' + text));
-
-    gridContainer.appendChild(btn);
-}
-
-// 定義按鈕資料
-const buttons = [
-    {text: '平時設攤宣導問答', emoji:'📝', href:'quiz.html', cls:'btn-quiz'},
-    {text: '智慧牌對對', emoji:'🃏', href:'card.html', cls:'btn-card'},
-    {text: '地寶追追追', emoji:'🔎', href:'q-find.html', cls:'btn-find'},
-    {text: '智慧拼好屋', emoji:'🧩', href:'pintoo.html', cls:'btn-pintoo'},
-    {text: '尋寶挑戰2', emoji:'🔍', href:'q-find-2.html', cls:'btn-find2'},
-    {text: '刨冰大挑戰', emoji:'🧊', href:'ice.html', cls:'btn-monopoly'},
-    
-    // 已預先套用飽和復古色的新關卡
-    {text: '神秘新關卡', emoji:'🔒', href:'#', cls:'btn-placeholder1'},
-    {text: '神秘新關卡', emoji:'🔒', href:'#', cls:'btn-placeholder2'},
-    {text: '神秘新關卡', emoji:'🔒', href:'#', cls:'btn-placeholder3'},
-];
-
-// 生成按鈕並填入網格
-buttons.forEach(b => addButton(b.text, b.emoji, b.href, b.cls));
-</script>
-
-</body>
-</html>
+document.getElementById('year').textContent=new Date().getFullYear();
+function nextSource(img){const a=(img.dataset.sources||'').split('||');let i=Number(img.dataset.index||0)+1;if(i<a.length){img.dataset.index=i;img.src=a[i]}else{img.style.display='none'}}
+const cards=[...document.querySelectorAll('.card')],search=document.getElementById('search'),count=document.getElementById('count'),empty=document.getElementById('empty');let topic='全部';
+function apply(){let q=search.value.trim().toLowerCase(),n=0;cards.forEach(c=>{let show=(topic==='全部'||c.dataset.topic===topic)&&(!q||c.dataset.search.toLowerCase().includes(q));c.classList.toggle('hidden',!show);if(show)n++});count.textContent=`顯示 ${n} 件作品`;empty.style.display=n?'none':'block'}
+search.addEventListener('input',apply);document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');topic=b.dataset.topic;apply()}));
+</script></body></html>
