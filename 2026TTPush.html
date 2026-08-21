@@ -566,6 +566,196 @@
       @media (max-width:600px){#gamePanel #game{height:60vh}}
     }
 
+  
+    /* 租稅問答：滿版顯示 */
+    body:has(#quizPanel:not(.hidden)){
+      overflow:hidden;
+    }
+
+    .wrap:has(#quizPanel:not(.hidden)){
+      max-width:none;
+      width:100%;
+      min-height:100vh;
+      padding:0;
+      margin:0;
+    }
+
+    #quizPanel:not(.hidden){
+      position:fixed;
+      inset:0;
+      z-index:700;
+      width:100vw;
+      height:100vh;
+      min-height:100vh;
+      margin:0;
+      padding:clamp(24px,4vw,64px);
+      border-radius:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:auto;
+      background:
+        radial-gradient(circle at 12% 15%,rgba(57,169,214,.22),transparent 28%),
+        radial-gradient(circle at 88% 18%,rgba(244,154,170,.28),transparent 30%),
+        radial-gradient(circle at 72% 85%,rgba(255,216,61,.16),transparent 22%),
+        linear-gradient(135deg,#fff7f8 0%,#eef9ff 50%,#fff9df 100%);
+    }
+
+    #quizPanel > .space{
+      width:min(980px,92vw);
+      max-width:980px !important;
+      margin:auto !important;
+    }
+
+    #quizPanel h2{
+      font-size:clamp(30px,4vw,52px);
+      color:var(--festival-blue-deep,#1684b7);
+    }
+
+    #quizPanel .question-card{
+      padding:clamp(22px,3vw,38px);
+      border-radius:24px;
+      box-shadow:0 14px 34px rgba(33,104,135,.10);
+    }
+
+    #quizPanel #question{
+      font-size:clamp(24px,2.5vw,36px) !important;
+      line-height:1.5;
+      text-align:center;
+    }
+
+    #quizPanel .answers{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+    }
+
+    #quizPanel .answer-btn{
+      min-height:78px;
+      padding:18px 20px;
+      border-radius:22px;
+      font-size:clamp(18px,1.6vw,24px);
+      line-height:1.45;
+      text-align:center;
+    }
+
+    #quizPanel #quizFeedback{
+      font-size:clamp(17px,1.4vw,21px);
+      line-height:1.6;
+      padding:18px 22px;
+      border-radius:20px;
+    }
+
+    @media(max-width:700px){
+      body:has(#quizPanel:not(.hidden)){
+        overflow:auto;
+      }
+
+      #quizPanel:not(.hidden){
+        min-height:100dvh;
+        height:100dvh;
+        padding:20px 14px;
+        align-items:flex-start;
+      }
+
+      #quizPanel > .space{
+        width:100%;
+        padding-top:24px;
+        padding-bottom:28px;
+      }
+
+      #quizPanel .answers{
+        grid-template-columns:1fr;
+      }
+
+      #quizPanel .answer-btn{
+        min-height:68px;
+      }
+    }
+
+    @supports not selector(body:has(*)){
+      #quizPanel:not(.hidden){
+        position:fixed;
+        inset:0;
+        z-index:700;
+        width:100vw;
+        height:100vh;
+        overflow:auto;
+      }
+    }
+
+  
+    /* Touch-friendly quiz answer controls */
+    #quizPanel .answer-btn{
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+      -webkit-user-select:none;
+      user-select:none;
+    }
+
+    /* Hover effects only on devices that truly support hover */
+    @media (hover:hover) and (pointer:fine){
+      #quizPanel .answer-btn:hover{
+        transform:translateY(-2px);
+        border-color:var(--festival-pink,#f49aaa);
+      }
+    }
+
+    /* On touch devices, avoid sticky hover states */
+    @media (hover:none), (pointer:coarse){
+      #quizPanel .answer-btn:hover{
+        transform:none;
+      }
+      #quizPanel .answer-btn:active{
+        transform:scale(.985);
+      }
+    }
+
+  
+    /* Senior-friendly larger typography for the tax quiz */
+    #quizPanel h2{
+      font-size:clamp(38px,4.8vw,64px) !important;
+      line-height:1.25;
+    }
+
+    #quizPanel #question{
+      font-size:clamp(30px,3.2vw,46px) !important;
+      line-height:1.55 !important;
+      font-weight:800;
+      letter-spacing:.02em;
+    }
+
+    #quizPanel .answer-btn{
+      min-height:96px !important;
+      padding:22px 26px !important;
+      font-size:clamp(24px,2.2vw,34px) !important;
+      line-height:1.45 !important;
+      font-weight:700;
+      letter-spacing:.01em;
+    }
+
+    #quizPanel #quizFeedback{
+      font-size:clamp(22px,1.9vw,30px) !important;
+      line-height:1.6 !important;
+      font-weight:700;
+    }
+
+    @media(max-width:700px){
+      #quizPanel h2{
+        font-size:34px !important;
+      }
+      #quizPanel #question{
+        font-size:28px !important;
+      }
+      #quizPanel .answer-btn{
+        min-height:82px !important;
+        font-size:23px !important;
+        padding:18px 20px !important;
+      }
+      #quizPanel #quizFeedback{
+        font-size:21px !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -642,7 +832,7 @@
     </div>
   </section>
 
-  <section id="quizPanel" class="panel quiz hidden">
+  <section id="quizPanel" class="panel quiz hidden quiz-fullscreen-panel">
     <div class="space" style="max-width:720px;margin:0 auto">
       <div class="center">
         <div style="font-size:52px">💡</div>
@@ -1024,7 +1214,25 @@
       b.type='button';
       b.className='answer-btn';
       b.textContent=String.fromCharCode(65+i)+'　'+answerText;
-      b.addEventListener('click',()=>answer(i));
+      let handled=false;
+      const choose=()=>{
+        if(handled) return;
+        handled=true;
+        answer(i);
+        setTimeout(()=>{handled=false;},500);
+      };
+
+      if(window.PointerEvent){
+        b.addEventListener('pointerup',e=>{
+          e.preventDefault();
+          choose();
+        });
+      }else{
+        b.addEventListener('click',e=>{
+          e.preventDefault();
+          choose();
+        });
+      }
       answersEl.appendChild(b);
     });
 
@@ -1401,6 +1609,14 @@
   $('passwordModal').addEventListener('click',e=>{
     if(e.target===$('passwordModal'))closePasswordModal();
   });
+
+
+  if(quizPanel){
+    quizPanel.addEventListener('touchend',e=>{
+      const btn=e.target.closest && e.target.closest('.answer-btn');
+      if(btn) e.preventDefault();
+    },{passive:false});
+  }
 
   loadLocalState();
   renderAdmin();
