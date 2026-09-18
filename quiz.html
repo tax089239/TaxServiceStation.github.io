@@ -133,7 +133,7 @@
 
     <!-- 開始畫面 -->
     <div id="startScreen">
-        <p>💡 每人隨機 3 題，每題限時 15 秒</p>
+        <p>💡 每人隨機 1 題，每題限時 15 秒</p>
         
         <p><b>1. 請選擇您的年齡層：</b></p>
         <div id="ageBtns" class="btn-group">
@@ -163,7 +163,7 @@
     <!-- 作答畫面 -->
     <div id="quizScreen" class="hidden">
         <div style="display:flex; justify-content:space-between; font-weight:bold;">
-            <span>第 <span id="qIndex">1</span> / 3 題</span>
+            <span>第 <span id="qIndex">1</span> / 1 題</span>
             <span style="color:var(--danger)">⏱ 剩餘 <span id="time">15</span> 秒</span>
         </div>
         <div class="progress-container">
@@ -273,7 +273,7 @@ function startGame() {
         alert("請先選擇您的年齡與性別！");
         return;
     }
-    currentQuiz = getRandomQuestions(questions, 3);
+    currentQuiz = getRandomQuestions(questions, 1);
     currentIdx = 0;
     playerAnswers = [];
     
@@ -360,7 +360,7 @@ function selectOption(choiceIdx) {
     // 稍微延遲進入下一題，讓使用者看清楚答案
     setTimeout(() => {
         currentIdx++;
-        if(currentIdx < 3) {
+        if(currentIdx < 1) {
             renderQuestion();
         } else {
             showResults();
@@ -382,7 +382,7 @@ function showResults() {
     document.getElementById('resultScreen').classList.remove('hidden');
     
     const correctCount = playerAnswers.filter(a => a.isRight).length;
-    const scoreRate = Math.round((correctCount / 3) * 100);
+    const scoreRate = Math.round((correctCount / 1) * 100);
     document.getElementById('rate').textContent = scoreRate;
 
     const uniqueID = new Set(allRecords.map(r => r.playerID)).size + 1;
